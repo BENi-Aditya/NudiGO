@@ -7,6 +7,7 @@ import { generateExercises, isGraded } from "@/data/exercises";
 import { missionForUnit } from "@/data/missions";
 import { ExerciseView, feedbackText } from "@/components/exercise-views";
 import { SpeakButton } from "@/components/speak-button";
+import { AIDoubtAssistant } from "@/components/ai-doubt-assistant";
 import { useProgress } from "@/lib/progress";
 import { NBButton, NBCard, NBProgress, Sticker, Kannada } from "@/lib/nb";
 import { cn } from "@/lib/utils";
@@ -159,6 +160,16 @@ function LessonPage() {
           </p>
         )}
       </div>
+
+      {/* AI Doubt Assistant */}
+      <AIDoubtAssistant
+        lessonId={lesson.id}
+        lessonTitle={lesson.title}
+        concepts={lessonConcepts(lesson).map((c) => c.english)}
+        masteredConcepts={lessonConcepts(lesson)
+          .filter((c) => c.id % 3 === 0)
+          .map((c) => c.english)}
+      />
     </div>
   );
 }

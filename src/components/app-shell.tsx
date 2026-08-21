@@ -1,16 +1,17 @@
 import { Link } from "@tanstack/react-router";
-import { Home, MessageSquareText, Target, User } from "lucide-react";
+import { Home, MessageSquareText, Target, User, Brain } from "lucide-react";
 import type { ReactNode } from "react";
 
 import { LogoMark, Wordmark } from "@/components/brand";
 import { cn } from "@/lib/utils";
 
-type Tab = "learn" | "practice" | "missions" | "profile";
+type Tab = "learn" | "practice" | "missions" | "profile" | "ai";
 
 const tabs: Array<{ key: Tab; to: string; label: string; Icon: typeof Home }> = [
   { key: "learn", to: "/learn", label: "Learn", Icon: Home },
   { key: "practice", to: "/practice", label: "Practice", Icon: MessageSquareText },
   { key: "missions", to: "/missions", label: "Missions", Icon: Target },
+  { key: "ai", to: "/ai-teacher", label: "AI", Icon: Brain },
   { key: "profile", to: "/profile", label: "Profile", Icon: User },
 ];
 

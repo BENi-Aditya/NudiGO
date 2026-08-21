@@ -10,18 +10,25 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AiTeacherRouteImport } from './routes/ai-teacher'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson/$lessonId'
 import { Route as RoleplayScenarioIdRouteImport } from './routes/roleplay/$scenarioId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiTeacherRoute = AiTeacherRouteImport.update({
+  id: '/ai-teacher',
+  path: '/ai-teacher',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthRoute = AuthRouteImport.update({
@@ -54,6 +61,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthCallbackRoute = AuthCallbackRouteImport.update({
+  id: '/callback',
+  path: '/callback',
+  getParentRoute: () => AuthRoute,
+} as any)
 const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   id: '/lesson/$lessonId',
   path: '/lesson/$lessonId',
@@ -67,35 +79,41 @@ const RoleplayScenarioIdRoute = RoleplayScenarioIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/ai-teacher': typeof AiTeacherRoute
+  '/auth': typeof AuthRouteWithChildren
   '/learn': typeof LearnRoute
   '/missions': typeof MissionsRoute
   '/onboarding': typeof OnboardingRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/roleplay/$scenarioId': typeof RoleplayScenarioIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/ai-teacher': typeof AiTeacherRoute
+  '/auth': typeof AuthRouteWithChildren
   '/learn': typeof LearnRoute
   '/missions': typeof MissionsRoute
   '/onboarding': typeof OnboardingRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/roleplay/$scenarioId': typeof RoleplayScenarioIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/auth': typeof AuthRoute
+  '/ai-teacher': typeof AiTeacherRoute
+  '/auth': typeof AuthRouteWithChildren
   '/learn': typeof LearnRoute
   '/missions': typeof MissionsRoute
   '/onboarding': typeof OnboardingRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
+  '/auth/callback': typeof AuthCallbackRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/roleplay/$scenarioId': typeof RoleplayScenarioIdRoute
 }
@@ -103,41 +121,48 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ai-teacher'
     | '/auth'
     | '/learn'
     | '/missions'
     | '/onboarding'
     | '/practice'
     | '/profile'
+    | '/auth/callback'
     | '/lesson/$lessonId'
     | '/roleplay/$scenarioId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ai-teacher'
     | '/auth'
     | '/learn'
     | '/missions'
     | '/onboarding'
     | '/practice'
     | '/profile'
+    | '/auth/callback'
     | '/lesson/$lessonId'
     | '/roleplay/$scenarioId'
   id:
     | '__root__'
     | '/'
+    | '/ai-teacher'
     | '/auth'
     | '/learn'
     | '/missions'
     | '/onboarding'
     | '/practice'
     | '/profile'
+    | '/auth/callback'
     | '/lesson/$lessonId'
     | '/roleplay/$scenarioId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AuthRoute: typeof AuthRoute
+  AiTeacherRoute: typeof AiTeacherRoute
+  AuthRoute: typeof AuthRouteWithChildren
   LearnRoute: typeof LearnRoute
   MissionsRoute: typeof MissionsRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -154,6 +179,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-teacher': {
+      id: '/ai-teacher'
+      path: '/ai-teacher'
+      fullPath: '/ai-teacher'
+      preLoaderRoute: typeof AiTeacherRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth': {
@@ -198,6 +230,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/auth/callback': {
+      id: '/auth/callback'
+      path: '/callback'
+      fullPath: '/auth/callback'
+      preLoaderRoute: typeof AuthCallbackRouteImport
+      parentRoute: typeof AuthRoute
+    }
     '/lesson/$lessonId': {
       id: '/lesson/$lessonId'
       path: '/lesson/$lessonId'
@@ -215,9 +254,20 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AuthRouteChildren {
+  AuthCallbackRoute: typeof AuthCallbackRoute
+}
+
+const AuthRouteChildren: AuthRouteChildren = {
+  AuthCallbackRoute: AuthCallbackRoute,
+}
+
+const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AuthRoute: AuthRoute,
+  AiTeacherRoute: AiTeacherRoute,
+  AuthRoute: AuthRouteWithChildren,
   LearnRoute: LearnRoute,
   MissionsRoute: MissionsRoute,
   OnboardingRoute: OnboardingRoute,

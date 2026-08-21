@@ -1,12 +1,11 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
-import { ArrowLeft, Chrome } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ArrowLeft, Mail, Lock, Eye, EyeOff } from "lucide-react";
 import { toast } from "sonner";
 
 import { LogoMark, Wordmark } from "@/components/brand";
 import { useAuth } from "@/lib/auth";
 import { NBButton, NBCard } from "@/lib/nb";
-import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/auth")({
   component: AuthPage,
@@ -16,73 +15,115 @@ function AuthPage() {
   const navigate = useNavigate();
   const { configured, user, signIn, signUp, signOut } = useAuth();
 
-  const [mode, setMode] = useState<"signin" | "signup" | "mock">("signin");
-  const [email, setEmail] = useState("aditya@gmail.com");
-  const [password, setPassword] = useState("1234");
+  const [mode, setMode] = useState<"signin" | "signup">("signin");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState(false);
 
-  const mockLogin = async () => {
-    setBusy(true);
-    setError(null);
-    await new Promise((r) => setTimeout(r, 800));
-
-    if (email === "aditya@gmail.com" && password === "1234") {
-      toast.success("Mock login successful! Welcome to NudiGO");
-      localStorage.setItem(
-        "nudigogo_mock_user",
-        JSON.stringify({
-          email,
-          name: name || "Aditya",
-          id: "mock_" + Date.now(),
-        }),
+  // Debug Supabase config
+  useEffect(() => {
+    console.log("[Auth] Supabase URL:", import.meta.env.VITE_SUPABASE_URL);
+    console.log("[Auth] Supabase configured:", configured);
+    if (!import.meta.env.VITE_SUPABASE_URL) {
+      console.error(
+        "[Auth] VITE_SUPABASE_URL not set in .env — OAuth won't work"
       );
-      setTimeout(() => {
-        window.location.href = "/learn";
-      }, 100);
-    } else {
-      setError('Mock mode: Use email "aditya@gmail.com" and password "1234"');
     }
-    setBusy(false);
-  };
+  }, [configured]);
 
-  const handleGoogleAuth = () => {
-    toast.info("Google OAuth placeholder. Add VITE_GOOGLE_CLIENT_ID to .env");
+  const handleGoogleAuth = async () => {
+    try {
+      setBusy(true);
+      console.log("[Auth] Starting Google OAuth via Supabase...");
+
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      console.log("[Auth] Supabase URL from env:", supabaseUrl);
+
+      if (!supabaseUrl) {
+        throw new Error(
+          "Supabase URL not configured. Add VITE_SUPABASE_URL to .env"
+        );
+      }
+
+      const { supabase } = await import("@/integrations/supabase/client");
+      console.log("[Auth] Supabase client loaded");
+
+      const redirectUrl = `${window.location.origin}/auth/callback`;
+      console.log("[Auth] OAuth redirect URL:", redirectUrl);
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+          redirectTo: redirectUrl,
+          queryParams: {
+            access_type: "offline",
+            prompt: "consent",
+          },
+        },
+      });
+
+      if (error) {
+        console.error("[Auth] Google OAuth error:", error);
+        toast.error(`Google OAuth failed: ${error.message}`);
+        setBusy(false);
+        return;
+      }
+
+      console.log("[Auth] Google OAuth initiated successfully");
+      if (data) {
+        console.log("[Auth] OAuth URL:", data);
+      }
+    } catch (err) {
+      console.error("[Auth] Google OAuth exception:", err);
+      const message =
+        err instanceof Error ? err.message : "Failed to start Google authentication";
+      toast.error(message);
+      setBusy(false);
+    }
   };
 
   const submit = async () => {
     setError(null);
     if (!email || !password) {
-      setError("Enter your email and password.");
+      setError("Email and password required");
       return;
     }
+
     setBusy(true);
 
-    if (mode === "signup") {
-      const { error: err } = await signUp(
-        email,
-        password,
-        name.trim() || undefined,
-      );
-      setBusy(false);
-      if (err) {
-        setError(err);
+    try {
+      if (mode === "signup") {
+        const { error: err } = await signUp(email, password, name || undefined);
+        if (err) {
+          setError(err);
+          setBusy(false);
+          return;
+        }
+        toast.success("Account created! Sign in to continue.");
+        setMode("signin");
+        setPassword("");
+        setBusy(false);
         return;
       }
-      toast.success("Account created — you can log in now.");
-      setMode("signin");
-      return;
-    }
 
-    const { error: err } = await signIn(email, password);
-    setBusy(false);
-    if (err) {
-      setError(err);
-      return;
+      const { error: err } = await signIn(email, password);
+      if (err) {
+        setError(err);
+        setBusy(false);
+        return;
+      }
+
+      toast.success("Welcome back!");
+      navigate({ to: "/learn" });
+    } catch (err) {
+      setError("An error occurred");
+      console.error("[Auth] Error:", err);
+    } finally {
+      setBusy(false);
     }
-    toast.success("Welcome back!");
-    void navigate({ to: "/learn" });
   };
 
   // Already signed in
@@ -106,7 +147,7 @@ function AuthPage() {
         </div>
         <div className="flex flex-1 flex-col justify-center">
           <NBCard className="space-y-3 text-center">
-            <h1 className="text-2xl">You are signed in</h1>
+            <h1 className="text-2xl font-black">You're signed in</h1>
             <p className="font-semibold text-ink/70">{user.email ?? "Signed in"}</p>
             <NBButton full onClick={() => navigate({ to: "/learn" })}>
               Continue learning
@@ -116,9 +157,8 @@ function AuthPage() {
               onClick={async () => {
                 await signOut();
                 toast("Signed out");
-                localStorage.removeItem("nudigogo_mock_user");
               }}
-              className="text-sm font-extrabold uppercase text-ink/60 underline"
+              className="text-sm font-bold text-ink/60 underline"
             >
               Log out
             </button>
@@ -130,6 +170,7 @@ function AuthPage() {
 
   return (
     <div className="mx-auto flex min-h-screen w-full flex-col bg-paper px-5 py-6 lg:max-w-2xl lg:px-8 lg:py-10">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <button
           type="button"
@@ -146,225 +187,170 @@ function AuthPage() {
         <span className="h-10 w-10" />
       </div>
 
+      {/* Main */}
       <div className="flex flex-1 flex-col justify-center py-8">
-        {!configured ? (
-          <div className="space-y-6">
-            <NBCard tone="yellow" className="space-y-3">
-              <h1 className="text-2xl">Try Mock Login</h1>
-              <p className="font-semibold text-ink/80">
-                For development, use:
-              </p>
-              <div className="space-y-2 rounded-lg bg-white/50 p-3 font-mono text-sm">
-                <p>
-                  Email: <span className="font-bold">aditya@gmail.com</span>
-                </p>
-                <p>
-                  Password: <span className="font-bold">1234</span>
-                </p>
-              </div>
-              <p className="text-xs font-semibold text-ink/60">
-                Real authentication will work when you add Supabase and Google OAuth keys to .env
-              </p>
-            </NBCard>
-
-            <div className="space-y-3">
-              <h2 className="text-lg font-bold">Quick Start</h2>
-
-              <button
-                type="button"
-                onClick={handleGoogleAuth}
-                className="nb-border nb-shadow-sm nb-press w-full flex items-center justify-center gap-2 rounded-xl bg-card px-4 py-3 font-extrabold uppercase hover:bg-card/80"
-              >
-                <Chrome className="h-5 w-5" aria-hidden />
-                Sign in with Google
-              </button>
-
-              <div className="flex gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("mock");
-                    setError(null);
-                  }}
-                  className={cn(
-                    "flex-1 rounded-xl px-4 py-3 font-extrabold uppercase",
-                    mode === "mock"
-                      ? "nb-border nb-shadow bg-primary text-primary-foreground"
-                      : "nb-border bg-card text-ink hover:bg-card/80",
-                  )}
-                >
-                  Mock Login
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMode("signin");
-                    setError(null);
-                  }}
-                  className={cn(
-                    "flex-1 rounded-xl px-4 py-3 font-extrabold uppercase",
-                    mode === "signin"
-                      ? "nb-border nb-shadow bg-primary text-primary-foreground"
-                      : "nb-border bg-card text-ink hover:bg-card/80",
-                  )}
-                >
-                  Email Login
-                </button>
-              </div>
-
-              {mode === "mock" || mode === "signin" ? (
-                <div className="space-y-3">
-                  <Field
-                    label="Email"
-                    value={email}
-                    onChange={setEmail}
-                    placeholder="you@example.com"
-                    type="email"
-                  />
-                  <Field
-                    label="Password"
-                    value={password}
-                    onChange={setPassword}
-                    placeholder="••••••••"
-                    type="password"
-                    onEnter={mode === "mock" ? mockLogin : submit}
-                  />
-
-                  {error && (
-                    <p className="rounded-lg bg-destructive/15 px-3 py-2 text-sm font-bold text-destructive">
-                      {error}
-                    </p>
-                  )}
-
-                  <NBButton
-                    full
-                    size="lg"
-                    disabled={busy}
-                    onClick={mode === "mock" ? mockLogin : submit}
-                  >
-                    {busy
-                      ? "Please wait..."
-                      : mode === "mock"
-                        ? "Mock Login"
-                        : "Sign in"}
-                  </NBButton>
-                </div>
-              ) : null}
-            </div>
-
-            <p className="text-center text-xs font-semibold text-ink/50">
-              Your progress is saved on this device automatically.
+        <div className="space-y-6">
+          {/* Title */}
+          <div className="text-center">
+            <h1 className="text-4xl font-black">
+              {mode === "signin" ? "Welcome back" : "Create account"}
+            </h1>
+            <p className="mt-2 text-lg font-semibold text-ink/70">
+              {mode === "signin"
+                ? "Sign in to continue learning"
+                : "Start learning Kannada"}
             </p>
           </div>
-        ) : (
-          <div className="space-y-6">
-            <h1 className="text-3xl">
-              {mode === "signin" ? "Welcome back" : "Create your account"}
-            </h1>
-            <p className="font-semibold text-ink/70">
-              Sync your streak and progress everywhere.
-            </p>
 
-            <div className="space-y-3">
-              {mode === "signup" && (
-                <Field
-                  label="Name (optional)"
+          {/* Google OAuth */}
+          <NBButton
+            full
+            size="lg"
+            onClick={handleGoogleAuth}
+            disabled={busy}
+            className="flex items-center justify-center gap-3 bg-white text-black hover:bg-gray-50"
+          >
+            {/* Google Logo SVG */}
+            <svg
+              className="h-5 w-5"
+              viewBox="0 0 24 24"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              aria-hidden
+            >
+              <path
+                d="M23.745 12.27c0-.79-.07-1.54-.187-2.27H12v4.51h6.47c-.29 1.48-.91 2.74-1.88 3.58v2.41h3.04c1.713-1.58 2.703-3.9 2.703-6.66z"
+                fill="#4285F4"
+              />
+              <path
+                d="M12 24c2.405 0 4.424-.795 5.896-2.622l-3.04-2.41c-.822.56-1.88.9-2.856.9-2.195 0-4.055-1.487-4.716-3.486H3.926v2.49C5.397 22.524 8.354 24 12 24z"
+                fill="#34A853"
+              />
+              <path
+                d="M7.284 14.382c-.18-.56-.28-1.156-.28-1.782s.1-1.222.28-1.782V7.328H3.926A11.986 11.986 0 002 12c0 1.947.474 3.79 1.307 5.41l3.358-2.59z"
+                fill="#FBBC04"
+              />
+              <path
+                d="M12 4.75c1.77 0 3.361.608 4.612 1.8l3.458-3.45C16.418.92 14.398 0 12 0 8.354 0 5.397 1.476 3.926 3.91l3.358 2.59c.66-1.99 2.52-3.75 4.716-3.75z"
+                fill="#EA4335"
+              />
+            </svg>
+            <span>{busy ? "Signing in..." : "Continue with Google"}</span>
+          </NBButton>
+
+          {/* Divider */}
+          <div className="flex items-center gap-3">
+            <div className="h-px flex-1 bg-ink/10" />
+            <span className="text-xs font-bold uppercase text-ink/50">Or</span>
+            <div className="h-px flex-1 bg-ink/10" />
+          </div>
+
+          {/* Email Form */}
+          <NBCard className="space-y-3">
+            {mode === "signup" && (
+              <div>
+                <label className="mb-1 block text-xs font-bold uppercase text-ink/60">
+                  Name (optional)
+                </label>
+                <input
+                  type="text"
                   value={name}
-                  onChange={setName}
+                  onChange={(e) => setName(e.target.value)}
                   placeholder="Your name"
+                  className="nb-border h-12 w-full rounded-xl bg-card px-4 font-bold outline-none"
                 />
-              )}
-              <Field
-                label="Email"
-                value={email}
-                onChange={setEmail}
-                placeholder="you@example.com"
-                type="email"
-              />
-              <Field
-                label="Password"
-                value={password}
-                onChange={setPassword}
-                placeholder="••••••••"
-                type="password"
-                onEnter={submit}
-              />
+              </div>
+            )}
+
+            {/* Email Input */}
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase text-ink/60">
+                Email
+              </label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/40" aria-hidden />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="you@example.com"
+                  className="nb-border h-12 w-full rounded-xl bg-card pl-10 pr-4 font-bold outline-none"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") submit();
+                  }}
+                />
+              </div>
             </div>
 
+            {/* Password Input */}
+            <div>
+              <label className="mb-1 block text-xs font-bold uppercase text-ink/60">
+                Password
+              </label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-ink/40" aria-hidden />
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="nb-border h-12 w-full rounded-xl bg-card pl-10 pr-10 font-bold outline-none"
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") submit();
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-ink/40 hover:text-ink/60"
+                  aria-label="Toggle password"
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" aria-hidden />
+                  ) : (
+                    <Eye className="h-5 w-5" aria-hidden />
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Error */}
             {error && (
               <p className="rounded-lg bg-destructive/15 px-3 py-2 text-sm font-bold text-destructive">
                 {error}
               </p>
             )}
 
-            <NBButton
-              full
-              size="lg"
-              disabled={busy}
-              onClick={submit}
-            >
-              {busy ? "Please wait..." : mode === "signin" ? "Log in" : "Sign up"}
+            {/* Submit */}
+            <NBButton full size="lg" onClick={submit} disabled={busy}>
+              {busy
+                ? "Please wait..."
+                : mode === "signin"
+                  ? "Sign in with Email"
+                  : "Create Account"}
             </NBButton>
+          </NBCard>
 
-            <button
-              type="button"
-              onClick={() => {
-                setMode((m) => (m === "signin" ? "signup" : "signin"));
-                setError(null);
-              }}
-              className="w-full text-sm font-extrabold uppercase text-ink/70 underline"
-            >
-              {mode === "signin"
-                ? "New here? Create an account"
-                : "Have an account? Log in"}
-            </button>
+          {/* Toggle */}
+          <button
+            type="button"
+            onClick={() => {
+              setMode(mode === "signin" ? "signup" : "signin");
+              setError(null);
+              setPassword("");
+            }}
+            className="w-full text-center text-sm font-bold text-ink/70 underline"
+          >
+            {mode === "signin"
+              ? "Don't have an account? Sign up"
+              : "Already have an account? Sign in"}
+          </button>
 
-            <button
-              type="button"
-              onClick={() => navigate({ to: "/learn" })}
-              className="w-full text-sm font-bold text-ink/50"
-            >
-              Skip for now
-            </button>
-          </div>
-        )}
+          <p className="text-center text-xs font-semibold text-ink/50">
+            Progress saved securely to your account.
+          </p>
+        </div>
       </div>
     </div>
-  );
-}
-
-function Field({
-  label,
-  value,
-  onChange,
-  placeholder,
-  type = "text",
-  onEnter,
-}: {
-  label: string;
-  value: string;
-  onChange: (v: string) => void;
-  placeholder?: string;
-  type?: string;
-  onEnter?: () => void;
-}) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-extrabold uppercase text-ink/60">
-        {label}
-      </span>
-      <input
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && onEnter) onEnter();
-        }}
-        className={cn(
-          "nb-border h-12 w-full rounded-xl bg-card px-4 font-bold outline-none",
-        )}
-      />
-    </label>
   );
 }

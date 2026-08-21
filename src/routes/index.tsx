@@ -13,7 +13,7 @@ const steps = [
   {
     Icon: BookOpen,
     title: "Learn phrases",
-    body: "Start with real Bangalore situations — not grammar drills.",
+    body: "Start with real Bangalore situations - not grammar drills.",
   },
   {
     Icon: Mic,
@@ -33,7 +33,7 @@ const steps = [
 ];
 
 const features = [
-  "Bangalore-focused — the Kannada you'll actually use",
+  "Bangalore-focused - the Kannada you'll actually use",
   "Short 3–7 minute lessons that fit your commute",
   "Speaking practice with instant feedback",
   "AI conversations with a waiter, auto driver & more",
@@ -82,8 +82,8 @@ function Landing() {
             to winning the auto conversation.
           </p>
           <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <NBLinkButton to="/onboarding" tone="primary" size="lg">
-              Start learning — it's free
+            <NBLinkButton to="/auth" tone="primary" size="lg">
+              Start learning - it's free
             </NBLinkButton>
           </div>
           <p className="mt-3 text-sm font-bold text-ink/60">
@@ -159,7 +159,7 @@ function Landing() {
             Learn it. Speak it. Go. Your first phrase is five minutes away.
           </p>
           <div className="mt-7 flex justify-center">
-            <NBLinkButton to="/onboarding" tone="white" size="lg">
+            <NBLinkButton to="/auth" tone="white" size="lg">
               Start learning
             </NBLinkButton>
           </div>

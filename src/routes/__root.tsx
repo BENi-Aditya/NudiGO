@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "NudiGO — Learn Kannada, one conversation at a time." },
+        { title: "NudiGO - Learn Kannada, one conversation at a time." },
         {
           name: "description",
           content:
@@ -94,12 +94,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "theme-color", content: "#FF3B30" },
         {
           property: "og:title",
-          content: "NudiGO — Learn Kannada, one conversation at a time.",
+          content: "NudiGO - Learn Kannada, one conversation at a time.",
         },
         {
           property: "og:description",
           content:
-            "Practical Kannada for life in Karnataka — short lessons, speaking practice, and AI conversation. Learn. Speak. Go.",
+            "Practical Kannada for life in Karnataka - short lessons, speaking practice, and AI conversation. Learn. Speak. Go.",
         },
         { property: "og:type", content: "website" },
         { name: "twitter:card", content: "summary_large_image" },

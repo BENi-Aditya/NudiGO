@@ -29,7 +29,7 @@ function AuthPage() {
     console.log("[Auth] Supabase configured:", configured);
     if (!import.meta.env.VITE_SUPABASE_URL) {
       console.error(
-        "[Auth] VITE_SUPABASE_URL not set in .env — OAuth won't work"
+        "[Auth] VITE_SUPABASE_URL not set in .env - OAuth won't work"
       );
     }
   }, [configured]);

@@ -1,5 +1,5 @@
 /**
- * Progress engine — the app's state heart (PRD §12, §18, §27).
+ * Progress engine - the app's state heart (PRD §12, §18, §27).
  *
  * - Works offline: everything persists to localStorage, so the full learning
  *   loop runs with no backend.
@@ -140,7 +140,7 @@ function saveLocal(state: ProgressState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   } catch {
-    // storage full / unavailable — non-fatal
+    // storage full / unavailable - non-fatal
   }
 }
 

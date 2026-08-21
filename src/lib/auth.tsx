@@ -2,7 +2,7 @@
  * Auth context. Wraps Supabase Auth when configured; otherwise it's a no-op
  * (user stays null and the app runs anonymously with local progress).
  *
- * SSR-safe: no browser/Supabase access at module load or during render —
+ * SSR-safe: no browser/Supabase access at module load or during render -
  * everything happens in an effect on the client.
  */
 import {

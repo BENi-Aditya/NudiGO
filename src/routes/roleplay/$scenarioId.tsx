@@ -87,7 +87,7 @@ function RoleplayPage() {
           role: "system",
           text:
             nextAttempt >= 2
-              ? "Not quite — tap the hint below."
+              ? "Not quite - tap the hint below."
               : "Hmm, try again.",
         },
       ]);
@@ -177,7 +177,7 @@ function RoleplayPage() {
               className="nb-border nb-shadow-sm nb-press w-full rounded-xl bg-accent p-3 text-left"
             >
               <span className="text-xs font-extrabold uppercase">
-                Hint — tap to use
+                Hint - tap to use
               </span>
               <Kannada className="mt-1 block text-lg">
                 {currentStep.hint.kannada}

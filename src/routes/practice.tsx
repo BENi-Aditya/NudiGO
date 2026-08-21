@@ -64,7 +64,7 @@ function PracticePage() {
         exercises={reviewExercises(due)}
         onExit={() => {
           setMode("hub");
-          toast.success("Review done — nicely kept up.");
+          toast.success("Review done - nicely kept up.");
         }}
       />
     );

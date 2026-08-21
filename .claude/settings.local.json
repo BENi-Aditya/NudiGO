@@ -6,7 +6,9 @@
       "WebFetch(domain:nitro.build)",
       "Skill(update-config)",
       "Skill(update-config:*)",
-      "Bash(NITRO_PRESET=node-server npm run build)"
+      "Bash(NITRO_PRESET=node-server npm run build)",
+      "Bash(sed -i '' 's|to=\"/onboarding\"|to=\"/auth\"|g' src/routes/index.tsx)",
+      "Bash(sed -i '' 's|Start learning — it'\\\\''s free|Start learning - it'\\\\''s free|g' src/routes/index.tsx)"
     ]
   }
 }

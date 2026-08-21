@@ -1,4 +1,4 @@
-/** Achievements — mirrors the seeded `achievements` table (PRD §18). */
+/** Achievements - mirrors the seeded `achievements` table (PRD §18). */
 
 export type AchievementMetric =
   "lessons" | "streak" | "xp" | "mastered" | "speak";

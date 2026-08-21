@@ -1,5 +1,5 @@
 /**
- * Real-world missions — the bridge from screen to street (PRD §17).
+ * Real-world missions - the bridge from screen to street (PRD §17).
  * Each mission unlocks when the learner finishes the linked unit's first
  * lesson, and points at a concept they just learned. Completion is
  * self-reported ("I did it"); missions never ask the learner to record or

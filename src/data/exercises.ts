@@ -1,5 +1,5 @@
 /**
- * Exercise engine — turns curriculum concepts into a playable lesson sequence.
+ * Exercise engine - turns curriculum concepts into a playable lesson sequence.
  *
  * Generation is DETERMINISTIC (seeded by lesson id) so the server-rendered
  * markup matches the client on hydration, and a given lesson always plays the
@@ -155,7 +155,7 @@ function mcqToEnglish(concept: Concept, rng: () => number): McqExercise {
     promptEnglish: concept.english,
     options,
     answer: concept.english,
-    explanation: `${concept.transliteration} — ${concept.english}. ${concept.note}`,
+    explanation: `${concept.transliteration} - ${concept.english}. ${concept.note}`,
   };
 }
 

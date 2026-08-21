@@ -78,7 +78,7 @@ export const scenarios: Scenario[] = [
         ack: { kannada: "ಆಯಿತು!", translit: "Ayitu!", english: "Done!" },
       },
     ],
-    success: "Your first Kannada coffee order — nicely done!",
+    success: "Your first Kannada coffee order - nicely done!",
   },
   {
     id: "auto",

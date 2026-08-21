@@ -125,7 +125,7 @@ function Onboarding() {
           <div className="animate-nb-pop">
             <h1 className="text-3xl">What do you want to handle first?</h1>
             <p className="mt-2 font-semibold text-ink/70">
-              Pick a few — you can change this later.
+              Pick a few - you can change this later.
             </p>
             <div className="mt-6 flex flex-wrap gap-2.5">
               {situations.map((s) => {

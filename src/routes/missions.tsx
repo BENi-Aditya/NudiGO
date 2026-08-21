@@ -1,0 +1,141 @@
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { Check, Target } from "lucide-react";
+import { toast } from "sonner";
+
+import { getConcept } from "@/data/curriculum";
+import { getMission, type Mission } from "@/data/missions";
+import { AppShell } from "@/components/app-shell";
+import { SpeakButton } from "@/components/speak-button";
+import { useProgress } from "@/lib/progress";
+import { NBButton, NBCard, Sticker, Kannada } from "@/lib/nb";
+
+export const Route = createFileRoute("/missions")({
+  component: MissionsPage,
+});
+
+function MissionsPage() {
+  const navigate = useNavigate();
+  const { hydrated, state, availableMissions, completeMission } = useProgress();
+
+  useEffect(() => {
+    if (hydrated && !state.profile.onboardingDone) {
+      void navigate({ to: "/onboarding" });
+    }
+  }, [hydrated, state.profile.onboardingDone, navigate]);
+
+  const unlocked = availableMissions();
+  const pending = unlocked.filter((m) => !state.missions[m.id]);
+  const completedIds = Object.keys(state.missions);
+
+  const onDid = (mission: Mission) => {
+    completeMission(mission.id, mission.reward);
+    toast.success(`Mission complete! +${mission.reward} XP`, {
+      description:
+        "You used Kannada in the real world. That's the whole point.",
+    });
+  };
+
+  return (
+    <AppShell active="missions">
+      <h1 className="mb-1 text-3xl">Missions</h1>
+      <p className="mb-5 font-semibold text-ink/70">
+        Take your Kannada off the screen.
+      </p>
+
+      {pending.length === 0 && completedIds.length === 0 && (
+        <NBCard tone="yellow">
+          <p className="font-bold">
+            Finish your first lesson to unlock a real-world mission. 🎯
+          </p>
+        </NBCard>
+      )}
+
+      {pending.length > 0 && (
+        <>
+          <Sticker tone="pink">Active</Sticker>
+          <div className="mt-3 space-y-4">
+            {pending.map((mission) => (
+              <PendingMission
+                key={mission.id}
+                mission={mission}
+                onDid={() => onDid(mission)}
+              />
+            ))}
+          </div>
+        </>
+      )}
+
+      {completedIds.length > 0 && (
+        <div className="mt-8">
+          <Sticker tone="white">Completed</Sticker>
+          <ul className="mt-3 space-y-2">
+            {completedIds
+              .map((id) => getMission(id))
+              .filter((m): m is Mission => Boolean(m))
+              .map((m) => (
+                <li
+                  key={m.id}
+                  className="nb-card flex items-center gap-3 bg-success/20 p-3"
+                >
+                  <span className="nb-border inline-flex h-7 w-7 items-center justify-center rounded-lg bg-success text-success-foreground">
+                    <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
+                  </span>
+                  <span className="flex-1 font-black">{m.title}</span>
+                  <span className="text-xs font-extrabold text-ink/60">
+                    +{m.reward} XP
+                  </span>
+                </li>
+              ))}
+          </ul>
+        </div>
+      )}
+    </AppShell>
+  );
+}
+
+function PendingMission({
+  mission,
+  onDid,
+}: {
+  mission: Mission;
+  onDid: () => void;
+}) {
+  const concept = getConcept(mission.conceptId);
+  return (
+    <NBCard>
+      <div className="flex items-start gap-2">
+        <Target className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
+        <div>
+          <p className="font-black">{mission.title}</p>
+          <p className="text-sm font-semibold text-ink/70">
+            {mission.objective}
+          </p>
+        </div>
+      </div>
+
+      {concept && (
+        <div className="nb-border mt-3 rounded-xl bg-secondary p-3 text-center">
+          <Kannada className="block text-2xl">{concept.kannada}</Kannada>
+          <p className="mt-1 font-extrabold">{concept.transliteration}</p>
+          <div className="mt-2 flex justify-center">
+            <SpeakButton text={concept.kannada} />
+          </div>
+        </div>
+      )}
+
+      {mission.safetyNote && (
+        <p className="mt-2 text-xs font-semibold text-ink/55">
+          {mission.safetyNote}
+        </p>
+      )}
+
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <Sticker tone="yellow">+{mission.reward} XP</Sticker>
+        <NBButton size="sm" onClick={onDid}>
+          I did it!
+        </NBButton>
+      </div>
+    </NBCard>
+  );
+}

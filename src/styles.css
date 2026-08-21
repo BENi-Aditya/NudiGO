@@ -1,0 +1,228 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+/*
+ * NamaGO design system — NEO-BRUTALISM.
+ * Palette is locked: red, yellow, white, ink, pink, paper.
+ * Thick 3px borders, hard offset shadows, flat fills, chunky controls.
+ */
+
+@theme inline {
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 14px;
+  --radius-xl: 16px;
+  --radius-2xl: 18px;
+
+  --font-sans: "Nunito Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-kannada: "Noto Sans Kannada", "Nunito Sans", sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+}
+
+:root {
+  --radius: 14px;
+
+  --ink: oklch(0.22 0 0);
+  --paper: oklch(0.99 0.012 95);
+
+  --background: oklch(0.99 0.012 95);
+  --foreground: oklch(0.22 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0 0);
+
+  /* red #FF3B30 */
+  --primary: oklch(0.638 0.226 29.5);
+  --primary-foreground: oklch(1 0 0);
+  /* yellow #FFD84D */
+  --secondary: oklch(0.891 0.152 90.5);
+  --secondary-foreground: oklch(0.22 0 0);
+  /* pink #FF8FC7 */
+  --accent: oklch(0.79 0.14 349);
+  --accent-foreground: oklch(0.22 0 0);
+
+  --muted: oklch(0.96 0.008 95);
+  --muted-foreground: oklch(0.45 0.01 90);
+
+  --destructive: oklch(0.638 0.226 29.5);
+  --destructive-foreground: oklch(1 0 0);
+  --success: oklch(0.72 0.18 145);
+  --success-foreground: oklch(0.22 0 0);
+
+  --border: oklch(0.22 0 0);
+  --input: oklch(0.22 0 0);
+  --ring: oklch(0.638 0.226 29.5);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-weight: 600;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  h1,
+  h2,
+  h3 {
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    text-transform: none;
+  }
+
+  :focus-visible {
+    outline: 3px solid var(--color-primary);
+    outline-offset: 2px;
+  }
+}
+
+/* ---------- Neo-brutalist primitives ---------- */
+
+@utility nb-border {
+  border-width: 3px;
+  border-style: solid;
+  border-color: var(--color-ink);
+}
+
+@utility nb-shadow {
+  box-shadow: 6px 6px 0 var(--color-ink);
+}
+
+@utility nb-shadow-sm {
+  box-shadow: 3px 3px 0 var(--color-ink);
+}
+
+@utility nb-shadow-lg {
+  box-shadow: 10px 10px 0 var(--color-ink);
+}
+
+@utility nb-press {
+  transition:
+    transform 120ms cubic-bezier(0.2, 0.9, 0.3, 1),
+    box-shadow 120ms cubic-bezier(0.2, 0.9, 0.3, 1);
+}
+
+@utility nb-kannada {
+  font-family: var(--font-kannada);
+  font-weight: 700;
+}
+
+@layer components {
+  .nb-press:active:not(:disabled) {
+    transform: translate(4px, 4px);
+    box-shadow: 2px 2px 0 var(--color-ink);
+  }
+
+  .nb-card {
+    background-color: var(--color-card);
+    border: 3px solid var(--color-ink);
+    border-radius: var(--radius);
+    box-shadow: 6px 6px 0 var(--color-ink);
+  }
+
+  .nb-tape {
+    background-image: repeating-linear-gradient(
+      45deg,
+      var(--color-secondary),
+      var(--color-secondary) 12px,
+      var(--color-ink) 12px,
+      var(--color-ink) 14px
+    );
+  }
+
+  .nb-dots {
+    background-image: radial-gradient(var(--color-ink) 1.5px, transparent 1.6px);
+    background-size: 14px 14px;
+  }
+}
+
+@keyframes nb-pop {
+  0% {
+    transform: scale(0.85) rotate(-3deg);
+    opacity: 0;
+  }
+  70% {
+    transform: scale(1.04) rotate(1deg);
+  }
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+}
+
+@keyframes nb-shake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  20% {
+    transform: translateX(-7px);
+  }
+  40% {
+    transform: translateX(7px);
+  }
+  60% {
+    transform: translateX(-4px);
+  }
+  80% {
+    transform: translateX(4px);
+  }
+}
+
+@keyframes nb-pulse-ring {
+  0% {
+    box-shadow: 0 0 0 0 var(--color-primary);
+  }
+  100% {
+    box-shadow: 0 0 0 22px transparent;
+  }
+}
+
+@utility animate-nb-pop {
+  animation: nb-pop 260ms cubic-bezier(0.2, 0.9, 0.3, 1) both;
+}
+
+@utility animate-nb-shake {
+  animation: nb-shake 320ms ease-in-out both;
+}
+
+@utility animate-nb-ring {
+  animation: nb-pulse-ring 1200ms ease-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,888 @@
+PRD — Kannada Language Learning App MVP
+
+1. Product Definition
+Working name: NudiGo
+Product type: Gamified language-learning web application
+Primary language: Kannada
+Initial learner language: English
+Platform: Responsive web application
+Hackathon scope: 13-hour MVP
+Target: A polished, highly interactive demonstration of a Duolingo-like learning experience specifically optimized for people who need practical Kannada in everyday Karnataka situations.
+The product should feel like a real consumer application rather than a hackathon prototype.
+The core product loop is:
+Choose goal → Start lesson → Learn → Practice → Make mistakes → Receive feedback → Review → Complete lesson → Earn progress → Continue learning → Practice conversation
+The MVP should demonstrate this loop extremely well.
+The application must not attempt to reproduce all of Duolingo. It should reproduce the feeling of learning through short, rewarding, progressively difficult interactions.
+The primary differentiator is contextual Indian-language learning.
+Instead of teaching Kannada as an abstract collection of vocabulary, the MVP should teach Kannada through situations a person living in Bengaluru/Karnataka actually encounters.
+Examples:
+Talking to an auto driver
+Ordering food
+Asking for directions
+Buying something
+Introducing yourself
+Speaking to classmates
+Asking someone to repeat themselves
+Basic everyday conversation
+
+2. Product Vision
+The long-term vision is:
+Make India's regional languages approachable, practical, and habit-forming to learn.
+Kannada is the first language.
+The underlying product concept should eventually support:
+Kannada
+Tamil
+Telugu
+Malayalam
+Bengali
+Assamese
+Marathi
+Gujarati
+Punjabi
+Odia
+Hindi
+and other Indian languages.
+However, the MVP must only expose Kannada, and Kannada only.
+The architecture and content model should be designed so additional languages can eventually be added without rebuilding the learning engine.
+
+3. Target User
+The primary MVP persona is:
+A young person, whose 2nd or 3rd language is English, has recently moved to Bengaluru and wants to learn enough Kannada to comfortably handle everyday interactions.
+A particularly strong example is:
+A college student who has moved to Bengaluru and knows no Kannada whatsoever.
+The user is not initially trying to achieve literary fluency.
+Their immediate goals are:
+"I want to understand people."
+"I want to respond without opening Google Translate."
+"I want to survive everyday conversations."
+This should influence the content.
+
+4. Product Principles
+4.1 Learn by doing
+Avoid long explanations. The learner should interact with Kannada almost immediately.
+4.2 Small learning units
+Lessons should feel achievable in approximately 3–5 minutes. The user should frequently think: "I'll just do one more lesson."
+4.3 Immediate feedback
+Every answer should produce immediate feedback.
+Correct: ✓ Correct
+Incorrect: ✗ Not quite
+Then explain or reveal the correct answer.
+4.4 Repetition without boredom
+The same vocabulary should appear through different exercise formats.
+A learner shouldn't see: ನೀರು = water
+once and never encounter it again.
+Instead:
+ನೀರು → water
+water → ನೀರು
+hear ನೀರು
+use ನೀರು in a sentence
+construct a sentence containing ನೀರು
+4.5 Context over isolated vocabulary
+Prefer "How much is this?" over: "How much"
+Prefer "I want water." over "water"
+4.6 Visual feedback
+The user should always understand:
+where they are
+what they're learning
+how well they're doing
+what comes next.
+4.7 Delightful interaction
+Animations should communicate state. Correct answers should feel satisfying. Wrong answers should feel corrective rather than punishing.
+Transitions should feel intentional.
+
+5. MVP Scope
+The MVP contains six major experiences for Kannada, and no other language:
+Landing / onboarding
+Learning path
+Lesson
+Lesson completion
+Review
+AI conversation practice
+The MVP should also maintain a lightweight progress state.
+
+6. Application Structure
+The application should have the following conceptual routes/screens:
+├── onboarding
+├── home
+├── lesson/:lessonId
+├── lesson-complete/:lessonId
+├── review
+└── conversation
+A full routing library is optional.
+Because this is a hackathon MVP, simple client-side state/routing is acceptable.
+
+7. Visual Design Direction
+Beauty is a core requirement, not an option.
+The interface should feel like a modern consumer EdTech product.
+Avoid the visual appearance of:
+a school management system
+a generic dashboard
+a Bootstrap template
+an AI wrapper
+an admin panel.
+The visual language should be:
+Playful + premium + youthful + approachable + distinctly Indian without becoming stereotypically "Indian".
+Styles to avoid at ALL COSTS:
+Minimal SaaS: rounded cards; soft shadows; pastel gradients; pill buttons; Inter. AI SaaS: purple/blue gradients; glass cards; sparkles; chat UI; gradient CTAs. Lovable-core: pastel gradients; huge rounded cards; glassmorphism; Lucide icons. Bolt-core: dark navy; electric gradients; glass panels; terminal motifs. Claude-core: warm off-white; terracotta; serif headings; cream cards. Cursor-core: near-black; purple/blue glow; monospace; terminal panels. Antigravity-core: dark spatial background; neon cyan/purple; floating glass; particles. Linear-core: charcoal; muted purple; compact density; subtle borders. Raycast-core: dark translucent UI; gradients; command palette; blur. Notion-core: off-white; monochrome; block layout; minimal shadows. Tailwind-core: Inter; rounded-xl/2xl; gray canvas; indigo accents. Shadcn-core: neutral palette; thin borders; muted backgrounds; compact controls. AI-native: dark gradients; sparkle icons; chat UI; model selectors. AI Slop: giant gradient headings; purple/pink/blue; excessive rounding; sparkles; generic AI copy. Startup Landing-core: huge hero; gradient CTA; logo cloud; feature grid; testimonials. Dashboard-core: sidebar; KPI cards; charts; tables; rounded containers. AI Wrapper-core: prompt input; chat panel; model selector; upload; streaming. ChatGPT Wrapper-core: history sidebar; centered chat; rounded messages; bottom composer. Gemini-core: pastel blue/purple; sparkles; rounded cards; chat UI. Hackathon-core: gradient hero; giant product name; glowing CTA; feature cards. AI Hackathon-core: purple gradient; futuristic dashboard; chat UI; sparkle icons. Lovable Hackathon-core: rounded-3xl; pastel gradients; fake dashboard data; glowing CTA. Cursor Hackathon-core: dark IDE UI; monospace; purple glow; terminal cards. “AI startup in 20 minutes”: Inter; purple gradient; rounded-2xl; glass cards; fake metrics. “Claude made this”: beige; serif heading; orange accent; cream cards. “Cursor made this”: dark; purple/blue glow; monospace; terminal motifs. “Lovable made this”: pastel purple; rounded-3xl; gradient CTA; floating cards. “Bolt made this”: dark navy; electric gradients; glass panels; terminal motifs.
+
+8. Color System
+Use a warm, energetic palette.
+Suggested base:
+Primary: deep indigo
+Accent: warm yellow
+Success: green
+Error: red/coral
+Background: very light warm neutral
+Text: deep charcoal
+Do not use excessive gradients.
+Use color primarily for:
+progress
+feedback
+selected states
+calls to action
+important visual anchors.
+The application should work in light mode for the MVP.
+
+9. Typography
+The application needs a font with excellent Kannada support.
+Use a modern Unicode Kannada-compatible font.
+Typography hierarchy:
+Heading
+Large, bold, confident. Example: ಕಲಿಯೋಣ!
+Primary text
+Clear English/Kannada combination.
+Kannada
+Kannada text should never look like an afterthought.
+It should have sufficient size, line height and spacing.
+For language-learning content, Kannada should generally be visually prominent.
+
+10. Onboarding
+The onboarding should take less than one minute.
+Screen 1 — Welcome
+Headline:
+Learn Kannada.
+One conversation at a time.
+Supporting text: Practical Kannada for life in Karnataka.
+Primary CTA: Start learning
+Secondary option: I already know some Kannada
+For the MVP, the second option can simply skip the absolute-beginner introduction.
+
+Screen 2 — Learning Goal
+Question: Why are you learning Kannada?
+Cards:
+Living in Karnataka : Everyday conversations
+College : Talk to classmates & friends
+Travel : Get around Karnataka
+Work : Communicate at work
+The selected option should visually activate.
+For MVP purposes, this selection can influence only the introductory lesson title/content.
+
+Screen 3 — Experience
+Question: How much Kannada do you know?
+Options:
+None
+A little
+I can understand some
+I can speak basic Kannada
+For the MVP:
+None → Unit 1
+Everything else → Unit 1 but with a slightly different introductory message.
+Don't build a complex placement test.
+
+Screen 4 — Commitment
+Question:
+How much time do you want to practice?
+Options:
+10 min/day
+20 min/day
+30 min/day
+This is primarily motivational in the MVP.
+Default: 10 min/day
+
+Screen 5 — Begin
+Show: Your Kannada journey starts here.
+Then: Start your first lesson →
+
+11. Home / Learning Path
+This is the primary screen after onboarding.
+It should not look like a dashboard.
+It should look like a journey.
+Top section:
+Good morning, Raktim.
+Then: Ready for some Kannada?
+Show current streak: 🔥 1 day
+Progress:
+Kannada Beginner
+12% complete
+Then the learning path.
+
+12. Learning Path Structure
+The MVP should show approximately 5 units.
+
+Unit 1 : Survival Kannada
+Learn the phrases you need immediately.
+Lessons:
+Hello!
+I don't understand
+Basic questions
+Asking for help
+Unit 2 : Getting Around
+Lessons:
+Directions
+Auto rides
+Bus & metro
+Places
+Unit 3
+Food & Shopping
+Lessons:
+Ordering food
+Prices
+Buying things
+Restaurants
+Unit 4
+People & College
+Lessons:
+Introductions
+Friends
+College
+Everyday conversations
+Unit 5
+Real Conversations
+Lessons:
+Putting it together
+Listening
+Speaking
+Conversation challenge
+Only Unit 1 and perhaps Unit 2 need complete functionality.
+Units 3–5 can be visually present but locked.
+This creates a convincing sense of future product depth.
+
+13. Unit Visual Design
+Each unit should have:
+icon
+title
+short description
+progress
+lesson nodes.
+For example:
+🚌 Getting Around
+Learn to navigate Bengaluru in Kannada.
+Lesson nodes can use:
+unlocked
+current
+completed
+locked.
+Completed lessons should visibly communicate success.
+
+14. Lesson System
+The lesson engine is the most important technical/product component.
+A lesson contains:
+Lesson
+ ├── title
+ ├── description
+ ├── estimatedDuration
+ ├── concepts[]
+ └── exercises[]
+Each lesson should contain approximately:
+8–12 exercises.
+Target completion time:
+3–5 minutes.
+
+15. Lesson Header
+During the lesson:
+Top:
+←              4 / 10
+━━━━━━━━━━━━━━━━━━
+Show progress continuously.
+There should be an exit button.
+If the user exits, preserve progress locally.
+
+16. Exercise Types
+The MVP should implement five exercise types.
+Exercise Type 1 — Multiple Choice Translation
+Display:
+What does this mean?
+Large Kannada:
+안녕하세요
+For Kannada, use actual Kannada:
+ನಮಸ್ಕಾರ
+Options:
+Hello
+Goodbye
+Thank you
+Sorry
+User selects.
+After selection:
+Correct: ✓ Correct!
+Incorrect: Not quite.
+Show: ನಮಸ್ಕಾರ = Hello
+Then: Continue
+
+17. Exercise Type 2 — Select the Kannada Word
+Prompt: Select "water"
+Options:
+ಮನೆ
+ನೀರು
+ಊಟ
+ರಸ್ತೆ
+This tests English → Kannada retrieval.
+
+18. Exercise Type 3 — Sentence Construction
+Prompt: Build the sentence.
+Meaning: I want water.
+Word tiles:
+ಬೇಕು
+ನೀರು
+ನನಗೆ
+User arranges: ನನಗೆ | ನೀರು | ಬೇಕು
+The interface should make dragging/tapping extremely satisfying.
+For the MVP, tapping a word can add it to the sentence.
+Tapping an already selected word can remove it.
+
+19. Exercise Type 4 — Listening
+Show: Listen and choose what you hear.
+Audio button: 
+🔊
+Then options.
+The user listens and selects the corresponding meaning.
+For the MVP, audio can be pre-generated and stored locally or loaded from a static source.
+Do not attempt to build custom speech synthesis.
+
+20. Exercise Type 5 — Translation Input
+Prompt: Translate into Kannada.
+English: I want water.
+Input: ___________________________________
+Expected: ನನಗೆ ನೀರು ಬೇಕು.
+For the MVP, exact string matching is acceptable.
+However, allow minor whitespace differences.
+Do not attempt sophisticated natural-language grading unless time permits.
+
+21. Exercise Feedback
+Feedback should be immediate.
+Correct:
+green success state
+subtle animation
+positive microcopy
+correct answer remains visible.
+Incorrect:
+red/coral error state
+correct answer displayed
+short explanation if useful.
+Do not punish mistakes excessively.
+The user should always know: what they answered, whether it was correct, what the correct  answer was, and why, if relevant.
+
+22. Hearts / Lives
+Do not implement the traditional Duolingo heart system.
+It introduces unnecessary complexity and can interfere with the core demonstration.
+Instead, mistakes simply reduce the lesson score.
+Example:
+8 / 10 correct
+The user can continue regardless of mistakes.
+
+23. Lesson Scoring
+Every exercise contributes to a score.
+Example:
+correct = +10
+incorrect = +0
+At completion: 8 / 10 correct; 80% accuracy
+Also track concepts.
+Example:
+ನೀರು: strong
+ಬೇಕು: weak
+ನನಗೆ: strong
+This information feeds the Review screen.
+
+24. Concept Model
+Every Kannada learning concept should have:
+id
+kannada
+english
+romanization
+exampleKannada
+exampleEnglish
+audio
+category
+difficulty
+Example:
+{
+    id: "water",
+    kannada: "ನೀರು",
+    english: "water",
+    romanization: "neeru",
+    exampleKannada: "ನನಗೆ ನೀರು ಬೇಕು.",
+    exampleEnglish: "I want water.",
+    category: "survival",
+    difficulty: 1
+}
+
+25. Lesson Completion
+After the final exercise, transition into a dedicated completion screen.
+Do not simply show: Lesson complete.
+Make it feel like a reward.
+Example:
+🎉 Lesson Complete
+You learned 5 new phrases.
+Then: 
+Accuracy : 90%
+XP earned :  +40 XP
+Words strengthened : 7
+Then a progress visualization:
+Survival Kannada
+████████░░ 80%
+CTA: Continue
+Secondary: Review mistakes
+
+26. Progress System
+Maintain a simple local state.
+Track:
+currentUnit
+completedLessons
+xp
+streak
+conceptScores
+lastStudyDate
+Use localStorage.
+SQLite3, or even a JSON-file-based system is enough for the MVP.
+
+27. XP
+Keep it extremely simple.
+Each completed exercise: +10 XP
+Lesson completion: +20 bonus XP
+Therefore a 10-question lesson gives approximately: 120 XP
+Display XP visually.
+Do not create complicated economies.
+
+28. Streak
+Implement a simple daily streak.
+If the user completes at least one lesson today: streak += 1
+If the previous study date was yesterday.
+If the user returns after missing a day: streak = 1
+For a hackathon demo, this is sufficient.
+
+29. Review System
+The Review page should answer: "What am I bad at?"
+Show concepts with low scores.
+Example:
+Review your weak words
+ಬೇಕು
+need / want
+You struggled with this twice.
+CTA: Practice
+The review session should select approximately 5 weak concepts.
+Use a mixture of exercise types.
+
+30. Adaptive Learning
+Keep the algorithm simple.
+Every concept has: score: 0–5
+Correct answer: score = min(score + 1, 5)
+Incorrect: score = max(score - 1, 0)
+Interpretation:
+0–1 = weak
+2–3 = learning
+4 = strong
+5 = mastered
+When generating review exercises, prioritize lower-score concepts.
+This gives you a legitimate adaptive-learning mechanism without wasting hackathon time.
+
+31. AI Conversation Mode
+This is the primary "wow" feature.
+Call it:
+Talk to Kannada
+or
+Conversation Mode
+The screen should communicate:
+You've learned enough.
+Now try using it.
+
+32. Conversation Scenarios
+Provide three scenarios.
+Scenario 1
+Ordering Food
+You're ordering food at a Bengaluru restaurant.
+Scenario 2
+Taking an Auto
+Ask an auto driver to take you somewhere.
+Scenario 3
+Meeting Someone
+Introduce yourself to a new classmate.
+Only the first scenario needs to be fully functional if time is constrained.
+
+33. Conversation UI
+Make it resemble a messaging interface rather than an AI dashboard.
+Top: 🍛 Restaurant
+Subtitle: Order something in Kannada.
+AI message: ನಮಸ್ಕಾರ! ಏನು ಬೇಕು?
+Below: What the AI said
+Optional English translation: Hello! What would you like?
+The learner responds.
+The application sends the response to the AI.
+AI evaluates it.
+
+34. AI Feedback
+The AI should not simply say: Correct.
+It should respond as a language tutor.
+Example: Nice! I understood you.
+Then: 
+A more natural way to say that is: ನನಗೆ ದೋಸೆ ಬೇಕು. "I want dosa."
+Then continue the conversation.
+This is much more compelling than a generic chatbot.
+
+35. AI Guardrails
+The AI should be instructed to:
+remain in the selected scenario
+use beginner-level Kannada
+avoid unnecessarily difficult vocabulary
+provide English explanations when necessary
+correct major errors
+encourage Kannada responses
+not overwhelm the learner
+progressively increase difficulty.
+For beginners, the AI should generally produce: Kannada + English translation
+Later: Kannada only
+
+36. Conversation Difficulty
+The conversation should start easy.
+Example:
+AI: ನಮಸ್ಕಾರ! ಏನು ಬೇಕು?
+User: ನನಗೆ ದೋಸೆ ಬೇಕು.
+AI: ಖಂಡಿತ. ಇನ್ನೇನು ಬೇಕು?
+User: ನೀರು ಬೇಕು.
+AI: ಸರಿ. ಒಂದು ದೋಸೆ ಮತ್ತು ಒಂದು ನೀರು.
+This demonstrates that the learner is actually using the language.
+
+37. Kannada Content for MVP
+The MVP should have around 30–40 concepts.
+Prioritize phrases.
+Suggested categories:
+Greetings
+ನಮಸ್ಕಾರ — Hello
+ಹೇಗಿದ್ದೀರಾ? — How are you?
+ಧನ್ಯವಾದ — Thank you
+ಪರವಾಗಿಲ್ಲ — It's okay
+ಕ್ಷಮಿಸಿ — Sorry / Excuse me
+Survival
+ನನಗೆ ಕನ್ನಡ ಗೊತ್ತಿಲ್ಲ. — I don't know Kannada.
+ಸ್ವಲ್ಪ ನಿಧಾನವಾಗಿ ಮಾತನಾಡಿ. — Please speak slowly.
+ನನಗೆ ಅರ್ಥವಾಗಲಿಲ್ಲ. — I didn't understand.
+ಮತ್ತೆ ಹೇಳಿ. — Say it again.
+ದಯವಿಟ್ಟು — Please.
+Food
+ನೀರು — Water
+ಊಟ — Food
+ದೋಸೆ — Dosa
+ಇಡ್ಲಿ — Idli
+ಬೇಕು — Want/need
+ಬೇಡ — Don't want/don't need
+Directions
+ಎಲ್ಲಿ? — Where?
+ಇಲ್ಲಿ — Here
+ಅಲ್ಲಿ — There
+ಹೋಗಿ — Go
+ಬನ್ನಿ — Come
+ಬಲ — Right
+ಎಡ — Left
+Transactions
+ಇದು ಎಷ್ಟು? — How much is this?
+ತುಂಬಾ ದುಬಾರಿ — Very expensive
+ಕಡಿಮೆ ಮಾಡಿ — Reduce the price
+ಬೇಕು — I want it
+ಬೇಡ — I don't want it
+College / Social
+ನಿಮ್ಮ ಹೆಸರೇನು? — What is your name?
+ನನ್ನ ಹೆಸರು... — My name is...
+ನೀವು ಎಲ್ಲಿಂದ? — Where are you from?
+ನಾನು ವಿದ್ಯಾರ್ಥಿ. — I am a student.
+
+38. Romanization
+Romanization should be available as secondary assistance.
+For example:
+ನೀರು
+neeru
+water
+Do not make romanization more visually prominent than Kannada.
+The learner should gradually become comfortable with Kannada script.
+A small “Show pronunciation” control can reveal it.
+
+39. Audio
+Every major vocabulary item should ideally have audio.
+The learner should be able to press:
+🔊
+and hear the Kannada pronunciation.
+For the hackathon:
+Pre-generated audio is preferred.
+Don't introduce runtime dependencies unless necessary.
+
+40. Navigation
+Bottom navigation can contain:
+Learn | Review | Practice
+Avoid five or six navigation items.
+The current screen should be clearly highlighted.
+
+41. Responsive Design
+The primary demo environment is likely a laptop browser.
+However, the application must also work on mobile widths.
+Breakpoints should support:
+desktop
+tablet
+mobile.
+On mobile:
+lesson content remains vertically centered
+answer buttons become full-width
+bottom navigation remains accessible
+Kannada text remains large.
+
+42. Animation Requirements
+Animation is important to the perceived quality.
+Use subtle animations for:
+page transitions
+lesson progression
+answer selection
+correct answer
+incorrect answer
+XP increase
+progress completion
+unlocked lessons.
+Avoid excessive animation.
+The goal is:
+responsive and alive, not distracting.
+
+43. Empty States
+Every screen needs a deliberate state.
+For Review with nothing weak:
+You're doing great.
+Nothing needs reviewing right now.
+CTA: Continue learning
+Do not leave blank screens.
+
+44. Error Handling
+If AI conversation fails:
+Something went wrong.
+Your lesson progress is safe. Try again.
+Provide:
+Retry
+The application must not crash if the AI API is unavailable.
+
+45. Offline/Fallback Behavior
+The core lesson system should work without AI.
+The AI conversation is an enhancement.
+If the API fails, the main learning experience should continue.
+This is essential for the hackathon demo.
+
+46. Technical Architecture
+Use:
+HTML
+For semantic structure.
+CSS
+For all visual design, responsive layout, animations and component states.
+TypeScript
+For:
+application state
+lesson engine
+exercise generation
+answer validation
+progress
+localStorage
+routing
+AI API interaction.
+Do not overengineer the architecture.
+
+
+47. Data-Driven Lessons
+Lessons should be defined as data rather than hardcoded UI.
+Example conceptual structure:
+{
+  id: "survival-01",
+  title: "Hello!",
+  description: "Learn your first Kannada phrases.",
+  concepts: [
+    "namaskara",
+    "dhanyavada",
+    "hegiddeera"
+  ],
+  exercises: [
+    {
+      type: "multipleChoice",
+      concept: "namaskara"
+    },
+    {
+      type: "selectKannada",
+      concept: "dhanyavada"
+    },
+    {
+      type: "sentenceBuild",
+      concept: "hegiddeera"
+    }
+  ]
+}
+This makes it easy to add lessons later.
+
+48. Exercise Engine
+The exercise engine receives:
+exercise definition + concept data
+and produces the appropriate UI.
+Conceptually: renderExercise(exercise)
+Supported:
+multipleChoice
+selectKannada
+sentenceBuild
+listening
+translation
+Every exercise should expose: checkAnswer()
+The lesson engine then determines whether to advance.
+
+49. State Management
+A global state object is enough.
+Example:
+{
+  user: {
+    name,
+    goal,
+    level
+  },
+
+  progress: {
+    xp,
+    streak,
+    currentUnit,
+    completedLessons,
+    conceptScores
+  },
+
+  currentLesson: {
+    lessonId,
+    currentExercise,
+    answers,
+    score
+  }
+}
+Persist only the necessary portions in localStorage.
+
+50. AI Integration
+Do not expose an API key directly in browser-side production code.
+For a hackathon prototype, if the chosen AI provider absolutely requires client-side access, understand that the key is exposed.
+Prefer a minimal backend/proxy if the team has time.
+However, do not let backend infrastructure consume the hackathon.
+The core product must work independently.
+
+51. AI Prompt Design
+The conversation agent should receive:
+Role: beginner Kannada tutor
+Learner: English-speaking beginner
+Scenario: ordering food
+Difficulty: beginner
+Known vocabulary: [...]
+instructions:
+ - speak simple Kannada
+ - provide English translation when appropriate
+ - correct important mistakes
+ - keep conversation natural
+ - stay in scenario
+ - encourage Kannada
+The model should return structured information if possible:
+{
+  "replyKannada": "...",
+  "translation": "...",
+  "correction": "...",
+  "encouragement": "..."
+}
+This makes the UI predictable.
+
+52. What Makes This "Duolingo-like"
+The MVP should reproduce these principles:
+Micro-lessons : Short sessions.
+Progression : Users visibly move through a path.
+Immediate feedback : Every interaction has a consequence.
+Repetition : Concepts return.
+Retrieval : Users have to recall rather than simply recognize.
+Gamification : XP, streaks and completion.
+Adaptive review : Weak concepts return more frequently.
+Increasing difficulty : Scaffolding gradually disappears.
+Habit formation : The user always has an obvious next action.
+
+53. What Makes It Different
+The core differentiator should be: Context-first regional language learning. The product isn't "Learn 100 Kannada words." It is "Learn how to survive your first week in Bengaluru."
+This distinction should be visible throughout the UX.
+Instead of units like: “Animals”, “Colors”, “Numbers”, the initial path should emphasize: “Talk to an auto driver.”, “Order food.”, “Ask for directions.”, “Introduce yourself.”, “Tell someone you don't understand Kannada.”
+
+54. Demo Journey
+The judges should see exactly this:
+The user opens the application.
+They are greeted: Learn Kannada. One conversation at a time.
+They choose: Living in Karnataka.
+They choose: Complete beginner.
+They enter the learning path.
+They see: Survival Kannada.
+They start the lesson.
+They answer: What does ನೀರು mean?
+They get it right.
+Next exercise.
+They get something wrong.
+The application immediately explains it.
+They build: ನನಗೆ | ನೀರು | ಬೇಕು
+The lesson progresses.
+They finish.
+They see:
+90%
++120 XP
+5 phrases learned
+Then: Ready to use it?
+They enter Conversation Mode.
+The AI says: ನಮಸ್ಕಾರ! ಏನು ಬೇಕು?
+The user responds.
+The AI continues.
+That is your entire product story in approximately two minutes.
+
+55. MVP Success Criteria
+The MVP is successful if a completely new user can:
+Understand what the application does within 10 seconds.
+Start a Kannada lesson within 30 seconds.
+Learn at least 3–5 useful Kannada phrases.
+Complete a short interactive lesson.
+Receive immediate feedback.
+See measurable progress.
+Review mistakes.
+Enter an actual Kannada conversation.
+Understand why the product is specifically useful for someone living in Karnataka.
+The application does not need hundreds of lessons to satisfy these criteria.
+It needs one excellent learning experience.
+
+56. Hackathon Priority Order
+If time starts running out, prioritize exactly in this order:
+P0 — Absolutely required
+Beautiful UI
+Onboarding
+Learning path
+Lesson engine
+5 exercise types
+Kannada content
+Answer feedback
+Lesson completion
+Progress persistence
+P1 — Strongly recommended
+Review system
+XP
+Streak
+Audio
+Adaptive concept scoring
+P2 — Differentiator
+AI conversation mode
+Scenario selection
+AI corrections
+P3 — Cut immediately if necessary
+Complex authentication
+Leaderboards
+Social features
+Multiple languages
+Advanced analytics
+Complex profiles
+Advanced gamification
+
+57. The One Rule for the Team
+If a feature doesn't improve this loop:
+Learn → Practice → Feedback → Remember → Use
+don't build it.
+And if you have to choose between 20 mediocre features and 5 exceptionally polished interactions, choose the five.
+For this hackathon, the winning version isn't the one that has the most functionality. It's the one where a judge spends 90 seconds using it and thinks:
+"I would actually use this to learn Kannada."
+
+

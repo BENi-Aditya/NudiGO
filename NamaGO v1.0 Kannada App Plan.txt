@@ -1,0 +1,1985 @@
+NAMAGO — PRODUCT REQUIREMENTS DOCUMENT
+Version 1.0 — Hackathon Master PRD
+Product: NamaGO
+Design Direction: Playful Minimalism + Kinetic UI
+Primary Launch Language: Kannada
+Primary Launch Market: Bangalore / Karnataka
+Document Purpose: Product, UX, engineering, content, AI, design, and hackathon execution reference
+
+================================================================================
+0. DOCUMENT CONTROL
+================================================================================
+
+Product Name:
+NamaGO
+
+Working tagline:
+Learn Kannada. Live Bangalore.
+
+Core product statement:
+NamaGO is a mobile-first, gamified Kannada-learning app designed for people who
+have recently moved to Bangalore or otherwise want to communicate comfortably
+in Kannada. It combines a guided, Duolingo-inspired learning path with
+contextual lessons, speaking practice, AI conversations, spaced review, and
+real-world missions.
+
+Design system:
+Playful Minimalism + Kinetic UI
+
+Primary audience:
+- Students moving to Bangalore
+- Young professionals moving to Bangalore
+- Migrants from other Indian states
+- English/Hindi speakers beginning Kannada
+- Visitors who want practical Kannada
+- Existing Bangalore residents who want to improve spoken Kannada
+
+Initial product scope:
+- Kannada for English-speaking beginners
+- English UI
+- Kannada script + Roman transliteration + English meaning
+- Bangalore-first practical situations
+- Mobile-first web app / installable PWA if time permits
+- Hackathon MVP first; architecture should allow expansion
+
+Important positioning:
+NamaGO is NOT "a Kannada dictionary."
+NamaGO is NOT "Google Translate with gamification."
+NamaGO is NOT a generic AI chatbot.
+NamaGO is a guided learning system whose AI is used for practice and adaptation.
+
+================================================================================
+1. EXECUTIVE SUMMARY
+================================================================================
+
+Problem:
+People who move to Bangalore often want to learn Kannada but struggle to find a
+modern, structured, motivating, beginner-friendly learning experience focused on
+the Kannada they actually need in daily life. Traditional resources can be
+text-heavy, fragmented, or disconnected from real-world situations.
+
+Agitation:
+A newcomer can memorize vocabulary and still freeze when an auto driver asks
+a simple question, a shopkeeper responds in Kannada, or a restaurant worker
+asks a follow-up. The problem is not simply lack of vocabulary. It is lack of
+retrieval practice, context, listening, speaking confidence, and repeated use.
+
+Solution:
+NamaGO turns practical Bangalore situations into short interactive lessons.
+A learner sees a phrase, hears it, understands it, practices it through varied
+exercises, speaks it, uses it in an AI roleplay, and receives a real-world
+mission. Previously learned concepts return through spaced review and new
+contexts.
+
+The core loop:
+Learn -> Practice -> Speak -> Simulate -> Use in real life -> Return -> Review
+
+Hackathon thesis:
+Do not build a massive language platform. Build one polished, convincing
+learning journey that demonstrates that a complete beginner can learn and use
+useful Kannada within minutes.
+
+================================================================================
+2. PRODUCT VISION
+================================================================================
+
+Vision:
+Make learning an Indian regional language feel as intuitive, rewarding, and
+socially normal as learning a global language on a modern consumer app.
+
+Long-term vision:
+NamaGO becomes a language-learning engine for Indian regional languages,
+starting with Kannada and expanding to Tamil, Telugu, Marathi, Bengali,
+Malayalam, Gujarati, Punjabi, and others.
+
+Near-term vision:
+Become the easiest way for a newcomer to Bangalore to become conversationally
+useful in Kannada.
+
+Product promise:
+"You don't need to become fluent today. You just need to know what to say next."
+
+================================================================================
+3. PRODUCT PRINCIPLES
+================================================================================
+
+3.1 Practical before theoretical
+Teach phrases that solve real problems before teaching abstract grammar.
+
+3.2 Context before vocabulary lists
+Words are introduced inside situations and reused in different contexts.
+
+3.3 Guided, not overwhelming
+The app always provides one clear next action.
+
+3.4 Small lessons, meaningful progress
+A lesson should generally take 3–7 minutes.
+
+3.5 Retrieval over passive reading
+Users should repeatedly recall, select, build, hear, and say language.
+
+3.6 Speak early
+Speaking should appear in beginner lessons, even when imperfect.
+
+3.7 AI assists; curriculum controls
+AI provides roleplay, feedback, hints, and adaptation. It must not invent the
+core curriculum or become the sole authority for Kannada correctness.
+
+3.8 Real-world transfer
+The ultimate success metric is not XP. It is whether the learner can use the
+language outside the app.
+
+3.9 Reward progress, not perfection
+Mistakes are expected. Feedback should be encouraging and specific.
+
+3.10 Visual simplicity
+Each screen has one primary task. Avoid dense dashboards and generic SaaS UI.
+
+3.11 Motion has purpose
+Animation communicates state, feedback, progress, hierarchy, or delight.
+Never animate merely because animation is available.
+
+3.12 Kannada is a first-class visual language
+Kannada script should be large, legible, and treated as primary content.
+
+================================================================================
+4. TARGET USERS
+================================================================================
+
+Primary persona A — New Bangalore Student
+Name example: Aditya
+Background: Moved from another Indian city for college.
+Language: Comfortable in English/Hindi, little or no Kannada.
+Need: Food, autos, shops, campus, introductions, basic conversation.
+Motivation: Wants to feel less dependent on English and connect with locals.
+Pain: Does not know what to learn first.
+
+Primary persona B — Young Professional
+Moved to Bangalore for a job.
+Need: Commute, restaurants, colleagues, housing, local services.
+Motivation: Integration and confidence.
+Pain: Existing resources feel academic or fragmented.
+
+Primary persona C — Curious Resident
+Already lives in Karnataka but has weak spoken Kannada.
+Need: Better everyday speaking and listening.
+Motivation: Social confidence.
+Pain: Knows words but cannot form responses quickly.
+
+Primary persona D — Short-Term Visitor
+Needs survival phrases.
+Motivation: Convenience.
+Expected engagement: Short-lived, high-intensity learning.
+
+================================================================================
+5. JOBS TO BE DONE
+================================================================================
+
+When I move to Bangalore,
+I want to learn useful Kannada in tiny daily lessons,
+so that I can handle ordinary situations without switching immediately to
+English.
+
+When someone speaks Kannada to me,
+I want to understand common phrases,
+so that I don't feel lost in basic conversations.
+
+When I learn a phrase,
+I want to practice saying it,
+so that I can actually use it outside the app.
+
+When I make a mistake,
+I want a helpful correction,
+so that I understand what to improve rather than simply seeing "wrong."
+
+================================================================================
+6. VALUE PROPOSITION
+================================================================================
+
+Functional:
+- Structured Kannada curriculum
+- Practical Bangalore scenarios
+- Listening and speaking practice
+- AI roleplay
+- Personalized review
+- Progress tracking
+
+Emotional:
+- "I can actually do this."
+- "I am less awkward when someone speaks Kannada."
+- "I just used Kannada in real life."
+
+Differentiator:
+App -> Real World -> App loop.
+
+Core line:
+"We don't just teach you Kannada. We teach you how to use Kannada."
+
+================================================================================
+7. PRODUCT SCOPE
+================================================================================
+
+MVP MUST HAVE:
+1. Landing/onboarding
+2. Learner goal selection
+3. Guided learning path
+4. Lesson engine
+5. Multiple exercise types
+6. Kannada script + transliteration + English
+7. Answer validation
+8. Lesson progress
+9. XP and streak representation
+10. AI conversation scenario
+11. Basic speaking flow
+12. Real-world mission
+13. Mobile-first polished UI
+14. Seed curriculum for at least 5–10 excellent lessons
+
+MVP SHOULD HAVE:
+- Login
+- Persistent progress via Supabase
+- Basic review queue
+- Audio playback
+- Simple learner profile
+- Mission history
+
+MVP NICE TO HAVE:
+- College leaderboard
+- Achievements
+- More advanced pronunciation scoring
+- PWA install
+- Personalized lesson ordering
+- Push reminders
+- Offline lesson cache
+
+NOT REQUIRED FOR HACKATHON:
+- Full language coverage
+- Hundreds of lessons
+- Complex social network
+- Native iOS/Android apps
+- Perfect speech assessment
+- Advanced grammar engine
+- Human teacher marketplace
+- Payments
+- Ads
+- Fully autonomous AI curriculum generation
+
+================================================================================
+8. CORE USER JOURNEY
+================================================================================
+
+First session:
+
+Landing
+  ->
+Onboarding
+  ->
+Choose reason for learning
+  ->
+Choose current level
+  ->
+Choose priority situations
+  ->
+Create learner profile
+  ->
+Start guided path
+  ->
+Lesson 1
+  ->
+Learn phrase
+  ->
+Practice
+  ->
+Speak
+  ->
+Mini conversation
+  ->
+Lesson completion
+  ->
+XP / streak
+  ->
+Real-world mission
+  ->
+Return to path
+
+Repeat session:
+
+Open app
+  ->
+See streak
+  ->
+See one recommended next step
+  ->
+Review due concepts
+  ->
+New lesson
+  ->
+Practice
+  ->
+Mission
+  ->
+Progress
+
+================================================================================
+9. ONBOARDING
+================================================================================
+
+Goal:
+Personalize the initial learning path without creating friction.
+
+Screen 1:
+"Welcome to Bangalore."
+
+Subtext:
+"Let's teach you the Kannada you'll actually use."
+
+CTA:
+Start learning
+
+Screen 2:
+"Why are you learning Kannada?"
+
+Options:
+- College
+- Work
+- I just moved here
+- Travel
+- Friends / community
+- Just curious
+
+Screen 3:
+"How much Kannada do you know?"
+
+Options:
+- Nothing yet
+- A few words
+- I understand some
+- I can speak a little
+
+Screen 4:
+"What do you want to handle first?"
+
+Multi-select:
+- Food
+- Autos
+- Shopping
+- College
+- Directions
+- Meeting people
+- Small talk
+
+Screen 5:
+"Your path is ready."
+
+Example:
+"Bangalore Beginner"
+"Start with greetings, food, and getting around."
+
+CTA:
+Let's go
+
+Onboarding rules:
+- Maximum 5 core screens.
+- No mandatory account creation before first useful lesson.
+- If authentication is required for persistence, allow it after first lesson.
+- Avoid asking for data that does not change the learning experience.
+
+================================================================================
+10. INFORMATION ARCHITECTURE
+================================================================================
+
+Primary navigation:
+1. Learn
+2. Missions
+3. Practice
+4. Profile
+
+Optional hackathon navigation:
+- Home
+- Path
+- Practice
+- Profile
+
+Home / Learn:
+- Current lesson
+- Path
+- Streak
+- XP
+- Review prompt
+
+Practice:
+- AI roleplay
+- Speaking
+- Review due
+- Quick practice
+
+Missions:
+- Active real-world mission
+- Completed missions
+- Mission history
+
+Profile:
+- Level
+- XP
+- Streak
+- Lessons
+- Conversations
+- Missions
+- Settings
+
+================================================================================
+11. GUIDED LEARNING PATH
+================================================================================
+
+The path is the central navigation system.
+
+It answers:
+- Where am I?
+- What have I completed?
+- What should I do next?
+- What is locked?
+- What needs review?
+
+Path structure:
+
+LEVEL 1 — FIRST KANNADA
+1. Namaskara
+2. My name is...
+3. How are you?
+4. Yes / No / Okay
+5. Thank you
+
+LEVEL 2 — DAILY LIFE
+6. Ordering food
+7. Water / quantities
+8. Asking the price
+9. Paying
+10. Vegetarian food
+
+LEVEL 3 — GETTING AROUND
+11. Taking an auto
+12. Asking directions
+13. Places
+14. Understanding common responses
+15. Metro / travel
+
+LEVEL 4 — COLLEGE / WORK
+16. Meeting people
+17. Asking for help
+18. Class / office phrases
+19. Small talk
+20. Making friends
+
+LEVEL 5 — CONVERSATION
+21. Basic questions
+22. Responding naturally
+23. 30-second roleplay
+24. 60-second roleplay
+25. First real conversation challenge
+
+Path behavior:
+- Current lesson visually dominates.
+- Completed lessons are visually quieter.
+- Locked lessons are muted.
+- Review nodes appear when concepts are due.
+- Users should not be forced to browse a complex curriculum tree.
+
+================================================================================
+12. LEARNING SCIENCE / CURRICULUM MODEL
+================================================================================
+
+NamaGO uses a simplified retrieval-and-review model.
+
+Each concept has:
+- Concept ID
+- Kannada form
+- Transliteration
+- English meaning
+- Audio
+- Skill
+- Difficulty
+- Related concepts
+- Example phrases
+- Common mistakes
+- Review status
+
+Concept mastery states:
+0 = unseen
+1 = introduced
+2 = practiced
+3 = recalled
+4 = used in context
+5 = strong
+
+A concept should appear across multiple contexts.
+
+Example:
+beku = want/need
+
+Lesson 6:
+Coffee beku.
+
+Lesson 8:
+Nanage neeru beku.
+
+Lesson 11:
+Nanage auto beku.
+
+Lesson 15:
+Help beku.
+
+The exact curriculum must be reviewed by a competent Kannada speaker before
+production use.
+
+Review scheduling:
+- Immediate reappearance within the lesson
+- Short-delay review in a later lesson
+- Contextual review several lessons later
+- User-triggered review when errors occur
+- Optional daily review queue
+
+Do not use a simplistic "learn once = mastered" model.
+
+================================================================================
+13. LESSON ENGINE
+================================================================================
+
+A lesson is a sequence of exercises.
+
+Lesson object:
+- id
+- title
+- situation
+- objective
+- estimated_minutes
+- difficulty
+- concepts
+- exercises
+- completion_reward
+- mission
+- audio assets
+- notes
+
+Exercise object:
+- id
+- type
+- prompt
+- content
+- options
+- answer
+- explanation
+- concept_ids
+- audio
+- difficulty
+- metadata
+
+Supported exercise types:
+1. Vocabulary introduction
+2. Multiple choice
+3. Translation
+4. Word bank
+5. Sentence builder
+6. Matching
+7. Listening recognition
+8. Speaking
+9. Conversation
+10. Review
+
+Lesson default sequence:
+1. Review
+2. New concept
+3. Recognition
+4. Controlled practice
+5. Listening
+6. Speaking
+7. Context
+8. Conversation
+9. Completion
+10. Mission
+
+Not every lesson must contain every type.
+
+================================================================================
+14. EXERCISE UX
+================================================================================
+
+14.1 Vocabulary introduction
+
+Display:
+Kannada
+Transliteration
+English meaning
+Audio button
+One example
+
+Primary action:
+Continue
+
+14.2 Multiple choice
+
+One question.
+3–4 options.
+Large tappable buttons.
+Immediate feedback.
+
+Correct:
+- Button moves slightly
+- Positive state
+- Optional micro-animation
+- XP feedback
+
+Incorrect:
+- Explain or reveal correct answer
+- Allow retry where appropriate
+- Do not shame
+
+14.3 Word bank
+
+Words appear as tappable chips.
+Selected words form sentence.
+Allow undo.
+Validate ordering.
+
+14.4 Listening
+
+Play audio.
+User selects what they heard.
+Allow replay.
+Optional slow playback.
+
+14.5 Speaking
+
+Prompt:
+"Say: Ondu coffee kodi."
+
+Microphone button.
+Recording state.
+Transcription.
+Evaluation.
+Feedback.
+
+14.6 Conversation
+
+AI takes a role.
+User responds.
+AI keeps scenario constrained to learner level.
+Hints are available.
+The user can retry.
+
+================================================================================
+15. SPEAKING SYSTEM
+================================================================================
+
+Goal:
+Make speaking feel approachable, not like an exam.
+
+Flow:
+Prompt
+  ->
+Tap microphone
+  ->
+Record
+  ->
+Speech-to-text
+  ->
+Normalize text
+  ->
+Compare with expected intent / phrase
+  ->
+Generate feedback
+  ->
+Continue or retry
+
+Hackathon implementation:
+Prioritize functional speech-to-text and reasonable phrase matching.
+Do not attempt scientifically precise phoneme scoring unless time permits.
+
+Feedback categories:
+- Meaning correct
+- Close
+- Try again
+- Pronunciation hint
+- Word missing
+- Extra word
+
+Example:
+Expected:
+Ondu coffee kodi.
+
+User transcript:
+Ondu coffee.
+
+Feedback:
+"Almost! Add 'kodi' at the end."
+
+Avoid numeric scores unless they are meaningful and defensible.
+
+================================================================================
+16. AI CONVERSATION SYSTEM
+================================================================================
+
+Purpose:
+Provide safe, constrained conversational practice.
+
+AI roles:
+- Waiter
+- Auto driver
+- Shopkeeper
+- Classmate
+- Friend
+- Receptionist
+- Local resident
+
+Scenario object:
+- scenario_id
+- title
+- context
+- role
+- learner_level
+- target_concepts
+- opening_message
+- allowed_complexity
+- success_condition
+
+System prompt requirements:
+- Speak appropriate Kannada for learner level.
+- Provide transliteration when configured.
+- Do not introduce unexplained advanced grammar unless intentionally teaching it.
+- Stay inside the scenario.
+- Be patient.
+- Correct meaningful mistakes.
+- Prefer short responses for beginners.
+- Never pretend that generated language is authoritative without curriculum grounding.
+- If uncertain about a Kannada phrase, fall back to approved curriculum phrases.
+
+Conversation states:
+1. Start
+2. User response
+3. AI response
+4. Feedback/hint if needed
+5. Continue
+6. Success/failure
+7. Summary
+
+AI should not be responsible for:
+- Authentication
+- XP calculations
+- unlocking lessons
+- permanent progress decisions
+- security rules
+
+Those belong to application logic.
+
+================================================================================
+17. REAL-WORLD MISSIONS
+================================================================================
+
+Mission purpose:
+Transfer learning from screen to real life.
+
+Examples:
+- Say Namaskara to someone.
+- Order a drink in Kannada.
+- Ask "Eshtu?" at a shop.
+- Use a Kannada phrase with an auto driver.
+- Ask where something is.
+- Introduce yourself in Kannada.
+
+Mission structure:
+- title
+- objective
+- target_phrase
+- context
+- safety note where appropriate
+- completion method
+- reward
+
+Hackathon completion:
+Self-report button:
+"I did it"
+
+Future:
+Optional evidence or reflection, but do not require surveillance or recording
+of other people.
+
+Important:
+Missions must never encourage unsafe interaction, harassment, or recording
+people without appropriate consent.
+
+================================================================================
+18. GAMIFICATION
+================================================================================
+
+Core mechanics:
+XP
+Streak
+Levels
+Achievements
+Missions
+Optional leaderboard
+
+XP examples:
+- Complete exercise: +2 to +5
+- Complete lesson: +20
+- Complete mission: +50
+- Practice conversation: +10
+- Review session: +10
+
+Avoid making XP the sole measure of learning.
+
+Streak:
+- Counts days with meaningful learning activity.
+- Provide streak recovery only if intentionally designed.
+- Never make streak loss emotionally punitive.
+
+Levels:
+Example:
+1. First Words
+2. Bangalore Beginner
+3. Local-ish
+4. Confident Speaker
+5. Conversation Ready
+
+Alternative profile metric:
+"Conversations practiced"
+This reflects actual product value better than XP alone.
+
+================================================================================
+19. REVIEW SYSTEM
+================================================================================
+
+Review is generated from:
+- recently introduced concepts
+- incorrect answers
+- weak concepts
+- concepts due for review
+- speaking mistakes
+
+Review cards should appear naturally in the path.
+
+Example:
+Before new auto lesson:
+"Quick review"
+
+What does "beku" mean?
+
+This prevents the learner from forgetting previous material.
+
+================================================================================
+20. DESIGN SYSTEM
+================================================================================
+
+Design direction:
+PLAYFUL MINIMALISM + KINETIC UI
+
+Design goals:
+- clean
+- friendly
+- modern
+- youthful
+- tactile
+- expressive
+- accessible
+- fast
+
+Avoid:
+- generic SaaS dashboard aesthetics
+- excessive glassmorphism
+- excessive gradients
+- card overload
+- tiny typography
+- huge decorative hero sections inside lessons
+- unnecessary animations
+- visually noisy backgrounds
+
+Core principle:
+One screen = one primary cognitive task.
+
+Color system:
+Use a small tokenized palette.
+Recommended direction:
+- Primary: Karnataka-inspired deep green
+- Accent: warm yellow
+- Secondary accent: terracotta/coral
+- Background: warm off-white
+- Text: deep charcoal
+- Success: accessible green
+- Error: accessible red
+- Neutral surfaces: warm gray
+
+Exact hex values should be finalized during visual prototyping and checked for
+contrast.
+
+Typography:
+Primary recommendation:
+Nunito or a similarly friendly rounded sans-serif.
+Use a Kannada-capable font for script rendering where needed.
+Kannada content must remain highly legible.
+
+Type scale:
+Display: 40–48 px
+H1: 32–40 px
+H2: 24–32 px
+Body: 16–18 px
+Secondary: 14–16 px
+Caption: 12–14 px
+
+Kannada lesson text:
+Prefer larger size than surrounding explanatory text.
+
+Spacing:
+Use a consistent spacing scale, e.g.
+4 / 8 / 12 / 16 / 24 / 32 / 48 / 64.
+
+Radius:
+- Buttons: 12–16 px
+- Cards: 16–20 px
+- Pills: 999 px
+Avoid random radius values.
+
+Shadows:
+Soft, limited shadows.
+Prefer hierarchy through spacing and contrast.
+Use tactile shadow for primary buttons where appropriate.
+
+================================================================================
+21. KINETIC UI SYSTEM
+================================================================================
+
+Motion goals:
+- confirm interaction
+- show progress
+- celebrate achievement
+- guide attention
+- make the product feel alive
+
+Motion principles:
+1. Fast
+2. Predictable
+3. Purposeful
+4. Reversible
+5. Accessible
+
+Interaction examples:
+Button press:
+- 80–120 ms compression
+
+Correct answer:
+- subtle scale/slide
+- success state
+- XP micro-animation
+
+Incorrect:
+- gentle horizontal movement or state change
+- avoid aggressive shaking
+
+Lesson completion:
+- progress completion animation
+- XP count-up
+- small celebratory motion
+
+Path unlock:
+- node grows into active state
+- short transition
+
+Streak:
+- flame animation only on meaningful milestone
+
+Accessibility:
+Respect prefers-reduced-motion.
+No essential information should depend only on animation.
+
+================================================================================
+22. CORE SCREEN SPECIFICATIONS
+================================================================================
+
+22.1 Landing screen
+
+Purpose:
+Communicate value immediately.
+
+Headline:
+"Learn Kannada. Live Bangalore."
+
+Subtext:
+"Short lessons. Real conversations. Kannada you can actually use."
+
+CTA:
+Start learning
+
+Visual:
+Bangalore-inspired illustration or abstract path.
+
+22.2 Home / Learn
+
+Must show:
+- greeting
+- streak
+- current lesson
+- progress
+- learning path
+- bottom navigation
+
+Primary CTA:
+Continue
+
+22.3 Lesson
+
+Must show:
+- close/back
+- progress
+- optional hearts/energy
+- exercise content
+- primary action
+
+Must not show:
+- unrelated stats
+- dense navigation
+- distracting promotional content
+
+22.4 Completion
+
+Show:
+- celebration
+- XP
+- concepts practiced
+- streak
+- next lesson
+- mission
+
+22.5 Practice
+
+Show:
+- AI scenarios
+- speaking
+- review
+
+22.6 Missions
+
+Show:
+- current mission
+- reward
+- completed missions
+
+22.7 Profile
+
+Show:
+- learner level
+- XP
+- streak
+- conversations
+- lessons
+- missions
+- settings
+
+================================================================================
+23. CONTENT GUIDELINES
+================================================================================
+
+Tone:
+Friendly.
+Short.
+Clear.
+Encouraging.
+Never patronizing.
+
+Avoid:
+- excessive emojis
+- baby talk
+- fake enthusiasm
+- "OMG YOU'RE A GENIUS"
+- long explanations during a lesson
+
+Use:
+"Nice."
+"Almost."
+"Try again."
+"Good catch."
+"You've got this."
+"One more."
+
+Kannada content must be:
+- reviewed by a fluent Kannada speaker
+- checked for spelling
+- checked for script
+- checked for transliteration consistency
+- checked for naturalness
+- tagged for formality/register
+
+Register tags:
+- formal
+- neutral
+- casual
+- spoken
+- region-specific if relevant
+
+Do not teach an unusual phrase simply because it is technically grammatical.
+
+================================================================================
+24. CURRICULUM CONTENT FORMAT
+================================================================================
+
+Each phrase record:
+
+id:
+language:
+kannada:
+transliteration:
+english:
+audio:
+register:
+difficulty:
+concept_ids:
+example:
+common_variants:
+common_mistakes:
+notes:
+verified_by:
+
+Example:
+
+id:
+food.order.001
+
+kannada:
+ಒಂದು ಕಾಫಿ ಕೊಡಿ
+
+transliteration:
+Ondu coffee kodi.
+
+english:
+One coffee please.
+
+register:
+polite / everyday
+
+concepts:
+- number_one
+- coffee
+- request_form
+
+================================================================================
+25. TECHNICAL ARCHITECTURE
+================================================================================
+
+Recommended stack:
+
+Frontend:
+Next.js
+TypeScript
+Tailwind CSS
+shadcn/ui where useful
+
+Backend:
+Supabase
+
+Database:
+PostgreSQL via Supabase
+
+Authentication:
+Supabase Auth
+
+Storage:
+Supabase Storage for approved audio/assets
+
+Server-side AI:
+Next.js server routes or Supabase Edge Functions
+
+AI:
+OpenAI API
+
+Hosting:
+Vercel
+
+Analytics:
+Simple event tracking initially.
+Avoid overbuilding analytics.
+
+Potential speech:
+Browser recording + speech-to-text service.
+Choose provider based on current API availability and hackathon constraints.
+
+Architecture:
+
+Browser
+  ->
+Next.js UI
+  ->
+Server-side route/function
+  ->
+AI API
+
+Browser
+  ->
+Supabase Auth
+  ->
+Supabase database
+
+Browser
+  ->
+Supabase Storage for approved assets
+
+Secrets:
+Never expose AI API keys in client-side code.
+
+================================================================================
+26. DATABASE MODEL
+================================================================================
+
+users
+- id
+- name
+- email
+- avatar_url
+- learning_goal
+- current_level
+- created_at
+
+lessons
+- id
+- title
+- description
+- category
+- difficulty
+- order_index
+- estimated_minutes
+- published
+
+concepts
+- id
+- kannada
+- transliteration
+- english
+- audio_url
+- register
+- difficulty
+- verified
+
+exercises
+- id
+- lesson_id
+- type
+- prompt
+- content_json
+- order_index
+
+lesson_concepts
+- lesson_id
+- concept_id
+
+user_progress
+- user_id
+- xp
+- streak
+- current_lesson_id
+- total_lessons_completed
+- total_conversations
+- total_missions
+
+concept_progress
+- user_id
+- concept_id
+- mastery
+- last_seen
+- next_review
+- correct_count
+- incorrect_count
+
+lesson_attempts
+- id
+- user_id
+- lesson_id
+- started_at
+- completed_at
+- score
+
+missions
+- id
+- title
+- description
+- target_phrase
+- reward
+- category
+
+mission_attempts
+- id
+- user_id
+- mission_id
+- completed_at
+
+conversation_sessions
+- id
+- user_id
+- scenario_id
+- started_at
+- ended_at
+- summary
+
+================================================================================
+27. APPLICATION LOGIC
+================================================================================
+
+Lesson unlock:
+Lesson N unlocks when prerequisite requirements are met.
+
+XP:
+Server should validate important rewards to prevent trivial client manipulation.
+
+Progress:
+Persist after meaningful events, not every animation frame.
+
+Review:
+When a learner gets an exercise wrong, related concepts receive higher review
+priority.
+
+AI:
+AI output does not directly unlock content unless server logic confirms the
+required condition.
+
+Conversation success:
+Can be based on completion of scenario objectives rather than exact wording.
+
+================================================================================
+28. API / SERVER RESPONSIBILITIES
+================================================================================
+
+Potential endpoints:
+
+POST /api/conversation/start
+POST /api/conversation/message
+POST /api/speech/evaluate
+POST /api/lesson/complete
+GET /api/progress
+POST /api/mission/complete
+GET /api/review
+
+Server responsibilities:
+- authenticate
+- validate input
+- call AI provider
+- sanitize output
+- calculate rewards
+- store progress
+- enforce rate limits where needed
+
+================================================================================
+29. SECURITY
+================================================================================
+
+Rules:
+- No API keys in frontend.
+- Use environment variables.
+- Enable database row-level security where appropriate.
+- Validate user-owned records.
+- Do not trust XP values sent from browser.
+- Do not expose private user data.
+- Minimize stored audio.
+- Do not record bystanders.
+- Do not store sensitive voice recordings unless necessary and clearly disclosed.
+- Add rate limits to AI endpoints if deployed publicly.
+
+================================================================================
+30. PERFORMANCE
+================================================================================
+
+Target:
+Fast first meaningful render.
+
+Priorities:
+1. Lesson screen loads quickly.
+2. Audio starts quickly.
+3. Buttons feel instant.
+4. AI response displays useful loading state.
+5. Images are optimized.
+6. Avoid shipping unnecessary libraries.
+
+Loading UX:
+Never show a blank screen.
+
+AI loading:
+Use contextual copy:
+"Thinking..."
+"Finding the right Kannada response..."
+
+Do not use fake progress bars for unknown operations.
+
+================================================================================
+31. ACCESSIBILITY
+================================================================================
+
+Requirements:
+- Keyboard navigation where applicable
+- visible focus states
+- accessible labels
+- sufficient color contrast
+- large tap targets
+- readable Kannada script
+- captions/transcripts for audio where appropriate
+- reduced-motion support
+- don't communicate state using color alone
+
+================================================================================
+32. ANALYTICS
+================================================================================
+
+Core events:
+
+onboarding_started
+onboarding_completed
+lesson_started
+exercise_answered
+exercise_correct
+exercise_incorrect
+lesson_completed
+speaking_started
+speaking_completed
+conversation_started
+conversation_completed
+mission_started
+mission_completed
+review_started
+streak_updated
+
+North-star behavior:
+Meaningful learning sessions completed.
+
+Product success indicators:
+- first lesson completion
+- second-day return
+- lesson completion rate
+- speaking attempt rate
+- conversation completion rate
+- mission completion rate
+- review retention
+
+================================================================================
+33. SUCCESS METRICS FOR HACKATHON
+================================================================================
+
+Demo success:
+A judge with zero Kannada can complete a lesson.
+
+Learning success:
+A beginner can correctly use 3–5 target phrases after a session.
+
+Product success:
+The judge understands the next action without explanation.
+
+Technical success:
+The core flow works end-to-end.
+
+Visual success:
+The app looks cohesive and intentional on first load.
+
+Pitch success:
+Judges understand the problem within 20 seconds.
+
+================================================================================
+34. HACKATHON DEMO SCRIPT
+================================================================================
+
+Opening:
+"I moved to Bangalore and realized something weird. I live here, but I can't
+speak the language of the city."
+
+Show:
+"No Kannada course on Duolingo."
+
+Then:
+"So instead of building another dictionary, we built NamaGO."
+
+Demo:
+
+1. Open onboarding.
+2. Select "I just moved here."
+3. Select "College."
+4. Choose food + auto.
+5. Start lesson.
+6. Learn one phrase.
+7. Answer quiz.
+8. Build sentence.
+9. Speak phrase.
+10. Start AI auto scenario.
+11. Respond.
+12. Complete scenario.
+13. Show XP.
+14. Show real-world mission.
+
+Closing:
+"NamaGO doesn't just teach you Kannada. It teaches you how to use it."
+
+Then:
+"Kannada is our first language. The same engine can eventually teach India's
+regional languages."
+
+================================================================================
+35. MVP DEMO LESSON
+================================================================================
+
+Scenario:
+Ordering coffee.
+
+Target concepts:
+- ondu = one
+- coffee
+- kodi = give/please
+- beku = want/need
+- beda = don't want
+- eshtu = how much
+
+Exercise 1:
+Learn "Ondu."
+
+Exercise 2:
+Multiple choice.
+
+Exercise 3:
+Learn "Coffee kodi."
+
+Exercise 4:
+Word bank:
+coffee / kodi / ondu
+
+Expected:
+Ondu coffee kodi.
+
+Exercise 5:
+Listening.
+
+Exercise 6:
+Speaking.
+
+Exercise 7:
+AI waiter:
+"Enu beku?"
+
+Learner:
+"Ondu coffee kodi."
+
+AI:
+"Sugar beka?"
+
+Learner:
+"Beda."
+
+Completion:
+"Your first Kannada order!"
+
+Mission:
+"Next time you order a drink, try saying 'Ondu coffee kodi.'"
+
+================================================================================
+36. V0.1 IMPLEMENTATION PLAN
+================================================================================
+
+Phase 1 — Skeleton
+- Create Next.js project
+- Install styling dependencies
+- Establish fonts
+- Establish design tokens
+- Create layout
+- Create navigation
+
+Phase 2 — Learning engine
+- Define lesson types
+- Define exercise types
+- Build exercise renderer
+- Build answer validation
+- Build lesson progress
+- Build completion state
+
+Phase 3 — Curriculum
+- Create 5 excellent lessons
+- Verify Kannada content
+- Add audio assets
+- Add review concepts
+
+Phase 4 — Gamification
+- XP
+- streak
+- completion animation
+- path unlocking
+
+Phase 5 — Supabase
+- database
+- authentication
+- progress persistence
+- row-level security
+
+Phase 6 — AI
+- scenario definitions
+- server-side AI route
+- conversation state
+- hints
+- corrections
+
+Phase 7 — Voice
+- recording
+- speech-to-text
+- expected phrase matching
+- feedback
+
+Phase 8 — Missions
+- mission data
+- completion
+- reward
+
+Phase 9 — Polish
+- motion
+- transitions
+- loading states
+- error states
+- responsive design
+- accessibility
+- performance
+
+================================================================================
+37. VIBECODING RULES
+================================================================================
+
+Rule 1:
+Never ask the coding agent to build the whole product in one prompt.
+
+Rule 2:
+Implement one vertical slice at a time.
+
+Rule 3:
+After every feature:
+- run app
+- test manually
+- fix errors
+- commit
+
+Rule 4:
+Do not allow generated code to silently replace working architecture.
+
+Rule 5:
+Keep business logic separate from UI.
+
+Rule 6:
+Keep curriculum in structured data, not scattered inside components.
+
+Rule 7:
+Use reusable exercise components.
+
+Rule 8:
+Use design tokens instead of random CSS values.
+
+Rule 9:
+Do not add a dependency unless it solves a real problem.
+
+Rule 10:
+If a feature is not required for the demo, defer it.
+
+Recommended development rhythm:
+
+Prompt agent
+  ->
+Run app
+  ->
+Test
+  ->
+Screenshot/error
+  ->
+Ask agent to fix
+  ->
+Commit
+  ->
+Next feature
+
+================================================================================
+38. DESIGN QA CHECKLIST
+================================================================================
+
+Every screen:
+[ ] Has one clear primary action
+[ ] Uses Namma design tokens
+[ ] Has readable typography
+[ ] Has enough whitespace
+[ ] Works on mobile width
+[ ] Does not contain unnecessary cards
+[ ] Has clear feedback
+[ ] Has loading/error state where needed
+[ ] Uses animation purposefully
+[ ] Supports reduced motion
+[ ] Has accessible tap targets
+
+Lesson:
+[ ] Kannada is visually dominant
+[ ] Transliteration is readable
+[ ] English meaning is available
+[ ] Audio is accessible
+[ ] Answer feedback is clear
+[ ] Progress is visible
+[ ] User knows what to do next
+
+================================================================================
+39. CONTENT QA CHECKLIST
+================================================================================
+
+For every Kannada phrase:
+[ ] Kannada spelling verified
+[ ] Transliteration verified
+[ ] English meaning verified
+[ ] Natural spoken usage checked
+[ ] Register tagged
+[ ] Audio verified
+[ ] Example verified
+[ ] Common alternative considered
+[ ] Not misleading to beginner
+
+================================================================================
+40. AI QA CHECKLIST
+================================================================================
+
+[ ] API key remains server-side
+[ ] AI cannot modify XP directly
+[ ] AI cannot unlock arbitrary lessons
+[ ] Scenario context is constrained
+[ ] Beginner responses are short
+[ ] Hints are useful
+[ ] Incorrect AI outputs can be reported
+[ ] Conversation has a clear end state
+[ ] Rate limiting exists before public launch
+[ ] AI fallback exists if API fails
+
+================================================================================
+41. ERROR STATES
+================================================================================
+
+Network error:
+"Looks like the connection dropped. Your progress is safe."
+
+AI unavailable:
+"Practice is taking a break. Try again in a moment."
+
+Microphone denied:
+"Microphone access is needed for speaking practice."
+Provide instructions / alternative text exercise.
+
+Audio unavailable:
+"Audio couldn't load."
+Provide replay and text fallback.
+
+Lesson save failed:
+"Your lesson is complete. We'll sync your progress when you're back online."
+
+================================================================================
+42. EMPTY STATES
+================================================================================
+
+No missions:
+"Finish your first lesson to unlock a real-world mission."
+
+No review:
+"You're caught up. Nice work."
+
+No conversations:
+"Your first Kannada conversation is waiting."
+
+================================================================================
+43. FUTURE FEATURES
+================================================================================
+
+After hackathon:
+- Personalized learning paths
+- More Kannada levels
+- Better pronunciation feedback
+- Offline lessons
+- PWA
+- Native mobile apps
+- Notifications
+- Friends
+- College leagues
+- Community challenges
+- Kannada stories
+- Video scenarios
+- Image-based vocabulary
+- Local dialect/register explanations
+- Human expert curriculum review
+- Regional language expansion
+- AI tutor memory
+- Voice conversation
+- Real-world location-aware lessons, only with explicit consent
+- Teacher mode
+- Classroom deployment
+
+Regional expansion architecture:
+Language should be a content layer, not a separate application.
+
+Target structure:
+Language
+  ->
+Curriculum
+  ->
+Concepts
+  ->
+Lessons
+  ->
+Exercises
+  ->
+Audio
+  ->
+AI scenarios
+
+================================================================================
+44. NON-GOALS
+================================================================================
+
+NamaGO will not attempt to:
+- replace professional language teachers
+- guarantee fluency
+- record conversations without consent
+- monitor people
+- provide covert surveillance
+- translate every possible Kannada sentence
+- teach every dialect immediately
+- become a social network during the hackathon
+
+================================================================================
+45. RISKS AND MITIGATIONS
+================================================================================
+
+Risk:
+Incorrect Kannada generated by AI.
+Mitigation:
+Human-verified curriculum and constrained AI scenarios.
+
+Risk:
+Too much scope.
+Mitigation:
+Vertical slice and strict MVP.
+
+Risk:
+App looks like generic VibeCode.
+Mitigation:
+Design system before feature expansion.
+
+Risk:
+Speaking feature is unreliable.
+Mitigation:
+Use speech-to-text + phrase/intent matching for MVP.
+
+Risk:
+Gamification overwhelms learning.
+Mitigation:
+Keep learning task primary.
+
+Risk:
+User learns phrases but doesn't use them.
+Mitigation:
+Real-world missions.
+
+Risk:
+Users abandon onboarding.
+Mitigation:
+Minimal onboarding and immediate first lesson.
+
+Risk:
+Content feels textbook-like.
+Mitigation:
+Bangalore-first scenarios and spoken language review.
+
+================================================================================
+46. BRAND
+================================================================================
+
+Name:
+NamaGO
+
+Brand idea:
+"Namma" evokes "ours / our" in Kannada usage; "GO" adds movement, action,
+and the idea of going out into the city and using the language.
+
+Brand personality:
+- Friendly
+- Curious
+- Local
+- Energetic
+- Helpful
+- Smart
+- Slightly playful
+- Never childish
+
+Potential taglines:
+Primary:
+Learn Kannada. Live Bangalore.
+
+Alternative:
+Learn it. Speak it. Go.
+
+Alternative:
+Your Kannada starts here.
+
+Core product phrase:
+Learn. Speak. Go.
+
+================================================================================
+47. FINAL PRODUCT EXPERIENCE
+================================================================================
+
+A user should be able to say:
+
+"I opened NamaGO, told it I moved to Bangalore for college, learned a few
+phrases, practiced them with an AI, and now I know what to say when I order
+food or take an auto."
+
+That sentence is the product.
+
+================================================================================
+48. DEFINITION OF DONE — HACKATHON
+================================================================================
+
+NamaGO is demo-ready when:
+
+[ ] A fresh user can start without confusion.
+[ ] Onboarding takes under 90 seconds.
+[ ] First lesson works end-to-end.
+[ ] At least 5 lessons exist.
+[ ] Lessons contain varied exercise types.
+[ ] Kannada + transliteration + English are displayed correctly.
+[ ] Audio works for core phrases.
+[ ] Speaking flow works at least at MVP level.
+[ ] AI roleplay works for at least 2 scenarios.
+[ ] XP and completion feedback work.
+[ ] Learning path shows progress.
+[ ] At least 3 real-world missions exist.
+[ ] App works on a phone-sized viewport.
+[ ] No major broken states appear during demo.
+[ ] API secrets are protected.
+[ ] Design system is consistent.
+[ ] Animations are purposeful and performant.
+[ ] Judges can understand the value without a long explanation.
+
+================================================================================
+49. THE NORTH STAR
+================================================================================
+
+The product is successful when a user who knew zero Kannada five minutes ago
+can walk away thinking:
+
+"I can actually say something now."
+
+Not:
+"I completed a quiz."
+
+Not:
+"I earned 50 XP."
+
+Not:
+"The UI looks cool."
+
+Those are supporting mechanisms.
+
+The emotional outcome is confidence.
+
+NamaGO exists to turn:
+"I don't know Kannada."
+
+into:
+
+"I know what to say."
+
+================================================================================
+END OF PRD
+================================================================================

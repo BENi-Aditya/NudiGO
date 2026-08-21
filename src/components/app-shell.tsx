@@ -1,9 +1,11 @@
 import { Link } from "@tanstack/react-router";
 import { Home, MessageSquareText, Target, User, Brain } from "lucide-react";
 import type { ReactNode } from "react";
+import { useEffect, useState } from "react";
 
 import { LogoMark, Wordmark } from "@/components/brand";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/lib/auth";
 
 type Tab = "learn" | "practice" | "missions" | "profile" | "ai";
 
@@ -21,6 +23,23 @@ const tabs: Array<{ key: Tab; to: string; label: string; Icon: typeof Home }> = 
  * desktop web app rather than a blown-up phone screen.
  */
 export function AppShell({ children, active }: { children: ReactNode; active: Tab }) {
+  const { user } = useAuth();
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const customAvatar = localStorage.getItem('user_avatar_url');
+      if (customAvatar) {
+        setAvatarUrl(customAvatar);
+      } else if (user?.user_metadata?.avatar_url) {
+        setAvatarUrl(user.user_metadata.avatar_url);
+      }
+    }
+  }, [user]);
+
+  const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || '';
+  const initial = userName.charAt(0).toUpperCase() || 'U';
+
   return (
     <div className="min-h-screen bg-paper">
       {/* Desktop sidebar */}
@@ -32,6 +51,7 @@ export function AppShell({ children, active }: { children: ReactNode; active: Ta
         <nav className="flex flex-col gap-2">
           {tabs.map(({ key, to, label, Icon }) => {
             const isActive = key === active;
+            const isProfileTab = key === 'profile';
             return (
               <Link
                 key={key}
@@ -44,7 +64,19 @@ export function AppShell({ children, active }: { children: ReactNode; active: Ta
                     : "text-ink/70 hover:bg-muted hover:text-ink",
                 )}
               >
-                <Icon className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+                {isProfileTab && avatarUrl ? (
+                  <img
+                    src={avatarUrl}
+                    alt={userName}
+                    className="h-5 w-5 rounded-lg object-cover"
+                  />
+                ) : isProfileTab && userName ? (
+                  <div className="nb-border inline-flex h-5 w-5 items-center justify-center rounded-lg bg-accent text-xs font-black">
+                    {initial}
+                  </div>
+                ) : (
+                  <Icon className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+                )}
                 {label}
               </Link>
             );
@@ -68,6 +100,7 @@ export function AppShell({ children, active }: { children: ReactNode; active: Ta
           <div className="nb-border nb-shadow flex items-stretch justify-between gap-1 rounded-2xl bg-card p-1.5">
             {tabs.map(({ key, to, label, Icon }) => {
               const isActive = key === active;
+              const isProfileTab = key === 'profile';
               return (
                 <Link
                   key={key}
@@ -81,7 +114,19 @@ export function AppShell({ children, active }: { children: ReactNode; active: Ta
                       : "text-ink/70 hover:text-ink",
                   )}
                 >
-                  <Icon className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+                  {isProfileTab && avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={userName}
+                      className="h-5 w-5 rounded-lg object-cover"
+                    />
+                  ) : isProfileTab && userName ? (
+                    <div className="nb-border inline-flex h-5 w-5 items-center justify-center rounded-lg bg-accent text-[8px] font-black">
+                      {initial}
+                    </div>
+                  ) : (
+                    <Icon className="h-5 w-5" strokeWidth={2.5} aria-hidden />
+                  )}
                   {label}
                 </Link>
               );

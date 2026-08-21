@@ -1,14 +1,15 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Check, Target } from "lucide-react";
+import { Check, Target, Lock } from "lucide-react";
 import { toast } from "sonner";
 
 import { getConcept } from "@/data/curriculum";
-import { getMission, type Mission } from "@/data/missions";
+import { getMission, missions as allMissions, type Mission } from "@/data/missions";
 import { AppShell } from "@/components/app-shell";
 import { SpeakButton } from "@/components/speak-button";
 import { useProgress } from "@/lib/progress";
 import { NBButton, NBCard, Sticker, Kannada } from "@/lib/nb";
+import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/missions")({
   component: MissionsPage,
@@ -16,7 +17,7 @@ export const Route = createFileRoute("/missions")({
 
 function MissionsPage() {
   const navigate = useNavigate();
-  const { hydrated, state, availableMissions, completeMission } = useProgress();
+  const { hydrated, state, availableMissions, completeMission, unitCompletedCount } = useProgress();
 
   useEffect(() => {
     if (hydrated && !state.profile.onboardingDone) {
@@ -90,6 +91,70 @@ function MissionsPage() {
           </ul>
         </div>
       )}
+
+      {/* All missions with unlock status */}
+      <div className="mt-8">
+        <Sticker tone="blue">All Missions</Sticker>
+        <div className="mt-3 space-y-3">
+          {allMissions.map((mission) => {
+            const isCompleted = Boolean(state.missions[mission.id]);
+            const isUnlocked = unlocked.includes(mission);
+            const lessonsCompleted = unitCompletedCount(mission.unitId);
+            const unlockLevel = `Level ${mission.unlockAfterLessons}`;
+
+            return (
+              <NBCard
+                key={mission.id}
+                className={cn(
+                  "transition-all",
+                  isCompleted && "bg-success/10",
+                  !isUnlocked && "opacity-60"
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <div className={cn(
+                    "mt-1 h-5 w-5 shrink-0",
+                    isCompleted ? "text-success" : isUnlocked ? "text-primary" : "text-ink/40"
+                  )}>
+                    {isCompleted ? (
+                      <Check className="h-5 w-5" />
+                    ) : !isUnlocked ? (
+                      <Lock className="h-5 w-5" />
+                    ) : (
+                      <Target className="h-5 w-5" />
+                    )}
+                  </div>
+                  <div className="flex-1">
+                    <p className={cn(
+                      "font-black",
+                      !isUnlocked && "text-ink/50"
+                    )}>
+                      {mission.title}
+                    </p>
+                    <p className={cn(
+                      "text-xs mt-1",
+                      isUnlocked ? "text-ink/70" : "text-ink/40"
+                    )}>
+                      {mission.objective}
+                    </p>
+                    <p className={cn(
+                      "text-xs mt-1 font-semibold",
+                      !isUnlocked && "text-ink/40"
+                    )}>
+                      Unlocks at: {unlockLevel}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <Sticker tone={isCompleted ? "green" : "yellow"}>
+                      +{mission.reward} XP
+                    </Sticker>
+                  </div>
+                </div>
+              </NBCard>
+            );
+          })}
+        </div>
+      </div>
     </AppShell>
   );
 }

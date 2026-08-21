@@ -54,4 +54,4 @@ export const situations: Option[] = [
 ];
 
 export const goalLabel = (id: string): string =>
-  goals.find((g) => g.id === id)?.label ?? "Bangalore Beginner";
+  goals.find((g) => g.id === id)?.label ?? "Bengaluru Beginner";

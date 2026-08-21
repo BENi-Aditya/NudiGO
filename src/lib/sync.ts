@@ -20,6 +20,7 @@ export type RemoteSnapshot = {
   lastActiveDate: string | null;
   lessons: Record<number, LessonStat>;
   conceptStats: Record<string, ConceptStat>;
+  achievements: Record<string, number>;
 };
 
 async function client() {
@@ -73,6 +74,13 @@ export async function loadRemote(
       };
     }
 
+    const achievements: Record<string, number> = {};
+    if (p?.achievements) {
+      for (const [id, timestamp] of Object.entries(p.achievements)) {
+        achievements[id] = typeof timestamp === 'number' ? timestamp : ms(timestamp as string);
+      }
+    }
+
     return {
       profile,
       xp: p?.xp ?? 0,
@@ -81,6 +89,7 @@ export async function loadRemote(
       lastActiveDate: p?.last_active_date ?? null,
       lessons,
       conceptStats,
+      achievements,
     };
   } catch (error) {
     console.error("[sync] loadRemote failed", error);
@@ -104,6 +113,7 @@ export async function pushProfile(
       streak: state.streak,
       longest_streak: state.longestStreak,
       last_active_date: state.lastActiveDate,
+      achievements: state.achievements,
     });
   } catch (error) {
     console.error("[sync] pushProfile failed", error);
@@ -153,5 +163,14 @@ export async function pushConcept(
     );
   } catch (error) {
     console.error("[sync] pushConcept failed", error);
+  }
+}
+
+export async function pushAvatarUrl(userId: string, avatarUrl: string): Promise<void> {
+  try {
+    const supabase = await client();
+    await supabase.from("profiles").update({ avatar_url: avatarUrl }).eq("id", userId);
+  } catch (error) {
+    console.error("[sync] pushAvatarUrl failed", error);
   }
 }

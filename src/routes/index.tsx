@@ -13,7 +13,7 @@ const steps = [
   {
     Icon: BookOpen,
     title: "Learn phrases",
-    body: "Start with real Bangalore situations - not grammar drills.",
+    body: "Start with real Bengaluru situations - not grammar drills.",
   },
   {
     Icon: Mic,
@@ -33,7 +33,7 @@ const steps = [
 ];
 
 const features = [
-  "Bangalore-focused - the Kannada you'll actually use",
+  "Bengaluru-focused - the Kannada you'll actually use",
   "Short 3–7 minute lessons that fit your commute",
   "Speaking practice with instant feedback",
   "AI conversations with a waiter, auto driver & more",
@@ -68,7 +68,7 @@ function Landing() {
       {/* Hero */}
       <section className="mx-auto max-w-5xl px-5 pb-12 pt-6 md:grid md:grid-cols-2 md:items-center md:gap-10 md:pt-12">
         <div>
-          <Sticker tone="pink">Kannada · Bangalore</Sticker>
+          <Sticker tone="pink">Kannada · Bengaluru</Sticker>
           <h1 className="mt-4 text-5xl leading-[1.05] md:text-6xl">
             Learn Kannada.
             <br />

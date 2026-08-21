@@ -1,0 +1,13 @@
+// Load avatar from IndexedDB or Google
+useEffect(() => {
+  if (typeof window !== 'undefined') {
+    (async () => {
+      const storedAvatar = await getAvatar();
+      if (storedAvatar) {
+        setAvatarUrl(storedAvatar);
+      } else if (user?.user_metadata?.avatar_url) {
+        setAvatarUrl(user.user_metadata.avatar_url);
+      }
+    })();
+  }
+}, [user]);

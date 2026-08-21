@@ -27,7 +27,7 @@ export const missions: Mission[] = [
     title: "Say Namaskara to someone",
     objective: "Greet a neighbour, guard, or shopkeeper in Kannada.",
     conceptId: "namaskara",
-    context: "A warm namaskara opens almost any interaction in Bangalore.",
+    context: "A warm namaskara opens almost any interaction in Bengaluru.",
     reward: 50,
   },
   {
@@ -57,7 +57,7 @@ export const missions: Mission[] = [
     title: "Order one coffee in Kannada",
     objective: "At a darshini or cafe, say “ondu kafi kodi”.",
     conceptId: "ondu-kafi-kodi",
-    context: "The classic first Bangalore order.",
+    context: "The classic first Bengaluru order.",
     reward: 50,
   },
   {

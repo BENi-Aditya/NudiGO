@@ -1,0 +1,12 @@
+  const handleCropComplete = async (croppedDataUrl: string) => {
+    await saveAvatar(croppedDataUrl);
+    setAvatarUrl(croppedDataUrl);
+    setCropImage(null);
+
+    // Save to Supabase if logged in
+    if (user?.id) {
+      void pushAvatarUrl(user.id, croppedDataUrl);
+    }
+
+    toast.success("Profile picture updated");
+  };

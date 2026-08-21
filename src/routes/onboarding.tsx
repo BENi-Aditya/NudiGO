@@ -79,7 +79,7 @@ function Onboarding() {
         {step === 0 && (
           <div className="animate-nb-pop space-y-5 text-center">
             <div className="text-6xl">👋</div>
-            <h1 className="text-4xl">Welcome to Bangalore.</h1>
+            <h1 className="text-4xl">Welcome to Bengaluru.</h1>
             <p className="text-lg font-semibold text-ink/80">
               Let's teach you the Kannada you'll actually use.
             </p>
@@ -160,7 +160,7 @@ function Onboarding() {
             <h1 className="text-4xl">Your path is ready.</h1>
             <NBCard tone="yellow" className="mx-auto max-w-xs text-left">
               <Sticker tone="white">{goalLabel(goal)}</Sticker>
-              <p className="mt-3 text-xl font-black">Bangalore Beginner</p>
+              <p className="mt-3 text-xl font-black">Bengaluru Beginner</p>
               <p className="mt-1 font-semibold text-ink/75">
                 You'll start with greetings, ordering food, and getting around.
               </p>

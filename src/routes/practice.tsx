@@ -118,7 +118,7 @@ function PracticePage() {
           <p className="font-black">AI conversations</p>
         </div>
         <p className="mt-1 text-sm font-semibold text-ink/70">
-          Roleplay a real Bangalore moment.
+          Roleplay a real Bengaluru moment.
         </p>
         <div className="mt-3 space-y-2">
           {scenarios.map((s) => {

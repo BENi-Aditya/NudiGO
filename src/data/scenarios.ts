@@ -125,6 +125,142 @@ export const scenarios: Scenario[] = [
     ],
     success: "You handled the auto like a local. Hoodi!",
   },
+  {
+    id: "shop-greeting",
+    title: "Greet at a shop",
+    role: "Shop owner",
+    emoji: "🏪",
+    context: "You walk into a local shop. Greet the owner warmly.",
+    requiresUnit: 1,
+    opening: {
+      kannada: "ಸುಸ್ವಾಗತ!",
+      translit: "Suswagat!",
+      english: "Welcome!",
+    },
+    steps: [
+      {
+        npc: {
+          kannada: "ನಮಸ್ಕಾರ! ಹೇಗಿದ್ದಿಯ?",
+          translit: "Namaskara! Hegiddiyi?",
+          english: "Hello! How are you?",
+        },
+        keywords: ["namaskara", "hegiddiyi", "fine", "nodi"],
+        hint: {
+          kannada: "ನಮಸ್ಕಾರ! ನನ್ನ ಚಿಕ್ಕದಿಲ್ಲ",
+          translit: "Namaskara! Nanna chikkadilla",
+          english: "Hello! I'm fine",
+        },
+        ack: {
+          kannada: "ತುಂಬಾ ಚೆನ್ನಾಗಿದೆ!",
+          translit: "Tumba chennaagide!",
+          english: "That's great!",
+        },
+      },
+    ],
+    success: "Perfect greeting! You're making friends already.",
+  },
+  {
+    id: "restaurant-bill",
+    title: "Ask for the bill",
+    role: "Restaurant server",
+    emoji: "🍽️",
+    context: "You've finished eating. Ask for the bill politely.",
+    requiresUnit: 6,
+    opening: {
+      kannada: "ಹೋಗಿತ್ತೀನ? ಇನ್ನೂ ಬೇಕಾ?",
+      translit: "Hogitte? Innu beka?",
+      english: "How was it? Do you need anything else?",
+    },
+    steps: [
+      {
+        npc: {
+          kannada: "ಇನ್ನೂ ಬೇಕಾ?",
+          translit: "Innu beka?",
+          english: "Anything else?",
+        },
+        keywords: ["bill", "kodi", "bill kodi", "illa"],
+        hint: {
+          kannada: "ಬಿಲ್‌ ಕೊಡಿ",
+          translit: "Bill kodi",
+          english: "Please give me the bill",
+        },
+        ack: {
+          kannada: "ಐತು. ಒಂದು ನಿಮಿಷ.",
+          translit: "Aitu. Ondu nimisha.",
+          english: "Sure. One moment.",
+        },
+      },
+    ],
+    success: "You handled it professionally. Jai Kannada!",
+  },
+  {
+    id: "ask-direction",
+    title: "Ask for directions",
+    role: "Friendly local",
+    emoji: "🗺️",
+    context: "You're lost. Ask a friendly person for directions.",
+    requiresUnit: 3,
+    opening: {
+      kannada: "ಹೇ, ನಿನಗೆ ಸಹಾಯ ಬೇಕಾ?",
+      translit: "Hey, ninagé sahaya beka?",
+      english: "Hey, do you need help?",
+    },
+    steps: [
+      {
+        npc: {
+          kannada: "ಎಲ್ಲಿ ಹೊಗೋದಾ?",
+          translit: "Elli hogoda?",
+          english: "Where are you going?",
+        },
+        keywords: ["koramangala", "indiranagar", "whitefield"],
+        hint: {
+          kannada: "ಕೋರಮಂಗಳಕ್ಕೆ ಹೊಗೋದಾ",
+          translit: "Koramangala-kke hogoda",
+          english: "I'm going to Koramangala",
+        },
+        ack: {
+          kannada: "ಆ ರೀತಿ! ಇದು ಲೆಕ್ಕ ಹೊಗೀದೀರಾ.",
+          translit: "A reeti! Idu lekka hogida!",
+          english: "Oh! You'll find it that way.",
+        },
+      },
+    ],
+    success: "Great job asking for help! Locals love that.",
+  },
+  {
+    id: "payment-decline",
+    title: "Decline and offer cash",
+    role: "Vendor",
+    emoji: "💳",
+    context: "You don't have a card. Politely decline card payment and offer cash.",
+    requiresUnit: 7,
+    opening: {
+      kannada: "ಕಾರ್ಡ್ ಇಲ್ಲಾ? ಕ್ರೆಡಿಟ್ ಬೇಕೇ?",
+      translit: "Card illa? Credit beke?",
+      english: "No card? Want credit?",
+    },
+    steps: [
+      {
+        npc: {
+          kannada: "ಕಾರ್ಡ್ ನಡೆಯುತ್ತೆ?",
+          translit: "Card nadeyutte?",
+          english: "Does your card work?",
+        },
+        keywords: ["illa", "paise", "ಅಡುಕೇ", "cash", "naaku"],
+        hint: {
+          kannada: "ಇಲ್ಲ, ನನಗೆ ಅಡುಕೇ ಸಾಲ್ತೆ",
+          translit: "Illa, nanagé aduké salte",
+          english: "No, cash is fine for me",
+        },
+        ack: {
+          kannada: "ಆಯಿತು!",
+          translit: "Ayitu!",
+          english: "Okay!",
+        },
+      },
+    ],
+    success: "Perfect! You're a natural at navigating Bengaluru.",
+  },
 ];
 
 export function getScenario(id: string): Scenario | undefined {

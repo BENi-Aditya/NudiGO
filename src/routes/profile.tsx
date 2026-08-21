@@ -1,14 +1,17 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { LogIn, LogOut, RotateCcw, Upload } from "lucide-react";
+import { LogIn, LogOut, RotateCcw, Upload, Bell } from "lucide-react";
 import { toast } from "sonner";
 
 import { achievements as allAchievements } from "@/data/achievements";
+import { goals, levels, situations } from "@/data/onboarding";
 import { AppShell } from "@/components/app-shell";
+import { ContributionChart } from "@/components/contribution-chart";
 import { useAuth } from "@/lib/auth";
 import { useProgress } from "@/lib/progress";
 import { NBButton, NBCard, Sticker } from "@/lib/nb";
 import { cn } from "@/lib/utils";
+import { pushAvatarUrl } from "@/lib/sync";
 
 export const Route = createFileRoute("/profile")({
   component: ProfilePage,
@@ -23,7 +26,17 @@ function ProfilePage() {
   const [nameDraft, setNameDraft] = useState("");
   const [editing, setEditing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
-  const [uploading, setUploading] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
+  const [notificationsEnabled, setNotificationsEnabled] = useState(
+    typeof window !== "undefined"
+      ? localStorage.getItem("notifications_enabled") !== "false"
+      : true
+  );
+  const [dailyReminder, setDailyReminder] = useState(
+    typeof window !== "undefined"
+      ? localStorage.getItem("daily_reminder_time") || "09:00"
+      : "09:00"
+  );
 
   useEffect(() => {
     if (hydrated && !state.profile.onboardingDone) {
@@ -67,81 +80,95 @@ function ProfilePage() {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    setUploading(true);
-    try {
-      // Convert to data URL for local storage
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        const dataUrl = event.target?.result as string;
-        localStorage.setItem('user_avatar_url', dataUrl);
-        setAvatarUrl(dataUrl);
-        toast.success("Profile picture updated");
-      };
-      reader.readAsDataURL(file);
-    } catch (err) {
-      toast.error("Failed to upload image");
-      console.error(err);
-    } finally {
-      setUploading(false);
-    }
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const dataUrl = event.target?.result as string;
+      localStorage.setItem("user_avatar_url", dataUrl);
+      setAvatarUrl(dataUrl);
+
+      // Save to Supabase if logged in
+      if (user?.id) {
+        void pushAvatarUrl(user.id, dataUrl);
+      }
+
+      toast.success("Profile picture updated");
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleNotificationsToggle = () => {
+    const newValue = !notificationsEnabled;
+    setNotificationsEnabled(newValue);
+    localStorage.setItem("notifications_enabled", String(newValue));
+    toast.success(newValue ? "Notifications enabled" : "Notifications disabled");
+  };
+
+  const handleReminderTimeChange = (time: string) => {
+    setDailyReminder(time);
+    localStorage.setItem("daily_reminder_time", time);
+    toast.success(`Daily reminder set to ${time}`);
   };
 
   const stats = [
-    { label: "Streak", value: `🔥 ${totals.streak}` },
-    { label: "Total XP", value: `${totals.xp}` },
+    { label: "Streak", value: `${totals.streak}`, color: "bg-red-400" },
+    { label: "Total XP", value: `${totals.xp}`, color: "bg-yellow-400" },
     {
       label: "Lessons",
       value: `${totals.lessonsCompleted}/${totals.totalLessons}`,
+      color: "bg-blue-400",
     },
-    { label: "Conversations", value: `${totals.conversations}` },
-    { label: "Missions", value: `${totals.missionsCompleted}` },
-    { label: "Mastered", value: `${totals.mastered}` },
+    { label: "Conversations", value: `${totals.conversations}`, color: "bg-purple-400" },
+    { label: "Missions", value: `${totals.missionsCompleted}`, color: "bg-green-400" },
+    { label: "Mastered", value: `${totals.mastered}`, color: "bg-indigo-400" },
   ];
 
   return (
     <AppShell active="profile">
       {/* Identity */}
-      <div className="mb-6 flex items-end gap-4">
-        <div className="relative">
+      <div className="mb-8 flex flex-col items-center">
+        <div className="relative mb-4">
           {avatarUrl ? (
             <img
               src={avatarUrl}
               alt={name}
-              className="nb-border nb-shadow h-16 w-16 rounded-2xl object-cover"
+              className="nb-border nb-shadow h-32 w-32 rounded-full object-cover ring-4 ring-primary/20"
             />
           ) : (
-            <div className="nb-border nb-shadow inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-3xl font-black">
+            <div className="nb-border nb-shadow inline-flex h-32 w-32 items-center justify-center rounded-full bg-gradient-to-br from-primary via-accent to-secondary text-6xl font-black text-white">
               {initial}
             </div>
           )}
-          <label className="absolute bottom-0 right-0 cursor-pointer">
+          <label className="absolute bottom-2 right-2 cursor-pointer">
             <input
               type="file"
               accept="image/*"
               onChange={handleAvatarUpload}
-              disabled={uploading}
               className="hidden"
             />
-            <div className="nb-border nb-shadow-sm nb-press inline-flex h-7 w-7 items-center justify-center rounded-lg bg-card">
-              <Upload className="h-4 w-4" />
+            <div className="nb-border nb-shadow-sm nb-press inline-flex h-10 w-10 items-center justify-center rounded-full bg-primary text-white">
+              <Upload className="h-5 w-5" />
             </div>
           </label>
         </div>
-        <div>
-          <h1 className="text-2xl leading-tight">{name}</h1>
-          <Sticker tone="yellow" className="mt-1">
-            {levelName}
-          </Sticker>
-        </div>
+        <h1 className="text-3xl font-black text-center">{name}</h1>
+        <Sticker tone="yellow" className="mt-2">
+          {levelName}
+        </Sticker>
       </div>
 
       {/* Stats */}
       <div className="grid grid-cols-3 gap-2">
         {stats.map((stat) => (
-          <NBCard key={stat.label} className="text-center">
-            <p className="text-sm font-bold text-ink/60">{stat.label}</p>
-            <p className="mt-1 text-lg font-black">{stat.value}</p>
-          </NBCard>
+          <div
+            key={stat.label}
+            className={cn(
+              "nb-border nb-shadow rounded-2xl p-4 text-center font-black text-white",
+              stat.color
+            )}
+          >
+            <p className="text-xs font-bold opacity-90">{stat.label}</p>
+            <p className="mt-2 text-2xl">{stat.value}</p>
+          </div>
         ))}
       </div>
 
@@ -201,23 +228,56 @@ function ProfilePage() {
         </NBCard>
       )}
 
+      {/* Contribution Chart */}
+      <div className="mt-8 rounded-2xl bg-ink/5 p-4">
+        <ContributionChart state={state} />
+      </div>
+
       {/* Achievements */}
-      <div className="mt-6">
-        <h2 className="mb-3 text-lg font-black">Achievements</h2>
-        <div className="grid grid-cols-2 gap-2">
+      <div className="mt-8">
+        <h2 className="mb-4 text-2xl font-black text-primary">
+          ✨ Achievements
+        </h2>
+        <div className="grid grid-cols-2 gap-3">
           {allAchievements.map((achievement) => {
-            const earned = state.progress.achievements.includes(achievement.id);
+            const earned = Boolean(state.achievements[achievement.id]);
+            const thresholdDisplay = achievement.threshold === 1 ? "🌟" : `${achievement.threshold}x`;
+            const colors = [
+              "bg-red-400",
+              "bg-blue-400",
+              "bg-purple-400",
+              "bg-green-400",
+              "bg-yellow-400",
+              "bg-indigo-400",
+              "bg-pink-400",
+              "bg-orange-400",
+            ];
+            const colorIdx = allAchievements.indexOf(achievement) % colors.length;
+
             return (
-              <NBCard
+              <div
                 key={achievement.id}
                 className={cn(
-                  "text-center transition-opacity",
-                  !earned && "opacity-50"
+                  "nb-border nb-shadow rounded-2xl p-4 transition-all",
+                  earned
+                    ? `${colors[colorIdx]} text-white`
+                    : "bg-ink/5 opacity-50 grayscale"
                 )}
               >
-                <div className="text-3xl">{achievement.icon}</div>
-                <p className="mt-1 text-xs font-bold">{achievement.name}</p>
-              </NBCard>
+                <div className="text-4xl mb-2">{achievement.icon}</div>
+                <p className={cn(
+                  "text-sm font-black",
+                  earned ? "text-white" : "text-ink/40"
+                )}>
+                  {achievement.name}
+                </p>
+                <p className={cn(
+                  "mt-2 text-xs font-bold",
+                  earned ? "text-white/90" : "text-ink/40"
+                )}>
+                  {thresholdDisplay}
+                </p>
+              </div>
             );
           })}
         </div>
@@ -225,6 +285,56 @@ function ProfilePage() {
 
       {/* Actions */}
       <div className="mt-8 space-y-2">
+        <NBButton
+          full
+          tone="secondary"
+          onClick={() => setShowSettings(!showSettings)}
+        >
+          <Bell className="h-4 w-4" />
+          {showSettings ? "Hide settings" : "Preferences"}
+        </NBButton>
+
+        {showSettings && (
+          <div className="mt-4 space-y-3">
+            <NBCard>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold">Notifications</p>
+                  <p className="text-xs text-ink/60">Get reminders and updates</p>
+                </div>
+                <button
+                  onClick={handleNotificationsToggle}
+                  className={cn(
+                    "h-6 w-10 rounded-full transition-colors",
+                    notificationsEnabled ? "bg-primary" : "bg-ink/20"
+                  )}
+                >
+                  <div
+                    className={cn(
+                      "h-5 w-5 rounded-full bg-white transition-transform",
+                      notificationsEnabled ? "translate-x-4.5" : "translate-x-0.5"
+                    )}
+                  />
+                </button>
+              </div>
+            </NBCard>
+
+            {notificationsEnabled && (
+              <NBCard>
+                <label className="text-xs font-bold uppercase text-ink/60">
+                  Daily reminder
+                </label>
+                <input
+                  type="time"
+                  value={dailyReminder}
+                  onChange={(e) => handleReminderTimeChange(e.target.value)}
+                  className="nb-border mt-2 h-10 w-full rounded-lg bg-card px-3 font-bold outline-none"
+                />
+              </NBCard>
+            )}
+          </div>
+        )}
+
         <NBButton full tone="secondary" onClick={doReset}>
           <RotateCcw className="h-4 w-4" />
           Reset progress

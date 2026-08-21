@@ -149,7 +149,7 @@ export async function* tutorKannada(
 Guidelines:
 - Use simple, clear language in both English and Kannada
 - Always provide Kannada text with Roman transliteration
-- Use examples relevant to daily life in Bangalore
+- Use examples relevant to daily life in Bengaluru
 - Encourage the learner and celebrate progress
 - Explain grammar and pronunciation naturally
 - If explaining Kannada, use this format:

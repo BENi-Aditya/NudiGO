@@ -136,6 +136,31 @@ function loadLocal(): ProgressState | null {
   }
 }
 
+function generateMockHeatmap(): Record<string, DayStat> {
+  const daily: Record<string, DayStat> = {};
+  const today = new Date();
+
+  // Generate mock data for 85 days (12 weeks) going backwards
+  for (let i = 0; i < 85; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const key = d.toISOString().split("T")[0];
+
+    // Create varied practice patterns
+    const hasActivity = Math.random() > 0.3; // 70% of days have activity
+    if (hasActivity) {
+      const xp = Math.floor(Math.random() * 100) + 10; // 10-110 XP
+      daily[key] = {
+        xp,
+        lessons: Math.floor(xp / 20),
+        exercises: Math.floor(xp / 2),
+      };
+    }
+  }
+
+  return daily;
+}
+
 function saveLocal(state: ProgressState): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -289,7 +314,7 @@ const LEVELS: Array<{ min: number; name: string }> = [
   { min: 1500, name: "Conversation Ready" },
   { min: 700, name: "Confident Speaker" },
   { min: 300, name: "Local-ish" },
-  { min: 100, name: "Bangalore Beginner" },
+  { min: 100, name: "Bengaluru Beginner" },
   { min: 0, name: "First Words" },
 ];
 
@@ -318,6 +343,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
   // Pull + reconcile with Supabase when the signed-in user changes.
   useEffect(() => {
     const uid = user?.id ?? null;
+    const email = user?.email ?? null;
     userRef.current = uid;
     if (!uid || !hydrated) return;
     let active = true;
@@ -342,8 +368,21 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
               prev.conceptStats,
               remote.conceptStats,
             ),
+            achievements: { ...prev.achievements, ...remote.achievements },
           };
         }
+
+        // Seed mock data for demo account
+        if (email === "aditya.tripathi.beni@gmail.com" && Object.keys(next.daily).length === 0) {
+          next = {
+            ...next,
+            daily: generateMockHeatmap(),
+            xp: Math.max(next.xp, 500),
+            streak: 12,
+            longestStreak: 25,
+          };
+        }
+
         // Seed / reconcile the account with the merged state.
         void pushProfile(uid, next);
         for (const [id, stat] of Object.entries(next.lessons)) {

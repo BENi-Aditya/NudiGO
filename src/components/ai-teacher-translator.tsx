@@ -14,41 +14,48 @@ export function AITeacherTranslator() {
   const [kannada, setKannada] = useState("");
   const [transliteration, setTransliteration] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-
-  useEffect(() => {
-    if (!isListening) {
-      setMascotSize(100);
-    }
-  }, [isListening]);
+  const [listener, setListener] = useState<ReturnType<typeof listenOnce> | null>(null);
 
   const handleStartListening = async () => {
     setIsListening(true);
     setMascotSize(100);
 
+    const newListener = listenOnce();
+    setListener(newListener);
+
+    const handleAudioLevel = setInterval(() => {
+      setMascotSize((prev) => {
+        const newSize = Math.min(140, prev + Math.random() * 10);
+        return newSize;
+      });
+    }, 100);
+
     try {
-      const { promise } = listenOnce();
+      const result = await newListener.promise;
+      clearInterval(handleAudioLevel);
 
-      const handleAudioLevel = () => {
-        setMascotSize((prev) => {
-          const newSize = Math.min(140, prev + Math.random() * 10);
-          return newSize;
-        });
-      };
-
-      const audioLevelInterval = setInterval(handleAudioLevel, 100);
-
-      const transcript = await promise;
-      clearInterval(audioLevelInterval);
-
-      if (transcript) {
-        setInputText(transcript);
-        await handleTranslate(transcript);
+      if (result.transcript) {
+        setInputText(result.transcript);
+        await handleTranslate(result.transcript);
+      } else if (result.error) {
+        console.error("[Translator] Error:", result.error);
       }
     } catch (err) {
       console.error("[Translator] Error:", err);
+      clearInterval(handleAudioLevel);
     } finally {
       setIsListening(false);
       setMascotSize(100);
+      setListener(null);
+    }
+  };
+
+  const handleStopListening = () => {
+    if (listener) {
+      listener.stop();
+      setIsListening(false);
+      setMascotSize(100);
+      setListener(null);
     }
   };
 
@@ -119,14 +126,23 @@ export function AITeacherTranslator() {
 
         {/* Voice buttons */}
         <div className="flex gap-4 flex-wrap justify-center">
-          <NBButton
-            onClick={handleStartListening}
-            disabled={isListening || isLoading}
-            tone={isListening ? "primary" : "default"}
-            className="px-6"
-          >
-            {isListening ? "🎤 Listening..." : "🎤 Speak"}
-          </NBButton>
+          {!isListening ? (
+            <NBButton
+              onClick={handleStartListening}
+              disabled={isLoading}
+              className="px-6"
+            >
+              🎤 Speak
+            </NBButton>
+          ) : (
+            <NBButton
+              onClick={handleStopListening}
+              tone="primary"
+              className="px-6"
+            >
+              ⏹ Stop
+            </NBButton>
+          )}
 
           <button
             type="button"

@@ -1,4 +1,4 @@
-/** Speech-to-text API endpoint using Google Cloud Speech-to-Text */
+/** Speech-to-text API endpoint using AssemblyAI */
 
 export async function POST({ request }: { request: Request }) {
   try {
@@ -22,42 +22,35 @@ export async function POST({ request }: { request: Request }) {
     const base64 = btoa(binary);
 
     console.log("[API] Received audio blob:", audioBlob.size, "bytes");
-    console.log("[API] Sending to Google Cloud Speech-to-Text...");
+    console.log("[API] Sending to AssemblyAI...");
 
-    // Call Google Cloud Speech-to-Text API
-    const googleApiKey = process.env.GOOGLE_CLOUD_SPEECH_API_KEY;
-    if (!googleApiKey) {
-      console.error("[API] Missing GOOGLE_CLOUD_SPEECH_API_KEY environment variable");
+    // Get API key from environment
+    const apiKey = process.env.ASSEMBLYAI_API_KEY;
+    if (!apiKey) {
+      console.error("[API] Missing ASSEMBLYAI_API_KEY environment variable");
       return new Response(
         JSON.stringify({ error: "Speech service not configured" }),
         { status: 500 }
       );
     }
 
-    const response = await fetch(
-      `https://speech.googleapis.com/v1/speech:recognize?key=${googleApiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          config: {
-            encoding: "WEBM_OPUS",
-            languageCode: "kn-IN",
-            model: "default",
-            enableAutomaticPunctuation: true,
-          },
-          audio: {
-            content: base64,
-          },
-        }),
-      }
-    );
+    // Call AssemblyAI API
+    const response = await fetch("https://api.assemblyai.com/v2/transcribe", {
+      method: "POST",
+      headers: {
+        "Authorization": apiKey,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        audio_data: base64,
+        encoding: "webm",
+        language_code: "kn",
+      }),
+    });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("[API] Google Cloud error:", error);
+      console.error("[API] AssemblyAI error:", error);
       return new Response(
         JSON.stringify({ error: `Speech service error: ${response.status}` }),
         { status: 500 }
@@ -65,20 +58,11 @@ export async function POST({ request }: { request: Request }) {
     }
 
     const result = await response.json();
-    console.log("[API] Google Cloud response:", result);
-
-    // Extract transcript from results
-    let transcript = "";
-    if (result.results && result.results.length > 0) {
-      const alternatives = result.results[result.results.length - 1].alternatives;
-      if (alternatives && alternatives.length > 0) {
-        transcript = alternatives[0].transcript || "";
-      }
-    }
+    console.log("[API] AssemblyAI response:", result);
 
     return new Response(
       JSON.stringify({
-        transcript: transcript,
+        transcript: result.text || "",
       }),
       { status: 200 }
     );

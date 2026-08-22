@@ -27,17 +27,13 @@ export function speak(text: string, opts: { slow?: boolean } = {}) {
 }
 
 export function canListen() {
-  return typeof window !== "undefined" && (
-    ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) ||
-    navigator?.mediaDevices?.getUserMedia
-  );
+  return typeof window !== "undefined" && navigator?.mediaDevices?.getUserMedia;
 }
 
 let globalMediaRecorder: MediaRecorder | null = null;
 let globalStream: MediaStream | null = null;
 let globalAudioChunks: Blob[] = [];
 let globalIsRecording = false;
-let globalRecognition: any = null;
 
 export function listenOnce(): {
   promise: Promise<{ transcript: string; error?: string }>;
@@ -62,61 +58,8 @@ export function listenOnce(): {
     resolvePromise = resolve;
   });
 
-  // Try Web Speech API first (free, no backend needed)
-  const useWebSpeechAPI = () => {
+  const startRecording = async () => {
     try {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
-      if (!SpeechRecognition) return false;
-
-      console.log("[STT] Using Web Speech API (free, no backend)");
-      globalRecognition = new SpeechRecognition();
-      globalRecognition.continuous = false;
-      globalRecognition.interimResults = false;
-      globalRecognition.lang = "kn-IN";
-
-      globalRecognition.onstart = () => {
-        globalIsRecording = true;
-        console.log("[STT] Web Speech API listening...");
-      };
-
-      globalRecognition.onresult = (event: any) => {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          if (event.results[i].isFinal) {
-            transcript = event.results[i][0].transcript;
-          }
-        }
-        console.log("[STT] Web Speech result:", transcript);
-        if (resolvePromise && !settled) {
-          settled = true;
-          resolvePromise({ transcript: transcript.trim() || "" });
-        }
-      };
-
-      globalRecognition.onerror = (event: any) => {
-        console.error("[STT] Web Speech error:", event.error);
-        if (resolvePromise && !settled) {
-          settled = true;
-          resolvePromise({ transcript: "", error: `Speech recognition error: ${event.error}` });
-        }
-      };
-
-      globalRecognition.onend = () => {
-        globalIsRecording = false;
-      };
-
-      globalRecognition.start();
-      return true;
-    } catch (err) {
-      console.error("[STT] Web Speech API unavailable:", err);
-      return false;
-    }
-  };
-
-  // Fallback to MediaRecorder + backend
-  const useMediaRecorder = async () => {
-    try {
-      console.log("[STT] Using MediaRecorder with backend (fallback)");
       console.log("[STT] Requesting microphone...");
       globalStream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -156,7 +99,7 @@ export function listenOnce(): {
     }
   };
 
-  const stopMediaRecorder = async () => {
+  const stopRecording = async () => {
     if (!globalMediaRecorder || !globalIsRecording) return;
 
     console.log("[STT] Stopping recording...");
@@ -186,7 +129,7 @@ export function listenOnce(): {
         return;
       }
 
-      console.log("[STT] Sending to backend...");
+      console.log("[STT] Sending to backend via AssemblyAI...");
       const formData = new FormData();
       formData.append("audio", audioBlob, "recording.webm");
 
@@ -196,6 +139,8 @@ export function listenOnce(): {
       });
 
       if (!response.ok) {
+        const errorText = await response.text();
+        console.error("[STT] Backend error:", errorText);
         throw new Error(`Server error: ${response.status}`);
       }
 
@@ -220,32 +165,15 @@ export function listenOnce(): {
     }
   };
 
-  // Start with Web Speech API, fall back to MediaRecorder if unavailable
-  const startRecording = async () => {
-    if (!useWebSpeechAPI()) {
-      await useMediaRecorder();
-    }
-  };
-
   startRecording();
 
   return {
     promise,
-    stop: () => {
-      if (globalRecognition) {
-        globalRecognition.stop();
-      } else {
-        stopMediaRecorder();
-      }
-    },
+    stop: stopRecording,
     isRecording: () => globalIsRecording,
     toggleRecording: async () => {
       if (globalIsRecording) {
-        if (globalRecognition) {
-          globalRecognition.stop();
-        } else {
-          await stopMediaRecorder();
-        }
+        await stopRecording();
       } else {
         await startRecording();
       }

@@ -30,42 +30,72 @@ export interface DoubtRequest {
   masteredConcepts?: string[];
 }
 
-/** Stream Gemini API response via backend proxy. */
+/** Stream Gemini API response directly. */
 export async function* streamClaudeResponse(
   systemPrompt: string,
   userMessage: string,
   conversationHistory: ConversationTurn[] = []
 ): AsyncGenerator<string, void, unknown> {
   const fullPrompt = systemPrompt + "\n\n" + userMessage;
+  const apiKey = import.meta.env.VITE_GOOGLE_GEMINI_API_KEY;
+
+  if (!apiKey) {
+    console.error("[AI] No API key found");
+    yield "Error: AI API key not configured.";
+    return;
+  }
 
   try {
-    console.log("[AI] Calling backend /api/gemini...");
-
-    const endpoint = '/api/gemini';
-
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ prompt: fullPrompt }),
-    });
+    console.log("[AI] Calling Gemini v1beta...");
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: fullPrompt,
+                },
+              ],
+            },
+          ],
+          generationConfig: {
+            maxOutputTokens: 1024,
+            temperature: 0.7,
+          },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_UNSPECIFIED",
+              threshold: "BLOCK_NONE",
+            },
+          ],
+        }),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("[AI] API error:", error);
+      console.error("[AI] API error:", response.status, error);
       yield "Error: Failed to generate response. Try again.";
       return;
     }
 
     const result = await response.json() as any;
-    const text = result.text || "";
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     if (text) {
-      console.log("[AI] Got response");
+      console.log("[AI] Got response, length:", text.length);
       for (const char of text) {
         yield char;
       }
+    } else {
+      console.error("[AI] No text in response:", result);
+      yield "Error: No response text received.";
     }
   } catch (err) {
     console.error("[AI] Stream error:", err);

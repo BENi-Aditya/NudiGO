@@ -14,11 +14,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const apiKey = process.env.VITE_GOOGLE_GEMINI_API_KEY;
     if (!apiKey) {
-      console.error("[API] Missing VITE_GOOGLE_GEMINI_API_KEY");
-      return res.status(500).json({ error: "AI service not configured" });
+      console.error("[Gemini API] Missing VITE_GOOGLE_GEMINI_API_KEY");
+      return res.status(500).json({ error: "API key not configured" });
     }
 
-    console.log("[API] Calling Gemini...");
+    console.log("[Gemini API] Calling Gemini with prompt length:", prompt.length);
+
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1/models/text-bison-001:generateText?key=${apiKey}`,
       {
@@ -44,16 +45,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("[API] Gemini error:", error);
-      return res.status(500).json({ error: `Gemini error: ${response.status}` });
+      console.error("[Gemini API] Error:", response.status, error);
+      return res.status(500).json({ error: `Gemini API error: ${response.status}` });
     }
 
     const result = await response.json() as any;
     const text = result.candidates?.[0]?.output || "";
 
+    console.log("[Gemini API] Got response, length:", text.length);
     return res.status(200).json({ text });
   } catch (error) {
-    console.error("[API] Error:", error);
+    console.error("[Gemini API] Error:", error);
     return res.status(500).json({ error: String(error) });
   }
 }

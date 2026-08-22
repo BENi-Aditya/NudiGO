@@ -290,6 +290,11 @@ type ProgressContextValue = {
     level: string;
     situations: string[];
   }) => void;
+  updatePreferences: (answers: {
+    goal: string;
+    level: string;
+    situations: string[];
+  }) => void;
   recordExercise: (conceptId: string, correct: boolean) => void;
   completeLesson: (lessonId: number, accuracy: number) => void;
   completeMission: (missionId: string, reward: number) => void;
@@ -411,6 +416,24 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
           level: answers.level,
           situations: answers.situations,
           onboardingDone: true,
+        },
+      };
+      if (userRef.current) void pushProfile(userRef.current, next);
+      return next;
+    });
+  }, []);
+
+  const updatePreferences = useCallback<
+    ProgressContextValue["updatePreferences"]
+  >((answers) => {
+    setState((prev) => {
+      const next: ProgressState = {
+        ...prev,
+        profile: {
+          ...prev.profile,
+          goal: answers.goal,
+          level: answers.level,
+          situations: answers.situations,
         },
       };
       if (userRef.current) void pushProfile(userRef.current, next);
@@ -671,6 +694,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     hydrated,
     state,
     completeOnboarding,
+    updatePreferences,
     recordExercise,
     completeLesson,
     completeMission,

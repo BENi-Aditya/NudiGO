@@ -19,7 +19,7 @@ export const Route = createFileRoute("/profile")({
 
 function ProfilePage() {
   const navigate = useNavigate();
-  const { hydrated, state, totals, levelName, setDisplayName, resetProgress } =
+  const { hydrated, state, totals, levelName, setDisplayName, resetProgress, updatePreferences } =
     useProgress();
   const { configured, user, signOut } = useAuth();
 
@@ -27,6 +27,10 @@ function ProfilePage() {
   const [editing, setEditing] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [showSettings, setShowSettings] = useState(false);
+  const [editingPreferences, setEditingPreferences] = useState(false);
+  const [prefGoal, setPrefGoal] = useState(state.profile.goal);
+  const [prefLevel, setPrefLevel] = useState(state.profile.level);
+  const [prefSituations, setPrefSituations] = useState(state.profile.situations);
   const [notificationsEnabled, setNotificationsEnabled] = useState(
     typeof window !== "undefined"
       ? localStorage.getItem("notifications_enabled") !== "false"
@@ -107,6 +111,22 @@ function ProfilePage() {
     setDailyReminder(time);
     localStorage.setItem("daily_reminder_time", time);
     toast.success(`Daily reminder set to ${time}`);
+  };
+
+  const toggleSituation = (id: string) => {
+    setPrefSituations((prev) =>
+      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+    );
+  };
+
+  const savePreferences = () => {
+    updatePreferences({
+      goal: prefGoal,
+      level: prefLevel,
+      situations: prefSituations,
+    });
+    setEditingPreferences(false);
+    toast.success("Preferences updated");
   };
 
   const stats = [
@@ -332,7 +352,91 @@ function ProfilePage() {
                 />
               </NBCard>
             )}
+
+            <NBButton full tone="secondary" onClick={() => setEditingPreferences(true)}>
+              Edit learning preferences
+            </NBButton>
           </div>
+        )}
+
+        {editingPreferences && (
+          <NBCard className="mt-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="font-bold">Edit Preferences</h3>
+              <button
+                onClick={() => setEditingPreferences(false)}
+                className="text-xs font-bold text-ink/50 hover:text-ink/70"
+              >
+                Close
+              </button>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold uppercase text-ink/60">Goal</label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {goals.map((g) => (
+                  <button
+                    key={g.id}
+                    onClick={() => setPrefGoal(g.id)}
+                    className={cn(
+                      "nb-border nb-shadow-sm nb-press rounded-full px-3 py-1.5 text-xs font-bold transition-all",
+                      prefGoal === g.id ? "bg-primary text-white" : "bg-card"
+                    )}
+                  >
+                    {g.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold uppercase text-ink/60">Level</label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {levels.map((l) => (
+                  <button
+                    key={l.id}
+                    onClick={() => setPrefLevel(l.id)}
+                    className={cn(
+                      "nb-border nb-shadow-sm nb-press rounded-full px-3 py-1.5 text-xs font-bold transition-all",
+                      prefLevel === l.id ? "bg-primary text-white" : "bg-card"
+                    )}
+                  >
+                    {l.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-xs font-bold uppercase text-ink/60">Situations</label>
+              <div className="mt-2 flex flex-wrap gap-2">
+                {situations.map((s) => {
+                  const active = prefSituations.includes(s.id);
+                  return (
+                    <button
+                      key={s.id}
+                      onClick={() => toggleSituation(s.id)}
+                      className={cn(
+                        "nb-border nb-shadow-sm nb-press rounded-full px-3 py-1.5 text-xs font-bold transition-all",
+                        active ? "bg-primary text-white" : "bg-card"
+                      )}
+                    >
+                      {s.label}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div className="flex gap-2">
+              <NBButton full tone="secondary" onClick={() => setEditingPreferences(false)}>
+                Cancel
+              </NBButton>
+              <NBButton full tone="primary" onClick={savePreferences}>
+                Save
+              </NBButton>
+            </div>
+          </NBCard>
         )}
 
         <NBButton full tone="secondary" onClick={doReset}>

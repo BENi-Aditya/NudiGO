@@ -152,16 +152,21 @@ export function listenOnce(): {
       reader.onload = async () => {
         try {
           const base64String = (reader.result as string).split(",")[1];
-          console.log("[STT] Sending to backend...");
+          console.log("[STT] Sending to /api/transcribe...");
 
-          const { transcribeAudio } = await import("./transcribe.server");
-          const result = await transcribeAudio(base64String);
+          const response = await fetch("/api/transcribe", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ audioBase64: base64String }),
+          });
 
-          console.log("[STT] Got result:", result);
+          const result = await response.json();
 
-          if (result.error) {
-            throw new Error(result.error);
+          if (!response.ok) {
+            throw new Error(result.error || `HTTP ${response.status}`);
           }
+
+          console.log("[STT] Got transcript:", result.transcript);
 
           if (resolvePromise && !settled) {
             settled = true;

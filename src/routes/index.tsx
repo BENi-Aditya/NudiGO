@@ -1,7 +1,8 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { BookOpen, Mic, MessagesSquare, Target, Check, LogIn } from "lucide-react";
+import { LogIn } from "lucide-react";
+import { useEffect, useState } from "react";
 
-import { LogoMark, Wordmark } from "@/components/brand";
+import { Wordmark } from "@/components/brand";
 import { useAuth } from "@/lib/auth";
 import { NBCard, NBLinkButton, Sticker, Kannada } from "@/lib/nb";
 
@@ -9,55 +10,29 @@ export const Route = createFileRoute("/")({
   component: Landing,
 });
 
-const steps = [
-  {
-    Icon: BookOpen,
-    title: "Learn phrases",
-    body: "Start with real Bengaluru situations - not grammar drills.",
-  },
-  {
-    Icon: Mic,
-    title: "Practice speaking",
-    body: "Say it out loud and hear it back. Build confidence early.",
-  },
-  {
-    Icon: MessagesSquare,
-    title: "Chat with AI",
-    body: "Roleplay an auto driver or cafe server before the real thing.",
-  },
-  {
-    Icon: Target,
-    title: "Use it for real",
-    body: "Get a real-world mission after every lesson. Actually speak.",
-  },
-];
-
-const features = [
-  "Bengaluru-focused - the Kannada you'll actually use",
-  "Short 3–7 minute lessons that fit your commute",
-  "Speaking practice with instant feedback",
-  "AI conversations with a waiter, auto driver & more",
-  "Real-world missions that take you off the screen",
-  "Streaks, XP and levels to keep you going",
-];
-
 function Landing() {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const [scrollY, setScrollY] = useState(0);
 
-  // If already logged in, redirect to learn
+  useEffect(() => {
+    const handleScroll = () => setScrollY(window.scrollY);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   if (user) {
     navigate({ to: "/learn" });
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen bg-paper overflow-hidden">
       {/* Header */}
-      <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
+      <header className="relative z-50 mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
         <div className="flex items-center gap-2">
-          <img src="/logo.jpg" alt="NudiGO" className="h-8 w-8 rounded-lg" />
-          <Wordmark className="text-xl" />
+          <img src="/logo.jpg" alt="NudiGO" className="h-10 w-10 rounded-lg nb-border nb-shadow-sm" />
+          <Wordmark className="text-2xl" />
         </div>
         <NBLinkButton to="/auth" tone="white" size="sm">
           <LogIn className="h-4 w-4" aria-hidden />
@@ -65,113 +40,202 @@ function Landing() {
         </NBLinkButton>
       </header>
 
-      {/* Hero */}
-      <section className="mx-auto max-w-5xl px-5 pb-12 pt-6 md:grid md:grid-cols-2 md:items-center md:gap-10 md:pt-12">
-        <div>
-          <Sticker tone="pink">Kannada · Bengaluru</Sticker>
-          <h1 className="mt-4 text-5xl leading-[1.05] md:text-6xl">
-            Learn Kannada.
-            <br />
-            One conversation
-            <br />
-            at a time.
-          </h1>
-          <p className="mt-5 max-w-md text-lg font-semibold text-ink/80">
-            Practical Kannada for life in Karnataka. Short lessons, real
-            conversations, and the phrases you need from your first coffee order
-            to winning the auto conversation.
-          </p>
-          <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-            <NBLinkButton to="/auth" tone="primary" size="lg">
-              Start learning - it's free
-            </NBLinkButton>
-          </div>
-          <p className="mt-3 text-sm font-bold text-ink/60">
-            No downloads • 5-minute first lesson
-          </p>
+      {/* Hero - Bold Asymmetric Layout */}
+      <section className="relative mx-auto max-w-6xl px-5 py-16 md:py-24">
+        {/* Floating animated elements */}
+        <div
+          className="absolute right-10 top-20 hidden md:block"
+          style={{ transform: `translateY(${scrollY * 0.1}px)` }}
+        >
+          <Sticker tone="pink" className="text-lg rotate-12 animate-pulse">ಕನ್ನಡ</Sticker>
+        </div>
+        <div
+          className="absolute left-10 top-40 hidden md:block"
+          style={{ transform: `translateY(${scrollY * 0.15}px)` }}
+        >
+          <Sticker tone="primary" className="text-lg -rotate-6">Bengaluru</Sticker>
         </div>
 
-        {/* Visual */}
-        <div className="mt-10 md:mt-0">
-          <NBCard className="nb-shadow-lg relative overflow-hidden bg-secondary">
-            <div className="nb-dots absolute inset-0 opacity-20" aria-hidden />
-            <div className="relative space-y-4">
-              <div className="text-center">
-                <Kannada className="text-6xl">ಒಂದು ಕಾಫಿ ಕೊಡಿ</Kannada>
-                <p className="mt-2 text-lg font-extrabold">Ondu kafi kodi</p>
-                <p className="text-sm font-bold text-ink/70">
-                  give me one coffee
-                </p>
-              </div>
-              <div className="flex flex-wrap justify-center gap-2">
-                <Sticker tone="white">namaskara</Sticker>
-                <Sticker tone="pink">meter haki</Sticker>
-                <Sticker tone="primary">eshtu?</Sticker>
-                <Sticker tone="white">sari</Sticker>
-              </div>
+        <div className="relative">
+          {/* Main headline - curved text effect with CSS */}
+          <div className="text-center md:text-left">
+            <div className="inline-block">
+              <h1 className="text-6xl leading-[0.95] md:text-8xl font-black relative">
+                <span className="block text-primary">Talk</span>
+                <span className="block text-ink -ml-4 md:-ml-8">like a</span>
+                <span className="block text-accent -ml-8 md:-ml-16">Local</span>
+              </h1>
+              {/* Curved underline decoration */}
+              <svg className="w-full h-12 -mt-4" viewBox="0 0 300 50" preserveAspectRatio="none">
+                <path
+                  d="M 10 40 Q 150 10 290 40"
+                  stroke="#FF3B30"
+                  strokeWidth="4"
+                  fill="none"
+                  className="animate-pulse"
+                />
+              </svg>
             </div>
+          </div>
+
+          {/* Subtext - punchy and real */}
+          <p className="mt-8 text-xl md:text-2xl font-bold text-ink/80 max-w-lg">
+            From <span className="text-primary">"meter haki"</span> to ordering filter coffee.
+            <br />
+            Real Kannada. Zero cringe.
+          </p>
+
+          {/* CTA */}
+          <div className="mt-10 flex flex-col sm:flex-row gap-4">
+            <NBLinkButton to="/auth" tone="primary" size="lg" className="text-lg px-8">
+              Start free
+            </NBLinkButton>
+            <div className="flex items-center gap-2 font-bold text-sm text-ink/60">
+              <span className="nb-border inline-flex h-8 w-8 items-center justify-center rounded-lg bg-card text-xs">5</span>
+              <span>min first lesson</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Animated phrase showcase - diagonal layout */}
+        <div className="mt-16 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <NBCard
+            tone="white"
+            className="nb-shadow-lg transform md:-rotate-2 hover:rotate-0 transition-transform cursor-default"
+          >
+            <Kannada className="text-4xl">ನಮಸ್ಕಾರ</Kannada>
+            <p className="mt-2 text-lg font-black">Namaskara</p>
+            <p className="text-sm font-bold text-ink/60">Hello</p>
+          </NBCard>
+
+          <NBCard
+            tone="pink"
+            className="nb-shadow-lg transform md:rotate-1 hover:rotate-0 transition-transform cursor-default md:mt-8"
+          >
+            <Kannada className="text-4xl">ಎಷ್ಟು?</Kannada>
+            <p className="mt-2 text-lg font-black">Eshtu?</p>
+            <p className="text-sm font-bold text-ink/60">How much?</p>
+          </NBCard>
+
+          <NBCard
+            tone="white"
+            className="nb-shadow-lg transform md:-rotate-1 hover:rotate-0 transition-transform cursor-default"
+          >
+            <Kannada className="text-4xl">ಮೀಟರ್ ಹಾಕಿ</Kannada>
+            <p className="mt-2 text-lg font-black">Meter haki</p>
+            <p className="text-sm font-bold text-ink/60">Use the meter</p>
           </NBCard>
         </div>
       </section>
 
-      {/* How it works */}
-      <section className="bg-card">
-        <div className="mx-auto max-w-5xl px-5 py-14">
-          <h2 className="text-3xl md:text-4xl">How NudiGO works</h2>
-          <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            {steps.map(({ Icon, title, body }, i) => (
-              <NBCard key={title} tone={i % 2 === 0 ? "white" : "pink"}>
-                <div className="nb-border nb-shadow-sm mb-3 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-paper">
-                  <Icon className="h-6 w-6" strokeWidth={2.5} aria-hidden />
-                </div>
-                <h3 className="text-lg">
-                  {i + 1}. {title}
-                </h3>
-                <p className="mt-1 text-sm font-semibold text-ink/75">{body}</p>
-              </NBCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="mx-auto max-w-5xl px-5 py-14">
-        <h2 className="text-3xl md:text-4xl">Why learners love it</h2>
-        <div className="mt-8 grid gap-3 sm:grid-cols-2">
-          {features.map((f) => (
-            <div key={f} className="nb-card flex items-start gap-3 p-4">
-              <span className="nb-border mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-success text-success-foreground">
-                <Check className="h-4 w-4" strokeWidth={3} aria-hidden />
-              </span>
-              <span className="font-bold">{f}</span>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      {/* Final CTA */}
-      <section className="bg-primary text-primary-foreground">
-        <div className="mx-auto max-w-5xl px-5 py-16 text-center">
-          <h2 className="text-3xl text-primary-foreground md:text-4xl">
-            Ready to speak Kannada?
+      {/* How it works - Cards with icons */}
+      <section className="bg-card py-20">
+        <div className="mx-auto max-w-6xl px-5">
+          <h2 className="text-4xl md:text-5xl font-black text-center mb-4">
+            Learn. Practice. <span className="text-primary">Go.</span>
           </h2>
-          <p className="mx-auto mt-3 max-w-md text-lg font-semibold text-primary-foreground/90">
-            Learn it. Speak it. Go. Your first phrase is five minutes away.
-          </p>
-          <div className="mt-7 flex justify-center">
-            <NBLinkButton to="/auth" tone="white" size="lg">
-              Start learning
-            </NBLinkButton>
+          <p className="text-center text-lg font-bold text-ink/70 mb-12">3 steps. Zero bullshit.</p>
+
+          <div className="grid md:grid-cols-3 gap-6">
+            <NBCard tone="white" className="text-center p-8">
+              <div className="nb-border nb-shadow-sm inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-primary text-primary-foreground text-3xl font-black mb-4">
+                1
+              </div>
+              <h3 className="text-2xl font-black mb-2">5-min lessons</h3>
+              <p className="font-semibold text-ink/75">Real phrases. No grammar torture.</p>
+            </NBCard>
+
+            <NBCard tone="pink" className="text-center p-8">
+              <div className="nb-border nb-shadow-sm inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-accent text-accent-foreground text-3xl font-black mb-4">
+                2
+              </div>
+              <h3 className="text-2xl font-black mb-2">Practice out loud</h3>
+              <p className="font-semibold text-ink/75">AI listens. You get instant feedback.</p>
+            </NBCard>
+
+            <NBCard tone="white" className="text-center p-8">
+              <div className="nb-border nb-shadow-sm inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-success text-success-foreground text-3xl font-black mb-4">
+                3
+              </div>
+              <h3 className="text-2xl font-black mb-2">Use it IRL</h3>
+              <p className="font-semibold text-ink/75">Real missions. Actual conversations.</p>
+            </NBCard>
           </div>
+        </div>
+      </section>
+
+      {/* Social proof / Why section - Asymmetric */}
+      <section className="py-20 relative overflow-hidden">
+        <div className="nb-dots absolute inset-0 opacity-10" aria-hidden />
+        <div className="relative mx-auto max-w-6xl px-5">
+          <div className="grid md:grid-cols-2 gap-12 items-center">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-black mb-6">
+                Why NudiGO hits different
+              </h2>
+              <div className="space-y-4">
+                {[
+                  "Built for Bengaluru (not textbook Kannada)",
+                  "Speak from day 1 (no grammar rabbit holes)",
+                  "AI tutor that actually helps",
+                  "Missions that get you off the app",
+                ].map((feature, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <span className="nb-border nb-shadow-sm inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground font-black text-sm">
+                      ✓
+                    </span>
+                    <span className="font-bold text-lg">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="relative">
+              <NBCard className="nb-shadow-xl bg-secondary p-8 transform md:rotate-2">
+                <div className="nb-dots absolute inset-0 opacity-20" aria-hidden />
+                <div className="relative">
+                  <img
+                    src="/logo.jpg"
+                    alt="Auto driver"
+                    className="h-32 w-32 mx-auto rounded-2xl nb-border nb-shadow-lg"
+                  />
+                  <p className="mt-6 text-2xl font-black text-center">
+                    "Finally, someone gets it."
+                  </p>
+                  <p className="mt-2 text-center font-bold text-ink/70">
+                    - Every non-Kannadiga in Bengaluru
+                  </p>
+                </div>
+              </NBCard>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA - Bold and simple */}
+      <section className="bg-primary py-20">
+        <div className="mx-auto max-w-3xl px-5 text-center">
+          <h2 className="text-5xl md:text-6xl font-black text-primary-foreground mb-6">
+            Ready?
+          </h2>
+          <p className="text-xl md:text-2xl font-bold text-primary-foreground/90 mb-10">
+            Your first "Kannada gothilla" is 5 minutes away. 😏
+          </p>
+          <NBLinkButton to="/auth" tone="white" size="lg" className="text-xl px-12">
+            Let's go
+          </NBLinkButton>
+          <p className="mt-6 text-sm font-bold text-primary-foreground/70">
+            No credit card. No download. Just start.
+          </p>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="mx-auto max-w-5xl px-5 py-10">
-        <div className="flex flex-wrap items-center justify-between gap-4">
+      <footer className="mx-auto max-w-6xl px-5 py-8">
+        <div className="flex flex-wrap items-center justify-between gap-4 text-sm">
           <Wordmark className="text-lg" />
-          <p className="text-sm font-bold text-ink/60">
-            Made with care in Bengaluru · © 2026 NudiGO
+          <p className="font-bold text-ink/60">
+            Made with ❤️ in Bengaluru
           </p>
         </div>
       </footer>

@@ -1,6 +1,6 @@
 /** Speech-to-text API endpoint using Google Cloud Speech-to-Text */
 
-export const POST = async ({ request }) => {
+export async function POST({ request }: { request: Request }) {
   try {
     const formData = await request.formData();
     const audioBlob = formData.get("audio") as Blob;
@@ -89,4 +89,4 @@ export const POST = async ({ request }) => {
       { status: 500 }
     );
   }
-};
+}

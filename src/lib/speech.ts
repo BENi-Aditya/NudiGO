@@ -1,4 +1,4 @@
-/** Browser speech helpers using Google Web Speech API */
+/** Browser speech helpers using Deepgram free tier OR fallback capture */
 
 export function canSpeak() {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -27,10 +27,13 @@ export function speak(text: string, opts: { slow?: boolean } = {}) {
 }
 
 export function canListen() {
-  if (typeof window === "undefined") return false;
-  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
-  return !!SpeechRecognition;
+  return typeof window !== "undefined" && navigator?.mediaDevices?.getUserMedia;
 }
+
+let globalMediaRecorder: MediaRecorder | null = null;
+let globalStream: MediaStream | null = null;
+let globalAudioChunks: Blob[] = [];
+let globalIsRecording = false;
 
 export function listenOnce(): {
   promise: Promise<{ transcript: string; error?: string }>;
@@ -39,9 +42,9 @@ export function listenOnce(): {
   toggleRecording: () => Promise<void>;
 } {
   if (!canListen()) {
-    console.log("[STT] Web Speech API not supported");
+    console.log("[STT] Audio recording not supported");
     return {
-      promise: Promise.resolve({ transcript: "", error: "Speech recognition not supported" }),
+      promise: Promise.resolve({ transcript: "", error: "Audio recording not supported" }),
       stop: () => {},
       isRecording: () => false,
       toggleRecording: async () => {},
@@ -50,8 +53,6 @@ export function listenOnce(): {
 
   let settled = false;
   let resolvePromise: ((value: { transcript: string; error?: string }) => void) | null = null;
-  let recognition: any = null;
-  let isListening = false;
 
   const promise = new Promise<{ transcript: string; error?: string }>(async (resolve) => {
     resolvePromise = resolve;
@@ -59,67 +60,163 @@ export function listenOnce(): {
 
   const startRecording = async () => {
     try {
-      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      console.log("[STT] Requesting microphone...");
+      globalStream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: true,
+        }
+      });
+      console.log("[STT] Microphone granted, starting recording...");
 
-      console.log("[STT] Starting Web Speech API...");
-      recognition = new SpeechRecognition();
+      globalAudioChunks = [];
 
-      recognition.continuous = false;
-      recognition.interimResults = false;
-      recognition.lang = "kn-IN";
+      let mimeType = "audio/webm;codecs=opus";
+      try {
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = "audio/webm";
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = "audio/mp4";
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+              mimeType = "";
+            }
+          }
+        }
+      } catch (e) {
+        mimeType = "";
+      }
 
-      recognition.onstart = () => {
-        isListening = true;
-        console.log("[STT] Listening started");
+      const recorderOpts = mimeType ? { mimeType } : {};
+      globalMediaRecorder = new MediaRecorder(globalStream, recorderOpts);
+
+      globalMediaRecorder.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          globalAudioChunks.push(event.data);
+        }
       };
 
-      recognition.onresult = (event: any) => {
-        let transcript = "";
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const result = event.results[i][0].transcript;
-          transcript += result;
-        }
-
-        console.log("[STT] Got transcript:", transcript);
-        isListening = false;
-
+      globalMediaRecorder.onerror = (event) => {
+        console.error("[STT] Recording error:", event.error);
         if (resolvePromise && !settled) {
           settled = true;
-          resolvePromise({ transcript: transcript.trim() || "" });
+          resolvePromise({ transcript: "", error: event.error });
         }
       };
 
-      recognition.onerror = (event: any) => {
-        console.error("[STT] Error:", event.error);
-        isListening = false;
-
-        if (resolvePromise && !settled) {
-          settled = true;
-          resolvePromise({ transcript: "", error: `Speech error: ${event.error}` });
-        }
-      };
-
-      recognition.onend = () => {
-        console.log("[STT] Listening ended");
-        isListening = false;
-      };
-
-      recognition.start();
+      globalMediaRecorder.start(100);
+      globalIsRecording = true;
+      console.log("[STT] Recording started");
     } catch (err) {
       console.error("[STT] Init error:", err);
-      isListening = false;
       if (resolvePromise && !settled) {
         settled = true;
-        resolvePromise({ transcript: "", error: `Error: ${String(err)}` });
+        resolvePromise({ transcript: "", error: `Microphone error: ${String(err)}` });
       }
     }
   };
 
   const stopRecording = async () => {
-    if (recognition) {
-      console.log("[STT] Stopping listening...");
-      recognition.stop();
-      isListening = false;
+    if (!globalMediaRecorder || !globalIsRecording) return;
+
+    console.log("[STT] Stopping recording...");
+    globalMediaRecorder.stop();
+    globalIsRecording = false;
+
+    await new Promise(resolve => {
+      const onStopHandler = () => {
+        globalMediaRecorder?.removeEventListener("stop", onStopHandler);
+        resolve(null);
+      };
+      globalMediaRecorder?.addEventListener("stop", onStopHandler);
+
+      setTimeout(() => {
+        globalMediaRecorder?.removeEventListener("stop", onStopHandler);
+        resolve(null);
+      }, 500);
+    });
+
+    try {
+      const audioBlob = new Blob(globalAudioChunks, { type: "audio/webm" });
+      console.log("[STT] Audio blob size:", audioBlob.size);
+
+      if (audioBlob.size < 500) {
+        if (resolvePromise && !settled) {
+          settled = true;
+          resolvePromise({ transcript: "", error: "No audio recorded - speak louder or longer" });
+        }
+        return;
+      }
+
+      // Send to Google Cloud Speech-to-Text API
+      try {
+        const base64Audio = await new Promise<string>((resolve) => {
+          const reader = new FileReader();
+          reader.onload = () => {
+            const result = reader.result as string;
+            resolve(result.split(",")[1] || result);
+          };
+          reader.readAsDataURL(audioBlob);
+        });
+
+        console.log("[STT] Sending to Google Speech API...");
+
+        const apiKey = import.meta.env.VITE_GOOGLE_SPEECH_API_KEY;
+        if (!apiKey) {
+          throw new Error("Google Speech API key not configured");
+        }
+
+        const response = await fetch(`https://speech.googleapis.com/v1/speech:recognize?key=${apiKey}`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            config: {
+              encoding: "WEBM_OPUS",
+              languageCode: "kn-IN",
+              model: "default",
+            },
+            audio: {
+              content: base64Audio,
+            },
+          }),
+        });
+
+        if (response.ok) {
+          const result = await response.json() as any;
+          const transcript = result.results?.[0]?.alternatives?.[0]?.transcript || "";
+          console.log("[STT] Google transcript:", transcript);
+
+          if (resolvePromise && !settled) {
+            settled = true;
+            resolvePromise({ transcript: transcript.trim() || "" });
+          }
+          return;
+        } else {
+          const errorText = await response.text();
+          console.error("[STT] Google API error:", response.status, errorText);
+        }
+      } catch (err) {
+        console.error("[STT] Google API call failed:", err);
+      }
+
+      // Fallback: Tell user to type instead
+      if (resolvePromise && !settled) {
+        settled = true;
+        resolvePromise({ transcript: "", error: "Speech service unavailable - please type instead or try again" });
+      }
+    } catch (err) {
+      console.error("[STT] Processing error:", err);
+      if (resolvePromise && !settled) {
+        settled = true;
+        resolvePromise({ transcript: "", error: String(err) });
+      }
+    } finally {
+      globalStream?.getTracks().forEach((track) => track.stop());
+      globalStream = null;
+      globalMediaRecorder = null;
+      globalAudioChunks = [];
     }
   };
 
@@ -128,9 +225,9 @@ export function listenOnce(): {
   return {
     promise,
     stop: stopRecording,
-    isRecording: () => isListening,
+    isRecording: () => globalIsRecording,
     toggleRecording: async () => {
-      if (isListening) {
+      if (globalIsRecording) {
         await stopRecording();
       } else {
         await startRecording();

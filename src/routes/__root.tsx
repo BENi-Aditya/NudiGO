@@ -84,7 +84,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       meta: [
         { charSet: "utf-8" },
         { name: "viewport", content: "width=device-width, initial-scale=1" },
-        { title: "NudiGO - Learn Kannada, one conversation at a time." },
+        { title: "NudiGO" },
         {
           name: "description",
           content:
@@ -94,7 +94,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         { name: "theme-color", content: "#FF3B30" },
         {
           property: "og:title",
-          content: "NudiGO - Learn Kannada, one conversation at a time.",
+          content: "NudiGO",
         },
         {
           property: "og:description",
@@ -106,7 +106,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       ],
       links: [
         { rel: "stylesheet", href: appCss },
-        { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+        { rel: "icon", href: "/favicon.svg", type: "image/svg+xml" },
+        { rel: "apple-touch-icon", href: "/mascot.svg" },
+        { rel: "manifest", href: "/manifest.json" },
         { rel: "preconnect", href: "https://fonts.googleapis.com" },
         {
           rel: "preconnect",

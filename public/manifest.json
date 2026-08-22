@@ -1,0 +1,17 @@
+{
+  "name": "NudiGO",
+  "short_name": "NudiGO",
+  "description": "Learn Kannada through conversation",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#FFF8F0",
+  "theme_color": "#FF3B30",
+  "icons": [
+    {
+      "src": "/mascot.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

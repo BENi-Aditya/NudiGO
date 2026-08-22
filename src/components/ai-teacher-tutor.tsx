@@ -1,45 +1,77 @@
 import { useState, useEffect, useRef } from "react";
-import { Send, Trash2 } from "lucide-react";
-import { NBButton, Kannada } from "@/lib/nb";
+import { Volume2 } from "lucide-react";
+import { NBButton } from "@/lib/nb";
 import { speak } from "@/lib/speech";
+import { listenOnce } from "@/lib/speech";
 import { tutorKannada, type ConversationTurn } from "@/lib/ai";
 
 export function AITeacherTutor() {
+  const [isListening, setIsListening] = useState(false);
+  const [mascotSize, setMascotSize] = useState(120);
   const [messages, setMessages] = useState<ConversationTurn[]>([]);
-  const [inputText, setInputText] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [currentLevel, setCurrentLevel] = useState<"beginner" | "intermediate" | "advanced">("beginner");
+  const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = async () => {
-    if (!inputText.trim()) return;
+  useEffect(() => {
+    if (!isListening) {
+      setMascotSize(120);
+    }
+  }, [isListening]);
+
+  const handleStartListening = async () => {
+    setIsListening(true);
+    setMascotSize(120);
+
+    try {
+      const { promise } = listenOnce();
+
+      const handleAudioLevel = () => {
+        setMascotSize((prev) => {
+          const newSize = Math.min(160, prev + Math.random() * 12);
+          return newSize;
+        });
+      };
+
+      const audioLevelInterval = setInterval(handleAudioLevel, 100);
+
+      const transcript = await promise;
+      clearInterval(audioLevelInterval);
+
+      if (transcript) {
+        await handleSendMessage(transcript);
+      }
+    } catch (err) {
+      console.error("[Tutor] Error:", err);
+    } finally {
+      setIsListening(false);
+      setMascotSize(120);
+    }
+  };
+
+  const handleSendMessage = async (userInput: string) => {
+    if (!userInput.trim()) return;
 
     const userMessage: ConversationTurn = {
       role: "user",
-      content: inputText,
+      content: userInput,
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInputText("");
     setIsLoading(true);
 
     try {
       let assistantResponse = "";
       for await (const chunk of tutorKannada({
-        message: inputText,
+        message: userInput,
         conversationHistory: messages,
         currentLevel,
       })) {
         assistantResponse += chunk;
-        // Update last message in real-time
         setMessages((prev) => {
           const updated = [...prev];
           if (updated[updated.length - 1]?.role === "assistant") {
@@ -54,7 +86,6 @@ export function AITeacherTutor() {
         });
       }
 
-      // Final update to ensure we have the complete response
       setMessages((prev) => {
         const updated = [...prev];
         if (updated[updated.length - 1]?.role === "assistant") {
@@ -62,15 +93,16 @@ export function AITeacherTutor() {
         }
         return updated;
       });
+
+      // Auto-speak the assistant response
+      await speak(assistantResponse);
     } catch (err) {
       console.error("[Tutor] Error:", err);
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: "assistant",
-          content: "Sorry, I encountered an error. Please try again.",
-        },
-      ]);
+      const errorMessage: ConversationTurn = {
+        role: "assistant",
+        content: "Sorry, I encountered an error. Please try again.",
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
@@ -78,34 +110,89 @@ export function AITeacherTutor() {
 
   const handleClearHistory = () => {
     setMessages([]);
-    setInputText("");
   };
 
   return (
-    <div className="flex h-[600px] flex-col gap-4">
-      {/* Level selector */}
-      <div className="flex gap-2">
-        {(["beginner", "intermediate", "advanced"] as const).map((level) => (
-          <button
-            key={level}
-            onClick={() => setCurrentLevel(level)}
-            className={`flex-1 rounded-lg px-3 py-2 text-xs font-bold uppercase transition ${
-              currentLevel === level
-                ? "nb-border nb-shadow bg-primary text-primary-foreground"
-                : "nb-border bg-card text-ink hover:bg-card/80"
-            }`}
+    <div className="space-y-6">
+      {/* Mascot Section */}
+      <div className="flex flex-col items-center justify-center space-y-4 rounded-2xl bg-gradient-to-br from-secondary to-secondary/50 p-8 nb-border">
+        <div className="text-center">
+          <p className="text-xs font-bold uppercase text-ink/60 mb-4">
+            Conversational Tutor
+          </p>
+          <img
+            src="/logo.jpg"
+            alt="NudiGO mascot"
+            className="mx-auto rounded-2xl nb-border nb-shadow-lg transition-all duration-100"
+            style={{
+              width: `${mascotSize}px`,
+              height: `${mascotSize}px`,
+              objectFit: "cover",
+            }}
+          />
+        </div>
+
+        {/* Recording indicator */}
+        {isListening && (
+          <div className="flex gap-1">
+            <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+            <div className="animation-delay-200 h-2 w-2 animate-bounce rounded-full bg-primary" />
+            <div className="animation-delay-400 h-2 w-2 animate-bounce rounded-full bg-primary" />
+          </div>
+        )}
+
+        {isLoading && (
+          <div className="flex gap-1">
+            <div className="h-2 w-2 animate-pulse rounded-full bg-accent" />
+            <div className="animation-delay-200 h-2 w-2 animate-pulse rounded-full bg-accent" />
+            <div className="animation-delay-400 h-2 w-2 animate-pulse rounded-full bg-accent" />
+          </div>
+        )}
+
+        {/* Controls */}
+        <div className="flex gap-4 flex-wrap justify-center">
+          <NBButton
+            onClick={handleStartListening}
+            disabled={isListening || isLoading}
+            tone={isListening ? "primary" : "default"}
+            className="px-6"
           >
-            {level}
+            {isListening ? "🎤 Listening..." : "🎤 Speak"}
+          </NBButton>
+
+          <button
+            type="button"
+            onClick={handleClearHistory}
+            className="nb-border nb-shadow-sm nb-press px-4 py-2 rounded-lg bg-card font-bold text-sm"
+          >
+            🔄 Clear
           </button>
-        ))}
+        </div>
+
+        {/* Level selector */}
+        <div className="flex gap-2 flex-wrap justify-center">
+          {(["beginner", "intermediate", "advanced"] as const).map((level) => (
+            <button
+              key={level}
+              onClick={() => setCurrentLevel(level)}
+              className={`px-3 py-1 text-xs font-bold uppercase rounded-lg transition ${
+                currentLevel === level
+                  ? "nb-border nb-shadow bg-primary text-primary-foreground"
+                  : "nb-border bg-card text-ink hover:bg-card/80"
+              }`}
+            >
+              {level}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Messages area */}
-      <div className="flex-1 space-y-3 overflow-y-auto rounded-lg border-2 border-ink/10 bg-paper p-4">
+      {/* Conversation */}
+      <div className="rounded-2xl bg-paper p-6 nb-border min-h-64 max-h-96 overflow-y-auto space-y-4">
         {messages.length === 0 ? (
           <div className="flex h-full items-center justify-center text-center">
             <p className="text-sm font-semibold text-ink/50">
-              Ask me anything about Kannada! I'm here to help you learn.
+              Click the microphone to start speaking with your Kannada tutor!
             </p>
           </div>
         ) : (
@@ -118,10 +205,10 @@ export function AITeacherTutor() {
                 }`}
               >
                 <div
-                  className={`max-w-xs rounded-xl px-4 py-2 ${
+                  className={`max-w-xs rounded-2xl px-4 py-3 nb-border ${
                     msg.role === "user"
-                      ? "nb-border nb-shadow bg-primary text-primary-foreground"
-                      : "nb-border bg-card"
+                      ? "nb-shadow bg-primary text-primary-foreground"
+                      : "bg-card"
                   }`}
                 >
                   <p className="whitespace-pre-wrap break-words text-sm font-semibold">
@@ -131,62 +218,30 @@ export function AITeacherTutor() {
                     <button
                       type="button"
                       onClick={() => speak(msg.content)}
-                      className="mt-2 text-xs font-bold text-primary underline"
+                      className="mt-2 text-xs font-bold underline flex items-center gap-1"
                     >
-                      🔊 Hear it
+                      <Volume2 className="h-3 w-3" aria-hidden />
+                      Replay
                     </button>
                   )}
                 </div>
               </div>
             ))}
-            {isLoading && (
-              <div className="flex justify-start">
-                <div className="nb-border space-y-1 rounded-xl bg-card px-4 py-2">
-                  <div className="flex gap-1">
-                    <div className="h-2 w-2 animate-bounce rounded-full bg-ink" />
-                    <div className="animation-delay-200 h-2 w-2 animate-bounce rounded-full bg-ink" />
-                    <div className="animation-delay-400 h-2 w-2 animate-bounce rounded-full bg-ink" />
-                  </div>
-                </div>
-              </div>
-            )}
             <div ref={messagesEndRef} />
           </>
         )}
       </div>
 
-      {/* Input area */}
-      <div className="flex gap-2">
-        <input
-          type="text"
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              handleSendMessage();
-            }
-          }}
-          placeholder="Ask a question about Kannada..."
-          className="nb-border flex-1 rounded-lg bg-card px-3 py-2 text-sm font-semibold outline-none"
-          disabled={isLoading}
-        />
-        <NBButton
-          onClick={handleSendMessage}
-          disabled={!inputText.trim() || isLoading}
-          className="px-3"
-        >
-          <Send className="h-4 w-4" aria-hidden />
-        </NBButton>
-        <button
-          type="button"
-          onClick={handleClearHistory}
-          className="nb-border nb-shadow-sm nb-press inline-flex h-10 w-10 items-center justify-center rounded-lg bg-card text-ink hover:bg-card/80"
-          aria-label="Clear history"
-        >
-          <Trash2 className="h-4 w-4" aria-hidden />
-        </button>
-      </div>
+      {/* Loading indicator */}
+      {isLoading && (
+        <div className="flex justify-center py-2">
+          <div className="flex gap-1">
+            <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+            <div className="animation-delay-200 h-2 w-2 animate-bounce rounded-full bg-primary" />
+            <div className="animation-delay-400 h-2 w-2 animate-bounce rounded-full bg-primary" />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,21 +1,60 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Volume2 } from "lucide-react";
-import { NBButton, NBCard, Kannada } from "@/lib/nb";
+import { NBButton, Kannada } from "@/lib/nb";
 import { speak } from "@/lib/speech";
+import { listenOnce } from "@/lib/speech";
 import { translateKannada } from "@/lib/ai";
 
 export function AITeacherTranslator() {
+  const [isListening, setIsListening] = useState(false);
+  const [mascotSize, setMascotSize] = useState(100);
+  const [sourceLanguage, setSourceLanguage] = useState<"english" | "kannada">("english");
   const [inputText, setInputText] = useState("");
-  const [sourceLanguage, setSourceLanguage] = useState<"english" | "kannada">(
-    "english"
-  );
   const [outputText, setOutputText] = useState("");
   const [kannada, setKannada] = useState("");
   const [transliteration, setTransliteration] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleTranslate = async () => {
-    if (!inputText.trim()) return;
+  useEffect(() => {
+    if (!isListening) {
+      setMascotSize(100);
+    }
+  }, [isListening]);
+
+  const handleStartListening = async () => {
+    setIsListening(true);
+    setMascotSize(100);
+
+    try {
+      const { promise } = listenOnce();
+
+      const handleAudioLevel = () => {
+        setMascotSize((prev) => {
+          const newSize = Math.min(140, prev + Math.random() * 10);
+          return newSize;
+        });
+      };
+
+      const audioLevelInterval = setInterval(handleAudioLevel, 100);
+
+      const transcript = await promise;
+      clearInterval(audioLevelInterval);
+
+      if (transcript) {
+        setInputText(transcript);
+        await handleTranslate(transcript);
+      }
+    } catch (err) {
+      console.error("[Translator] Error:", err);
+    } finally {
+      setIsListening(false);
+      setMascotSize(100);
+    }
+  };
+
+  const handleTranslate = async (textToTranslate?: string) => {
+    const textInput = textToTranslate || inputText;
+    if (!textInput.trim()) return;
 
     setIsLoading(true);
     setOutputText("");
@@ -25,14 +64,13 @@ export function AITeacherTranslator() {
     try {
       let fullResponse = "";
       for await (const chunk of translateKannada({
-        text: inputText,
+        text: textInput,
         targetLanguage: sourceLanguage === "english" ? "kannada" : "english",
       })) {
         fullResponse += chunk;
         setOutputText(fullResponse);
       }
 
-      // Parse the response
       if (sourceLanguage === "english") {
         const kannadaMatch = fullResponse.match(/KANNADA:\s*([^\n]+)/);
         const translitMatch = fullResponse.match(/TRANSLITERATION:\s*([^\n]+)/);
@@ -51,13 +89,45 @@ export function AITeacherTranslator() {
   };
 
   return (
-    <div className="space-y-4">
-      {/* Input Section */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label className="text-xs font-extrabold uppercase text-ink/60">
-            {sourceLanguage === "english" ? "English" : "Kannada"}
-          </label>
+    <div className="space-y-6">
+      {/* Mascot Section */}
+      <div className="flex flex-col items-center justify-center space-y-4 rounded-2xl bg-gradient-to-br from-secondary to-secondary/50 p-8 nb-border">
+        <div className="text-center">
+          <p className="text-xs font-bold uppercase text-ink/60 mb-2">
+            {sourceLanguage === "english" ? "Speak English" : "Speak Kannada"}
+          </p>
+          <img
+            src="/logo.jpg"
+            alt="NudiGO mascot"
+            className="mx-auto rounded-2xl nb-border nb-shadow-lg transition-all duration-100"
+            style={{
+              width: `${mascotSize}px`,
+              height: `${mascotSize}px`,
+              objectFit: "cover",
+            }}
+          />
+        </div>
+
+        {/* Recording indicator */}
+        {isListening && (
+          <div className="flex gap-1">
+            <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+            <div className="animation-delay-200 h-2 w-2 animate-bounce rounded-full bg-primary" />
+            <div className="animation-delay-400 h-2 w-2 animate-bounce rounded-full bg-primary" />
+          </div>
+        )}
+
+        {/* Voice buttons */}
+        <div className="flex gap-4 flex-wrap justify-center">
+          <NBButton
+            onClick={handleStartListening}
+            disabled={isListening || isLoading}
+            tone={isListening ? "primary" : "default"}
+            className="px-6"
+          >
+            {isListening ? "🎤 Listening..." : "🎤 Speak"}
+          </NBButton>
+
           <button
             type="button"
             onClick={() => {
@@ -67,49 +137,29 @@ export function AITeacherTranslator() {
               setKannada("");
               setTransliteration("");
             }}
-            className="text-xs font-bold text-primary underline hover:text-primary/80"
+            className="nb-border nb-shadow-sm nb-press px-4 py-2 rounded-lg bg-card font-bold text-sm"
           >
             ↔ Switch
           </button>
         </div>
-        <textarea
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder={
-            sourceLanguage === "english"
-              ? "Enter English text..."
-              : "Enter Kannada text..."
-          }
-          className="nb-border h-24 w-full rounded-xl bg-card p-3 font-semibold outline-none"
-          disabled={isLoading}
-        />
       </div>
 
-      {/* Translate Button */}
-      <NBButton
-        full
-        onClick={handleTranslate}
-        disabled={!inputText.trim() || isLoading}
-      >
-        {isLoading ? "Translating..." : "Translate"}
-      </NBButton>
-
-      {/* Output Section */}
-      {outputText && (
-        <NBCard className="space-y-3 bg-secondary">
+      {/* Results */}
+      {(kannada || outputText) && (
+        <div className="rounded-2xl bg-card p-6 nb-border space-y-4">
           {sourceLanguage === "english" && kannada && (
             <>
               <div>
-                <p className="text-xs font-extrabold uppercase text-ink/60">
-                  Kannada
+                <p className="text-xs font-bold uppercase text-ink/60 mb-2">
+                  Kannada Translation
                 </p>
                 <div className="flex items-center justify-between gap-2">
-                  <Kannada className="text-3xl">{kannada}</Kannada>
+                  <Kannada className="text-4xl font-black">{kannada}</Kannada>
                   <button
                     type="button"
                     onClick={() => speak(kannada)}
-                    className="nb-border nb-shadow-sm nb-press inline-flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-primary-foreground"
-                    aria-label="Play audio"
+                    className="nb-border nb-shadow-sm nb-press inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                    aria-label="Play Kannada audio"
                   >
                     <Volume2 className="h-5 w-5" aria-hidden />
                   </button>
@@ -118,7 +168,7 @@ export function AITeacherTranslator() {
 
               {transliteration && (
                 <div>
-                  <p className="text-xs font-extrabold uppercase text-ink/60">
+                  <p className="text-xs font-bold uppercase text-ink/60 mb-1">
                     Transliteration
                   </p>
                   <p className="text-lg font-semibold">{transliteration}</p>
@@ -127,25 +177,35 @@ export function AITeacherTranslator() {
             </>
           )}
 
-          {sourceLanguage === "kannada" && (
+          {sourceLanguage === "kannada" && outputText && (
             <div>
-              <p className="text-xs font-extrabold uppercase text-ink/60">
-                English
+              <p className="text-xs font-bold uppercase text-ink/60 mb-2">
+                English Translation
               </p>
-              <p className="text-lg font-semibold">{outputText}</p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-lg font-semibold flex-1">{outputText}</p>
+                <button
+                  type="button"
+                  onClick={() => speak(outputText)}
+                  className="nb-border nb-shadow-sm nb-press inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
+                  aria-label="Play English audio"
+                >
+                  <Volume2 className="h-5 w-5" aria-hidden />
+                </button>
+              </div>
             </div>
           )}
+        </div>
+      )}
 
-          <button
-            type="button"
-            onClick={() => {
-              navigator.clipboard.writeText(kannada || outputText);
-            }}
-            className="text-xs font-bold text-primary underline"
-          >
-            Copy
-          </button>
-        </NBCard>
+      {isLoading && (
+        <div className="flex justify-center py-4">
+          <div className="flex gap-1">
+            <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
+            <div className="animation-delay-200 h-2 w-2 animate-bounce rounded-full bg-primary" />
+            <div className="animation-delay-400 h-2 w-2 animate-bounce rounded-full bg-primary" />
+          </div>
+        </div>
       )}
     </div>
   );

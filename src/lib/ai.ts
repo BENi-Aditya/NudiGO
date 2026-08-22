@@ -30,82 +30,62 @@ export interface DoubtRequest {
   masteredConcepts?: string[];
 }
 
-/** Stream Claude API response with real-time updates. */
+/** Stream Gemini API response with real-time updates. */
 export async function* streamClaudeResponse(
   systemPrompt: string,
   userMessage: string,
   conversationHistory: ConversationTurn[] = []
 ): AsyncGenerator<string, void, unknown> {
-  const apiKey = import.meta.env.VITE_AI_API_KEY;
+  const apiKey = import.meta.env.VITE_GOOGLE_GEMINI_API_KEY;
   if (!apiKey) {
-    console.error("[AI] No API key found in VITE_AI_API_KEY");
+    console.error("[AI] No API key found in VITE_GOOGLE_GEMINI_API_KEY");
     yield "Error: AI API key not configured.";
     return;
   }
 
-  const messages: ConversationTurn[] = [
-    ...conversationHistory,
-    { role: "user", content: userMessage },
-  ];
+  const fullPrompt = systemPrompt + "\n\n" + userMessage;
 
   try {
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "x-api-key": apiKey,
-        "anthropic-version": "2023-06-01",
-        "content-type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "claude-3-5-sonnet-20241022",
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: messages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
-        stream: true,
-      }),
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1/models/text-bison-001:generateText?key=${apiKey}`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          prompt: {
+            text: fullPrompt,
+          },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_UNSPECIFIED",
+              threshold: "BLOCK_NONE",
+            },
+          ],
+          generationConfig: {
+            maxOutputTokens: 1024,
+            temperature: 0.7,
+          },
+        }),
+      }
+    );
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("[AI] API error:", error);
+      console.error("[AI] Gemini API error:", error);
       yield `Error: ${response.statusText}`;
       return;
     }
 
-    const reader = response.body?.getReader();
-    if (!reader) {
-      yield "Error: No response body";
-      return;
-    }
-
-    const decoder = new TextDecoder();
-    let buffer = "";
-
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split("\n");
-      buffer = lines.pop() || "";
-
-      for (const line of lines) {
-        if (line.startsWith("data: ")) {
-          const data = line.slice(6);
-          if (data === "[DONE]") continue;
-
-          try {
-            const parsed = JSON.parse(data);
-            const delta = parsed.delta?.text;
-            if (delta) {
-              yield delta;
-            }
-          } catch {
-            // Ignore parse errors
-          }
+    const result = await response.json() as any;
+    const candidates = result.candidates;
+    if (Array.isArray(candidates) && candidates.length > 0) {
+      const text = candidates[0]?.output || "";
+      if (text) {
+        // Stream the text character by character for UI effect
+        for (const char of text) {
+          yield char;
         }
       }
     }

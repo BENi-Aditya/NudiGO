@@ -1,4 +1,4 @@
-/** Browser speech helpers: Record audio and send to backend for STT */
+/** Browser speech helpers using Google Web Speech API */
 
 export function canSpeak() {
   return typeof window !== "undefined" && "speechSynthesis" in window;
@@ -27,13 +27,10 @@ export function speak(text: string, opts: { slow?: boolean } = {}) {
 }
 
 export function canListen() {
-  return typeof window !== "undefined" && navigator?.mediaDevices?.getUserMedia;
+  if (typeof window === "undefined") return false;
+  const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+  return !!SpeechRecognition;
 }
-
-let globalMediaRecorder: MediaRecorder | null = null;
-let globalStream: MediaStream | null = null;
-let globalAudioChunks: Blob[] = [];
-let globalIsRecording = false;
 
 export function listenOnce(): {
   promise: Promise<{ transcript: string; error?: string }>;
@@ -42,9 +39,9 @@ export function listenOnce(): {
   toggleRecording: () => Promise<void>;
 } {
   if (!canListen()) {
-    console.log("[STT] Audio recording not supported");
+    console.log("[STT] Web Speech API not supported");
     return {
-      promise: Promise.resolve({ transcript: "", error: "Audio recording not supported" }),
+      promise: Promise.resolve({ transcript: "", error: "Speech recognition not supported" }),
       stop: () => {},
       isRecording: () => false,
       toggleRecording: async () => {},
@@ -53,6 +50,8 @@ export function listenOnce(): {
 
   let settled = false;
   let resolvePromise: ((value: { transcript: string; error?: string }) => void) | null = null;
+  let recognition: any = null;
+  let isListening = false;
 
   const promise = new Promise<{ transcript: string; error?: string }>(async (resolve) => {
     resolvePromise = resolve;
@@ -60,155 +59,67 @@ export function listenOnce(): {
 
   const startRecording = async () => {
     try {
-      console.log("[STT] Requesting microphone...");
-      globalStream = await navigator.mediaDevices.getUserMedia({
-        audio: {
-          echoCancellation: true,
-          noiseSuppression: true,
-          autoGainControl: true,
-        }
-      });
-      console.log("[STT] Microphone granted, starting recording...");
+      const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
-      globalAudioChunks = [];
+      console.log("[STT] Starting Web Speech API...");
+      recognition = new SpeechRecognition();
 
-      let mimeType = "audio/webm;codecs=opus";
-      try {
-        if (!MediaRecorder.isTypeSupported(mimeType)) {
-          mimeType = "audio/webm";
-          if (!MediaRecorder.isTypeSupported(mimeType)) {
-            mimeType = "audio/mp4";
-            if (!MediaRecorder.isTypeSupported(mimeType)) {
-              mimeType = "";
-            }
-          }
-        }
-      } catch (e) {
-        mimeType = "";
-      }
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "kn-IN";
 
-      const recorderOpts = mimeType ? { mimeType } : {};
-      globalMediaRecorder = new MediaRecorder(globalStream, recorderOpts);
-
-      globalMediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          globalAudioChunks.push(event.data);
-        }
+      recognition.onstart = () => {
+        isListening = true;
+        console.log("[STT] Listening started");
       };
 
-      globalMediaRecorder.onerror = (event) => {
-        console.error("[STT] Recording error:", event.error);
+      recognition.onresult = (event: any) => {
+        let transcript = "";
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const result = event.results[i][0].transcript;
+          transcript += result;
+        }
+
+        console.log("[STT] Got transcript:", transcript);
+        isListening = false;
+
         if (resolvePromise && !settled) {
           settled = true;
-          resolvePromise({ transcript: "", error: event.error });
+          resolvePromise({ transcript: transcript.trim() || "" });
         }
       };
 
-      globalMediaRecorder.start(100);
-      globalIsRecording = true;
-      console.log("[STT] Recording started");
+      recognition.onerror = (event: any) => {
+        console.error("[STT] Error:", event.error);
+        isListening = false;
+
+        if (resolvePromise && !settled) {
+          settled = true;
+          resolvePromise({ transcript: "", error: `Speech error: ${event.error}` });
+        }
+      };
+
+      recognition.onend = () => {
+        console.log("[STT] Listening ended");
+        isListening = false;
+      };
+
+      recognition.start();
     } catch (err) {
       console.error("[STT] Init error:", err);
+      isListening = false;
       if (resolvePromise && !settled) {
         settled = true;
-        resolvePromise({ transcript: "", error: `Microphone error: ${String(err)}` });
+        resolvePromise({ transcript: "", error: `Error: ${String(err)}` });
       }
     }
   };
 
   const stopRecording = async () => {
-    if (!globalMediaRecorder || !globalIsRecording) return;
-
-    console.log("[STT] Stopping recording...");
-    globalMediaRecorder.stop();
-    globalIsRecording = false;
-
-    await new Promise(resolve => {
-      const onStopHandler = () => {
-        globalMediaRecorder?.removeEventListener("stop", onStopHandler);
-        resolve(null);
-      };
-      globalMediaRecorder?.addEventListener("stop", onStopHandler);
-
-      setTimeout(() => {
-        globalMediaRecorder?.removeEventListener("stop", onStopHandler);
-        resolve(null);
-      }, 500);
-    });
-
-    try {
-      const audioBlob = new Blob(globalAudioChunks, { type: "audio/webm" });
-      console.log("[STT] Audio blob size:", audioBlob.size);
-
-      if (audioBlob.size < 500) {
-        if (resolvePromise && !settled) {
-          settled = true;
-          resolvePromise({ transcript: "", error: "No audio recorded - speak louder" });
-        }
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onload = async () => {
-        try {
-          const base64String = (reader.result as string).split(",")[1];
-          console.log("[STT] Sending to /api/transcribe...");
-
-          try {
-            const response = await fetch("/api/transcribe", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ audioBase64: base64String }),
-            });
-
-            if (response.ok) {
-              const result = await response.json();
-              console.log("[STT] Got transcript:", result.transcript);
-
-              if (resolvePromise && !settled) {
-                settled = true;
-                resolvePromise({ transcript: result.transcript || "" });
-              }
-              return;
-            }
-          } catch (err) {
-            console.error("[STT] API call failed:", err);
-          }
-
-          // Fallback: if API fails, return the audio blob size as indication of successful recording
-          // User can type instead or retry
-          if (resolvePromise && !settled) {
-            settled = true;
-            resolvePromise({ transcript: "", error: "Speech service temporarily unavailable - please type instead or try again" });
-          }
-        } catch (err) {
-          console.error("[STT] Error:", err);
-          if (resolvePromise && !settled) {
-            settled = true;
-            resolvePromise({ transcript: "", error: String(err) });
-          }
-        }
-      };
-
-      reader.onerror = () => {
-        if (resolvePromise && !settled) {
-          settled = true;
-          resolvePromise({ transcript: "", error: "Failed to read audio" });
-        }
-      };
-
-      reader.readAsDataURL(audioBlob);
-    } catch (err) {
-      console.error("[STT] Processing error:", err);
-      if (resolvePromise && !settled) {
-        settled = true;
-        resolvePromise({ transcript: "", error: String(err) });
-      }
-    } finally {
-      globalStream?.getTracks().forEach((track) => track.stop());
-      globalStream = null;
-      globalMediaRecorder = null;
-      globalAudioChunks = [];
+    if (recognition) {
+      console.log("[STT] Stopping listening...");
+      recognition.stop();
+      isListening = false;
     }
   };
 
@@ -217,9 +128,9 @@ export function listenOnce(): {
   return {
     promise,
     stop: stopRecording,
-    isRecording: () => globalIsRecording,
+    isRecording: () => isListening,
     toggleRecording: async () => {
-      if (globalIsRecording) {
+      if (isListening) {
         await stopRecording();
       } else {
         await startRecording();

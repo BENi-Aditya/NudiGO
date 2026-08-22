@@ -10,6 +10,7 @@ interface AIDoubtAssistantProps {
   masteredConcepts?: string[];
 }
 
+
 export function AIDoubtAssistant({
   lessonId,
   lessonTitle,

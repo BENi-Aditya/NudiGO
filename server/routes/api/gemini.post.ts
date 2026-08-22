@@ -19,7 +19,7 @@ export default defineEventHandler(async (event) => {
 
     console.log("[Gemini Backend] Calling Gemini API...");
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-sonnet:generateContent`,
       {
         method: "POST",
         headers: {

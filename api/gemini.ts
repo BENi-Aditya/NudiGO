@@ -21,7 +21,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log("[Gemini API] Calling Gemini with prompt length:", prompt.length);
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.5-sonnet:generateContent`,
       {
         method: "POST",
         headers: {

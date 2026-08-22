@@ -1,0 +1,60 @@
+<svg width="120" height="120" viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Main body - round cute shape -->
+  <ellipse cx="60" cy="70" rx="35" ry="38" fill="#FF3B30"/>
+
+  <!-- Bottom belly highlight -->
+  <ellipse cx="60" cy="85" rx="25" ry="20" fill="#FF6B5E" opacity="0.6"/>
+
+  <!-- Head -->
+  <circle cx="60" cy="40" r="28" fill="#FF3B30"/>
+
+  <!-- Traditional bindi/tilak on forehead -->
+  <ellipse cx="60" cy="28" rx="4" ry="6" fill="#FFD700"/>
+  <circle cx="60" cy="25" r="2.5" fill="#FF0000"/>
+
+  <!-- Cute big eyes -->
+  <ellipse cx="50" cy="42" rx="6" ry="8" fill="#FFFFFF"/>
+  <ellipse cx="70" cy="42" rx="6" ry="8" fill="#FFFFFF"/>
+
+  <!-- Pupils looking slightly up (curious/friendly) -->
+  <circle cx="50" cy="41" r="3.5" fill="#2C1810"/>
+  <circle cx="70" cy="41" r="3.5" fill="#2C1810"/>
+
+  <!-- Eye shine highlights -->
+  <circle cx="51.5" cy="39.5" r="1.5" fill="#FFFFFF"/>
+  <circle cx="71.5" cy="39.5" r="1.5" fill="#FFFFFF"/>
+
+  <!-- Adorable smile -->
+  <path d="M 52 50 Q 60 55 68 50" stroke="#2C1810" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+
+  <!-- Cute nose -->
+  <ellipse cx="60" cy="47" rx="2" ry="1.5" fill="#D63027"/>
+
+  <!-- Traditional jasmine flower garland (South Indian touch) -->
+  <circle cx="45" cy="52" r="3" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="75" cy="52" r="3" fill="#FFFFFF" opacity="0.9"/>
+  <circle cx="48" cy="57" r="2.5" fill="#FFFFFF" opacity="0.8"/>
+  <circle cx="72" cy="57" r="2.5" fill="#FFFFFF" opacity="0.8"/>
+
+  <!-- Small arms -->
+  <ellipse cx="30" cy="75" rx="8" ry="12" fill="#FF3B30" transform="rotate(-15 30 75)"/>
+  <ellipse cx="90" cy="75" rx="8" ry="12" fill="#FF3B30" transform="rotate(15 90 75)"/>
+
+  <!-- Cute little hands -->
+  <circle cx="26" cy="85" r="5" fill="#FF6B5E"/>
+  <circle cx="94" cy="85" r="5" fill="#FF6B5E"/>
+
+  <!-- Tiny feet -->
+  <ellipse cx="50" cy="108" rx="8" ry="6" fill="#D63027"/>
+  <ellipse cx="70" cy="108" rx="8" ry="6" fill="#D63027"/>
+
+  <!-- Small decorative patterns (kolam-inspired) -->
+  <circle cx="40" cy="70" r="1.5" fill="#FFD700" opacity="0.7"/>
+  <circle cx="80" cy="70" r="1.5" fill="#FFD700" opacity="0.7"/>
+  <circle cx="45" cy="80" r="1.5" fill="#FFD700" opacity="0.7"/>
+  <circle cx="75" cy="80" r="1.5" fill="#FFD700" opacity="0.7"/>
+
+  <!-- Cheek blush -->
+  <ellipse cx="44" cy="48" rx="5" ry="3" fill="#FF8B7E" opacity="0.5"/>
+  <ellipse cx="76" cy="48" rx="5" ry="3" fill="#FF8B7E" opacity="0.5"/>
+</svg>

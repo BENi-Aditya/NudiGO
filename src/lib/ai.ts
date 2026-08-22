@@ -58,10 +58,14 @@ export async function* streamClaudeResponse(
           model: "openai/gpt-oss-120b",
           messages: [
             { role: "system", content: systemPrompt },
+            ...conversationHistory.map(turn => ({
+              role: turn.role,
+              content: turn.content
+            })),
             { role: "user", content: userMessage },
           ],
           temperature: 0.7,
-          max_tokens: 1024,
+          max_tokens: 300,
           stream: false,
         }),
       }
@@ -99,15 +103,17 @@ export async function* translateKannada(
   const systemPrompt =
     request.targetLanguage === "kannada"
       ? `You are a Kannada language translator. Translate the given English text to Kannada.
-         Provide the response in this format:
-         KANNADA: <Kannada script>
-         TRANSLITERATION: <Roman transliteration>
-         MEANING: <Precise English meaning>`
+IMPORTANT: Keep response VERY SHORT - maximum 2-3 lines.
+Format EXACTLY as:
+KANNADA: [Kannada script only, no English letters]
+TRANSLITERATION: [Roman transliteration only]
+MEANING: [One line English meaning]`
       : `You are a Kannada language translator. Translate the given Kannada text to English.
-         Provide the response in this format:
-         KANNADA: <Original Kannada script>
-         TRANSLITERATION: <Roman transliteration>
-         ENGLISH: <Clear English translation>`;
+IMPORTANT: Keep response VERY SHORT - maximum 2-3 lines.
+Format EXACTLY as:
+KANNADA: [Original Kannada script only]
+TRANSLITERATION: [Roman transliteration only]
+ENGLISH: [One line English translation]`;
 
   const userMessage =
     request.targetLanguage === "kannada"
@@ -121,18 +127,21 @@ export async function* translateKannada(
 export async function* tutorKannada(
   request: TutorRequest
 ): AsyncGenerator<string, void, unknown> {
-  const systemPrompt = `You are a patient and encouraging Kannada language teacher. You teach learners at ${request.currentLevel} level.
+  const systemPrompt = `You are a Kannada language teacher for ${request.currentLevel} learners in Bengaluru.
 
-Guidelines:
-- Use simple, clear language in both English and Kannada
-- Always provide Kannada text with Roman transliteration
-- Use examples relevant to daily life in Bengaluru
-- Encourage the learner and celebrate progress
-- Explain grammar and pronunciation naturally
-- If explaining Kannada, use this format:
-  KANNADA: <script>
-  TRANSLITERATION: <roman>
-  ENGLISH: <meaning>`;
+RESPONSE RULES (CRITICAL):
+- Maximum 2-3 lines per response
+- Keep explanations simple and direct
+- For Kannada text, use format: Kannada: [script], Transliteration: [roman], Meaning: [English]
+- No markdown, no special formatting
+- When responding with Kannada, ensure pure Kannada script (no English letters mixed in)
+- When responding with English, keep it clear and concise
+
+Teaching style:
+- Encourage and motivate
+- Use real Bengaluru contexts (autos, filter coffee, local phrases)
+- Ask follow-up questions to check understanding
+- Adapt to learner level`;
 
   yield* streamClaudeResponse(
     systemPrompt,

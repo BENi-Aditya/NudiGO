@@ -18,10 +18,28 @@ function pickVoice(): SpeechSynthesisVoice | undefined {
 export function speak(text: string, opts: { slow?: boolean } = {}) {
   if (!canSpeak()) return;
   window.speechSynthesis.cancel();
+
+  // Detect if text contains Kannada characters
+  const kannadaRegex = /[ಀ-೿]/g;
+  const hasKannada = kannadaRegex.test(text);
+
   const utterance = new SpeechSynthesisUtterance(text);
-  const voice = pickVoice();
-  if (voice) utterance.voice = voice;
-  utterance.lang = voice?.lang ?? "kn-IN";
+
+  if (hasKannada) {
+    // Use Kannada voice for Kannada text
+    utterance.lang = "kn-IN";
+    const voices = window.speechSynthesis.getVoices();
+    const kannadaVoice = voices.find((v) => v.lang?.toLowerCase().startsWith("kn"));
+    if (kannadaVoice) utterance.voice = kannadaVoice;
+  } else {
+    // Use English voice for English text
+    utterance.lang = "en-IN";
+    const voices = window.speechSynthesis.getVoices();
+    const enVoice = voices.find((v) => v.lang?.toLowerCase().startsWith("en-in")) ??
+                    voices.find((v) => v.lang?.toLowerCase().startsWith("en"));
+    if (enVoice) utterance.voice = enVoice;
+  }
+
   utterance.rate = opts.slow ? 0.6 : 0.9;
   window.speechSynthesis.speak(utterance);
 }

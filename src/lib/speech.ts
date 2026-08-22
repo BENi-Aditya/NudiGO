@@ -154,23 +154,32 @@ export function listenOnce(): {
           const base64String = (reader.result as string).split(",")[1];
           console.log("[STT] Sending to /api/transcribe...");
 
-          const response = await fetch("/api/transcribe", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ audioBase64: base64String }),
-          });
+          try {
+            const response = await fetch("/api/transcribe", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ audioBase64: base64String }),
+            });
 
-          const result = await response.json();
+            if (response.ok) {
+              const result = await response.json();
+              console.log("[STT] Got transcript:", result.transcript);
 
-          if (!response.ok) {
-            throw new Error(result.error || `HTTP ${response.status}`);
+              if (resolvePromise && !settled) {
+                settled = true;
+                resolvePromise({ transcript: result.transcript || "" });
+              }
+              return;
+            }
+          } catch (err) {
+            console.error("[STT] API call failed:", err);
           }
 
-          console.log("[STT] Got transcript:", result.transcript);
-
+          // Fallback: if API fails, return the audio blob size as indication of successful recording
+          // User can type instead or retry
           if (resolvePromise && !settled) {
             settled = true;
-            resolvePromise({ transcript: result.transcript || "" });
+            resolvePromise({ transcript: "", error: "Speech service temporarily unavailable - please type instead or try again" });
           }
         } catch (err) {
           console.error("[STT] Error:", err);

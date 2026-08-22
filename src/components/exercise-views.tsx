@@ -315,8 +315,8 @@ function SpeakView({
   const supported = mounted && canListen();
 
   const toggleRecording = async () => {
-    if (status === "idle") {
-      // Start recording
+    if (status === "idle" || status === "error") {
+      // Start recording (or retry after error)
       setStatus("listening");
       setHeard("");
       setError("");

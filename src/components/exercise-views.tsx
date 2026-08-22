@@ -309,47 +309,59 @@ function SpeakView({
   const [error, setError] = useState<string>("");
   const [typedAnswer, setTypedAnswer] = useState<string>("");
   const [mounted, setMounted] = useState(false);
+  const [recordingHandle, setRecordingHandle] = useState<any>(null);
+
   useEffect(() => setMounted(true), []);
   const supported = mounted && canListen();
 
-  const record = async () => {
-    setStatus("listening");
-    setHeard("");
-    setError("");
-    console.log("[SpeakView] Starting recording...");
+  const toggleRecording = async () => {
+    if (status === "idle") {
+      // Start recording
+      setStatus("listening");
+      setHeard("");
+      setError("");
+      console.log("[SpeakView] Starting listening...");
 
-    const { promise } = listenOnce();
+      const handle = listenOnce();
+      setRecordingHandle(handle);
 
-    try {
-      const { transcript, error: err } = await promise;
-      console.log("[SpeakView] Got transcript:", transcript, "error:", err);
+      try {
+        const { transcript, error: err } = await handle.promise;
+        console.log("[SpeakView] Got result:", transcript, "error:", err);
 
-      if (err) {
-        setError(err);
+        if (err) {
+          setError(err);
+          setStatus("error");
+          return;
+        }
+
+        if (!transcript) {
+          setError("No speech detected. Please try again.");
+          setStatus("error");
+          return;
+        }
+
+        setHeard(transcript);
+        const norm = normalizeAnswer(transcript);
+        const target = normalizeAnswer(exercise.transliteration);
+        const kn = normalizeAnswer(exercise.kannada);
+        const tokens = target.split(" ").filter(Boolean);
+        const overlap = tokens.some((t) => t.length > 1 && norm.includes(t));
+        const correct =
+          Boolean(norm) && (norm.includes(target) || norm.includes(kn) || overlap);
+        setStatus("done");
+        onAnswer(correct);
+      } catch (err) {
+        console.error("[SpeakView] Exception:", err);
+        setError(String(err));
         setStatus("error");
-        return;
       }
-
-      if (!transcript) {
-        setError("No speech detected. Please try again.");
-        setStatus("error");
-        return;
+    } else if (status === "listening") {
+      // Stop recording
+      console.log("[SpeakView] Stopping recording...");
+      if (recordingHandle) {
+        await recordingHandle.stop();
       }
-
-      setHeard(transcript);
-      const norm = normalizeAnswer(transcript);
-      const target = normalizeAnswer(exercise.transliteration);
-      const kn = normalizeAnswer(exercise.kannada);
-      const tokens = target.split(" ").filter(Boolean);
-      const overlap = tokens.some((t) => t.length > 1 && norm.includes(t));
-      const correct =
-        Boolean(norm) && (norm.includes(target) || norm.includes(kn) || overlap);
-      setStatus("done");
-      onAnswer(correct);
-    } catch (err) {
-      console.error("[SpeakView] Exception:", err);
-      setError(String(err));
-      setStatus("error");
     }
   };
 
@@ -390,8 +402,8 @@ function SpeakView({
             <>
               <button
                 type="button"
-                disabled={disabled || status === "listening"}
-                onClick={record}
+                disabled={disabled}
+                onClick={toggleRecording}
                 className={cn(
                   "nb-border nb-shadow nb-press mx-auto inline-flex h-20 w-20 items-center justify-center rounded-full transition-all lg:h-24 lg:w-24",
                   status === "listening"
@@ -400,7 +412,7 @@ function SpeakView({
                       ? "bg-destructive text-destructive-foreground"
                       : "bg-card hover:bg-card/80",
                 )}
-                aria-label="Tap to record"
+                aria-label={status === "listening" ? "Tap to stop" : "Tap to record"}
               >
                 <Mic className="h-8 w-8 lg:h-10 lg:w-10" aria-hidden />
               </button>

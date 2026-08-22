@@ -304,9 +304,10 @@ function SpeakView({
   disabled,
   onAnswer,
 }: ViewProps<Extract<Exercise, { type: "speak" }>>) {
-  const [status, setStatus] = useState<"idle" | "listening" | "done" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "listening" | "done" | "error" | "typing">("idle");
   const [heard, setHeard] = useState<string>("");
   const [error, setError] = useState<string>("");
+  const [typedAnswer, setTypedAnswer] = useState<string>("");
   const [mounted, setMounted] = useState(false);
   useEffect(() => setMounted(true), []);
   const supported = mounted && canListen();
@@ -352,6 +353,23 @@ function SpeakView({
     }
   };
 
+  const submitTypedAnswer = () => {
+    if (!typedAnswer.trim()) {
+      setError("Please type something");
+      return;
+    }
+    setHeard(typedAnswer);
+    const norm = normalizeAnswer(typedAnswer);
+    const target = normalizeAnswer(exercise.transliteration);
+    const kn = normalizeAnswer(exercise.kannada);
+    const tokens = target.split(" ").filter(Boolean);
+    const overlap = tokens.some((t) => t.length > 1 && norm.includes(t));
+    const correct =
+      Boolean(norm) && (norm.includes(target) || norm.includes(kn) || overlap);
+    setStatus("done");
+    onAnswer(correct);
+  };
+
   return (
     <div className="text-center">
       <p className="text-sm font-extrabold uppercase tracking-wide text-ink/60">
@@ -368,53 +386,89 @@ function SpeakView({
 
       {supported ? (
         <div>
-          <button
-            type="button"
-            disabled={disabled || status === "listening"}
-            onClick={record}
-            className={cn(
-              "nb-border nb-shadow nb-press mx-auto inline-flex h-20 w-20 items-center justify-center rounded-full transition-all lg:h-24 lg:w-24",
-              status === "listening"
-                ? "animate-nb-ring bg-primary text-primary-foreground"
-                : status === "error"
-                  ? "bg-destructive text-destructive-foreground"
-                  : "bg-card hover:bg-card/80",
-            )}
-            aria-label="Tap to record"
-          >
-            <Mic className="h-8 w-8 lg:h-10 lg:w-10" aria-hidden />
-          </button>
-
-          {status === "listening" && (
-            <p className="mt-3 font-extrabold text-primary lg:text-lg">
-              Listening... say it now
-            </p>
-          )}
-
-          {status === "error" && (
-            <div>
-              <p className="mt-3 font-extrabold text-destructive lg:text-lg">
-                {error}
-              </p>
-              {error.includes("HTTPS") && (
-                <p className="mt-2 text-xs text-ink/60">
-                  To fix: use <code className="bg-card px-2 py-1 rounded">npm run dev</code> or tunnel with ngrok for HTTPS
-                </p>
-              )}
+          {status !== "typing" ? (
+            <>
               <button
                 type="button"
-                onClick={() => setStatus("idle")}
-                className="mt-2 text-sm font-extrabold uppercase text-primary underline"
+                disabled={disabled || status === "listening"}
+                onClick={record}
+                className={cn(
+                  "nb-border nb-shadow nb-press mx-auto inline-flex h-20 w-20 items-center justify-center rounded-full transition-all lg:h-24 lg:w-24",
+                  status === "listening"
+                    ? "animate-nb-ring bg-primary text-primary-foreground"
+                    : status === "error"
+                      ? "bg-destructive text-destructive-foreground"
+                      : "bg-card hover:bg-card/80",
+                )}
+                aria-label="Tap to record"
               >
-                Try again
+                <Mic className="h-8 w-8 lg:h-10 lg:w-10" aria-hidden />
               </button>
-            </div>
-          )}
 
-          {status === "done" && heard && (
-            <p className="mt-3 text-sm font-semibold text-ink/60 lg:text-base">
-              We heard: <span className="font-bold">"{heard}"</span>
-            </p>
+              {status === "listening" && (
+                <p className="mt-3 font-extrabold text-primary lg:text-lg">
+                  Listening... say it now
+                </p>
+              )}
+
+              {status === "error" && (
+                <div>
+                  <p className="mt-3 font-extrabold text-destructive lg:text-lg">
+                    {error}
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setStatus("idle")}
+                      className="flex-1 text-sm font-extrabold uppercase text-primary underline"
+                    >
+                      Try again
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => { setStatus("typing"); setError(""); setTypedAnswer(""); }}
+                      className="flex-1 text-sm font-extrabold uppercase text-ink/60 underline"
+                    >
+                      Type instead
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {status === "done" && heard && (
+                <p className="mt-3 text-sm font-semibold text-ink/60 lg:text-base">
+                  We heard: <span className="font-bold">"{heard}"</span>
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="space-y-3">
+              <input
+                type="text"
+                value={typedAnswer}
+                onChange={(e) => setTypedAnswer(e.target.value)}
+                placeholder="Type the Kannada word..."
+                className="nb-border w-full rounded-xl bg-card px-4 py-3 font-bold outline-none"
+                onKeyDown={(e) => e.key === "Enter" && submitTypedAnswer()}
+              />
+              {error && <p className="text-sm font-bold text-destructive">{error}</p>}
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setStatus("idle")}
+                  className="flex-1 text-sm font-extrabold uppercase text-ink/60 underline"
+                >
+                  Back
+                </button>
+                <button
+                  type="button"
+                  onClick={submitTypedAnswer}
+                  className="flex-1 rounded-lg bg-primary px-4 py-2 text-sm font-extrabold text-white"
+                >
+                  Check
+                </button>
+              </div>
+            </div>
           )}
         </div>
       ) : (
@@ -423,7 +477,7 @@ function SpeakView({
             Speech recognition not available in this browser.
           </p>
           <p className="mt-1 text-xs text-ink/50 lg:text-sm">
-            Make sure you're using HTTPS (https://localhost or ngrok tunnel).
+            Use the typing option below or say it out loud and tap "I said it".
           </p>
         </div>
       )}

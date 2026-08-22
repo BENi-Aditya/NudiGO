@@ -30,14 +30,13 @@ export interface DoubtRequest {
   masteredConcepts?: string[];
 }
 
-/** Stream Gemini API response directly. */
+/** Stream Groq API response (completely free, no billing required). */
 export async function* streamClaudeResponse(
   systemPrompt: string,
   userMessage: string,
   conversationHistory: ConversationTurn[] = []
 ): AsyncGenerator<string, void, unknown> {
-  const fullPrompt = systemPrompt + "\n\n" + userMessage;
-  const apiKey = import.meta.env.VITE_GOOGLE_GEMINI_API_KEY;
+  const apiKey = import.meta.env.VITE_GROQ_API_KEY || import.meta.env.VITE_GOOGLE_GEMINI_API_KEY;
 
   if (!apiKey) {
     console.error("[AI] No API key found");
@@ -46,46 +45,24 @@ export async function* streamClaudeResponse(
   }
 
   try {
-    console.log("[AI] Calling Gemini v1beta...");
+    console.log("[AI] Calling Groq...");
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`,
+      `https://api.groq.com/openai/v1/chat/completions`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
         },
         body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                {
-                  text: fullPrompt,
-                },
-              ],
-            },
+          model: "llama-3.1-70b-versatile",
+          messages: [
+            { role: "system", content: systemPrompt },
+            { role: "user", content: userMessage },
           ],
-          generationConfig: {
-            maxOutputTokens: 1024,
-            temperature: 0.7,
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_HATE_SPEECH",
-              threshold: "BLOCK_NONE",
-            },
-            {
-              category: "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-              threshold: "BLOCK_NONE",
-            },
-            {
-              category: "HARM_CATEGORY_DANGEROUS_CONTENT",
-              threshold: "BLOCK_NONE",
-            },
-            {
-              category: "HARM_CATEGORY_HARASSMENT",
-              threshold: "BLOCK_NONE",
-            },
-          ],
+          temperature: 0.7,
+          max_tokens: 1024,
+          stream: false,
         }),
       }
     );
@@ -98,7 +75,7 @@ export async function* streamClaudeResponse(
     }
 
     const result = await response.json() as any;
-    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
+    const text = result.choices?.[0]?.message?.content || "";
 
     if (text) {
       console.log("[AI] Got response, length:", text.length);

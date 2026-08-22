@@ -21,24 +21,33 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     console.log("[Gemini API] Calling Gemini with prompt length:", prompt.length);
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/text-bison-001:generateText?key=${apiKey}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent`,
       {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "x-goog-api-key": apiKey,
         },
         body: JSON.stringify({
-          prompt: { text: prompt },
-          safetySettings: [
+          contents: [
             {
-              category: "HARM_CATEGORY_UNSPECIFIED",
-              threshold: "BLOCK_NONE",
+              parts: [
+                {
+                  text: prompt,
+                },
+              ],
             },
           ],
           generationConfig: {
             maxOutputTokens: 1024,
             temperature: 0.7,
           },
+          safetySettings: [
+            {
+              category: "HARM_CATEGORY_UNSPECIFIED",
+              threshold: "BLOCK_NONE",
+            },
+          ],
         }),
       }
     );
@@ -50,7 +59,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
 
     const result = await response.json() as any;
-    const text = result.candidates?.[0]?.output || "";
+    const text = result.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
     console.log("[Gemini API] Got response, length:", text.length);
     return res.status(200).json({ text });

@@ -40,29 +40,69 @@ function Landing() {
         </NBLinkButton>
       </header>
 
-      {/* Hero - Clean Traditional Layout */}
+      {/* Hero - Modern asymmetric with animated right section */}
       <section className="relative mx-auto max-w-6xl px-5 py-16 md:py-24">
-        {/* Simple centered hero */}
-        <div className="text-center max-w-3xl mx-auto">
-          <Sticker tone="pink" className="inline-block">Kannada · Bengaluru</Sticker>
+        <div className="grid md:grid-cols-2 gap-8 items-center">
+          {/* Left: Text content */}
+          <div className="space-y-6">
+            <Sticker tone="pink" className="inline-block">Kannada · Bengaluru</Sticker>
 
-          <h1 className="mt-6 text-5xl md:text-6xl lg:text-7xl font-black leading-tight">
-            Talk like a Local
-          </h1>
+            <h1 className="text-5xl md:text-6xl lg:text-7xl font-black leading-tight">
+              Stop pretending.
+              <br />
+              <span className="text-primary">Start speaking.</span>
+            </h1>
 
-          <p className="mt-6 text-xl md:text-2xl font-bold text-ink/80">
-            From "meter haki" to ordering filter coffee.
-            <br />
-            Real Kannada. Zero cringe.
-          </p>
-
-          <div className="mt-10 flex flex-col sm:flex-row gap-4 justify-center items-center">
-            <NBLinkButton to="/auth" tone="primary" size="lg" className="text-lg px-10">
-              Start free
-            </NBLinkButton>
-            <p className="text-sm font-bold text-ink/60">
-              5-min first lesson · No download
+            <p className="text-lg md:text-xl font-bold text-ink/70">
+              Learn the Kannada that actually works—from your first auto ride to your favorite filter coffee haunt. No textbooks. No cringe. Just real.
             </p>
+
+            <div className="flex flex-col sm:flex-row gap-4 pt-4">
+              <NBLinkButton to="/auth" tone="primary" size="lg" className="text-lg px-10">
+                Start free
+              </NBLinkButton>
+              <p className="text-sm font-bold text-ink/60 self-center">
+                5-min first lesson · No download
+              </p>
+            </div>
+          </div>
+
+          {/* Right: Animated hero element with floating text */}
+          <div className="relative h-96 md:h-full min-h-96">
+            {/* Yellow tortoise pattern background */}
+            <div className="absolute inset-0 bg-gradient-to-br from-amber-100 via-yellow-50 to-orange-100 rounded-3xl nb-border nb-shadow-xl overflow-hidden">
+              {/* Animated pattern overlay */}
+              <div className="absolute inset-0 opacity-30">
+                <div className="absolute top-4 left-4 w-24 h-24 rounded-full border-4 border-primary animate-pulse" />
+                <div className="absolute bottom-8 right-6 w-32 h-32 rounded-full border-4 border-accent animate-pulse" style={{ animationDelay: "0.5s" }} />
+                <div className="absolute top-1/3 right-8 w-16 h-16 rounded-full bg-primary/10" />
+              </div>
+
+              {/* Floating animated text elements */}
+              <div className="absolute top-12 left-8 animate-bounce" style={{ animationDuration: "3s" }}>
+                <p className="text-sm font-black text-primary">ಸುಲಿಗ</p>
+                <p className="text-xs font-bold text-ink/60">Speaking</p>
+              </div>
+
+              <div className="absolute bottom-16 right-8 animate-bounce" style={{ animationDuration: "4s", animationDelay: "0.5s" }}>
+                <p className="text-sm font-black text-accent">ಆತ್ಮವಿಶ್ವಾಸ</p>
+                <p className="text-xs font-bold text-ink/60">Confidence</p>
+              </div>
+
+              <div className="absolute top-1/2 right-12 animate-pulse" style={{ animationDuration: "2s" }}>
+                <p className="text-lg font-black text-primary/70">✓</p>
+              </div>
+
+              {/* Center mascot/icon */}
+              <div className="absolute inset-0 flex items-center justify-center">
+                <img
+                  src="/logo.jpg"
+                  alt="NudiGO mascot"
+                  className="h-40 w-40 rounded-2xl nb-border nb-shadow-lg object-cover animate-pulse"
+                  style={{ animationDuration: "3s" }}
+                />
+              </div>
+            </div>
           </div>
         </div>
 

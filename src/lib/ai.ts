@@ -30,7 +30,7 @@ export interface DoubtRequest {
   masteredConcepts?: string[];
 }
 
-/** Stream Gemini API response via backend proxy. */
+/** Stream Gemini API response via Vercel API route. */
 export async function* streamClaudeResponse(
   systemPrompt: string,
   userMessage: string,
@@ -39,21 +39,25 @@ export async function* streamClaudeResponse(
   const fullPrompt = systemPrompt + "\n\n" + userMessage;
 
   try {
-    console.log("[AI] Calling backend /api/gemini...");
-    const response = await fetch("/api/gemini", {
+    console.log("[AI] Calling /api/ai...");
+    const endpoint = typeof window === 'undefined'
+      ? process.env.VERCEL_URL
+        ? `https://${process.env.VERCEL_URL}/api/ai`
+        : 'http://localhost:3000/api/ai'
+      : '/api/ai';
+
+    const response = await fetch(endpoint, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({
-        prompt: fullPrompt,
-      }),
+      body: JSON.stringify({ prompt: fullPrompt }),
     });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("[AI] Backend error:", error);
-      yield `Error: ${response.statusText}`;
+      console.error("[AI] API error:", error);
+      yield `Error: Failed to generate response`;
       return;
     }
 
@@ -61,8 +65,7 @@ export async function* streamClaudeResponse(
     const text = result.text || "";
 
     if (text) {
-      console.log("[AI] Got response, streaming...");
-      // Stream the text character by character for UI effect
+      console.log("[AI] Got response");
       for (const char of text) {
         yield char;
       }
@@ -70,7 +73,7 @@ export async function* streamClaudeResponse(
       yield `Error: ${result.error}`;
     }
   } catch (err) {
-    console.error("[AI] Stream error:", err);
+    console.error("[AI] Error:", err);
     yield "Error: Failed to connect to AI service.";
   }
 }

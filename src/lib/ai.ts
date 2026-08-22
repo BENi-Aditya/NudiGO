@@ -30,64 +30,44 @@ export interface DoubtRequest {
   masteredConcepts?: string[];
 }
 
-/** Stream Gemini API response with real-time updates. */
+/** Stream Gemini API response via backend proxy. */
 export async function* streamClaudeResponse(
   systemPrompt: string,
   userMessage: string,
   conversationHistory: ConversationTurn[] = []
 ): AsyncGenerator<string, void, unknown> {
-  const apiKey = import.meta.env.VITE_GOOGLE_GEMINI_API_KEY;
-  if (!apiKey) {
-    console.error("[AI] No API key found in VITE_GOOGLE_GEMINI_API_KEY");
-    yield "Error: AI API key not configured.";
-    return;
-  }
-
   const fullPrompt = systemPrompt + "\n\n" + userMessage;
 
   try {
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1/models/text-bison-001:generateText?key=${apiKey}`,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          prompt: {
-            text: fullPrompt,
-          },
-          safetySettings: [
-            {
-              category: "HARM_CATEGORY_UNSPECIFIED",
-              threshold: "BLOCK_NONE",
-            },
-          ],
-          generationConfig: {
-            maxOutputTokens: 1024,
-            temperature: 0.7,
-          },
-        }),
-      }
-    );
+    console.log("[AI] Calling backend /api/gemini...");
+    const response = await fetch("/api/gemini", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        prompt: fullPrompt,
+      }),
+    });
 
     if (!response.ok) {
       const error = await response.text();
-      console.error("[AI] Gemini API error:", error);
+      console.error("[AI] Backend error:", error);
       yield `Error: ${response.statusText}`;
       return;
     }
 
     const result = await response.json() as any;
-    const candidates = result.candidates;
-    if (Array.isArray(candidates) && candidates.length > 0) {
-      const text = candidates[0]?.output || "";
-      if (text) {
-        // Stream the text character by character for UI effect
-        for (const char of text) {
-          yield char;
-        }
+    const text = result.text || "";
+
+    if (text) {
+      console.log("[AI] Got response, streaming...");
+      // Stream the text character by character for UI effect
+      for (const char of text) {
+        yield char;
       }
+    } else if (result.error) {
+      yield `Error: ${result.error}`;
     }
   } catch (err) {
     console.error("[AI] Stream error:", err);

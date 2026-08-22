@@ -31,13 +31,8 @@ function Landing() {
       {/* Header */}
       <header className="relative z-50 mx-auto flex max-w-6xl items-center justify-between px-5 py-5">
         <div className="flex items-center gap-2">
-<<<<<<< HEAD
           <img src="/logo.jpg" alt="NudiGO" className="h-10 w-10 rounded-lg nb-border nb-shadow-sm" />
           <Wordmark className="text-2xl" />
-=======
-          <img src="/mascot.svg" alt="NudiGO Mascot" className="h-8 w-8" />
-          <Wordmark className="text-xl" />
->>>>>>> parent of 9b080e7 (Replace all logos with logo.jpg - auto rickshaw driver mascot)
         </div>
         <NBLinkButton to="/auth" tone="white" size="sm">
           <LogIn className="h-4 w-4" aria-hidden />

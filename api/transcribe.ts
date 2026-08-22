@@ -1,11 +1,15 @@
-export default defineEventHandler(async (event) => {
+import type { VercelRequest, VercelResponse } from '@vercel/node';
+
+export default async function handler(req: VercelRequest, res: VercelResponse) {
+  if (req.method !== 'POST') {
+    return res.status(405).json({ error: 'Method not allowed' });
+  }
+
   try {
-    const body = await readBody(event);
-    const audioBase64 = body?.audioBase64;
+    const { audioBase64 } = req.body as { audioBase64: string };
 
     if (!audioBase64) {
-      setResponseStatus(event, 400);
-      return { transcript: "", error: "No audio provided" };
+      return res.status(400).json({ transcript: "", error: "No audio provided" });
     }
 
     console.log("[API] Received audio, length:", audioBase64.length);
@@ -13,8 +17,7 @@ export default defineEventHandler(async (event) => {
     const apiKey = process.env.ASSEMBLYAI_API_KEY;
     if (!apiKey) {
       console.error("[API] Missing ASSEMBLYAI_API_KEY");
-      setResponseStatus(event, 500);
-      return { transcript: "", error: "Service not configured" };
+      return res.status(500).json({ transcript: "", error: "Service not configured" });
     }
 
     console.log("[API] Calling AssemblyAI...");
@@ -34,17 +37,15 @@ export default defineEventHandler(async (event) => {
     if (!response.ok) {
       const error = await response.text();
       console.error("[API] AssemblyAI error:", response.status, error);
-      setResponseStatus(event, 500);
-      return { transcript: "", error: `Service error: ${response.status}` };
+      return res.status(500).json({ transcript: "", error: `Service error: ${response.status}` });
     }
 
     const result = await response.json() as any;
     console.log("[API] Success, transcript length:", result.text?.length ?? 0);
 
-    return { transcript: result.text || "" };
+    return res.status(200).json({ transcript: result.text || "" });
   } catch (error) {
     console.error("[API] Error:", error);
-    setResponseStatus(event, 500);
-    return { transcript: "", error: String(error) };
+    return res.status(500).json({ transcript: "", error: String(error) });
   }
-});
+}

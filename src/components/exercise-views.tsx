@@ -396,6 +396,11 @@ function SpeakView({
               <p className="mt-3 font-extrabold text-destructive lg:text-lg">
                 {error}
               </p>
+              {error.includes("HTTPS") && (
+                <p className="mt-2 text-xs text-ink/60">
+                  To fix: use <code className="bg-card px-2 py-1 rounded">npm run dev</code> or tunnel with ngrok for HTTPS
+                </p>
+              )}
               <button
                 type="button"
                 onClick={() => setStatus("idle")}
@@ -418,7 +423,7 @@ function SpeakView({
             Speech recognition not available in this browser.
           </p>
           <p className="mt-1 text-xs text-ink/50 lg:text-sm">
-            Say it out loud, then tap "I said it".
+            Make sure you're using HTTPS (https://localhost or ngrok tunnel).
           </p>
         </div>
       )}

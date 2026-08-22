@@ -120,6 +120,8 @@ export function listenOnce(): {
 
       const error = event.error ?? "Unknown error";
       console.error("[STT] Error:", error);
+      console.error("[STT] Error details:", event);
+      console.error("[STT] Is HTTPS?", typeof window !== "undefined" && window.location.protocol === "https:");
 
       settled = true;
       if (timeoutId) clearTimeout(timeoutId);
@@ -127,12 +129,20 @@ export function listenOnce(): {
       let userMessage = error;
       if (error === "network") {
         userMessage = "Network error - check your internet connection";
+        // On localhost, this might be because HTTPS is not enforced. Provide helpful message.
+        if (typeof window !== "undefined" && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")) {
+          if (window.location.protocol !== "https:") {
+            userMessage = "Speech recognition requires HTTPS. Try accessing via https://localhost or ngrok.";
+          }
+        }
       } else if (error === "no-speech") {
         userMessage = "No speech detected - try speaking louder";
       } else if (error === "audio-capture") {
         userMessage = "Microphone not available - check permissions";
       } else if (error === "service-not-allowed") {
         userMessage = "Speech recognition service not allowed";
+      } else if (error === "bad-grammar") {
+        userMessage = "Grammar issue - try again";
       }
 
       resolve({ transcript: "", error: userMessage });

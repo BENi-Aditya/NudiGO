@@ -35,34 +35,6 @@ let globalStream: MediaStream | null = null;
 let globalAudioChunks: Blob[] = [];
 let globalIsRecording = false;
 
-async function transcribeWithAssemblyAI(audioBase64: string): Promise<string> {
-  try {
-    // Call the AssemblyAI API directly from the browser
-    const response = await fetch("https://api.assemblyai.com/v2/transcribe", {
-      method: "POST",
-      headers: {
-        "Authorization": (import.meta as any).env.VITE_ASSEMBLYAI_API_KEY || "",
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        audio_data: audioBase64,
-        encoding: "webm",
-        language_code: "kn",
-      }),
-    });
-
-    if (!response.ok) {
-      throw new Error(`AssemblyAI error: ${response.status}`);
-    }
-
-    const result = await response.json();
-    return result.text || "";
-  } catch (err) {
-    console.error("[STT] AssemblyAI error:", err);
-    throw err;
-  }
-}
-
 export function listenOnce(): {
   promise: Promise<{ transcript: string; error?: string }>;
   stop: () => void;
@@ -171,24 +143,32 @@ export function listenOnce(): {
       if (audioBlob.size < 500) {
         if (resolvePromise && !settled) {
           settled = true;
-          resolvePromise({ transcript: "", error: "No audio recorded - speak louder or longer" });
+          resolvePromise({ transcript: "", error: "No audio recorded - speak louder" });
         }
         return;
       }
 
-      // Convert to base64
       const reader = new FileReader();
       reader.onload = async () => {
         try {
           const base64String = (reader.result as string).split(",")[1];
-          console.log("[STT] Sending to AssemblyAI...");
-          const transcript = await transcribeWithAssemblyAI(base64String);
+          console.log("[STT] Sending to backend...");
+
+          const { transcribeAudio } = await import("./transcribe.server");
+          const result = await transcribeAudio(base64String);
+
+          console.log("[STT] Got result:", result);
+
+          if (result.error) {
+            throw new Error(result.error);
+          }
 
           if (resolvePromise && !settled) {
             settled = true;
-            resolvePromise({ transcript });
+            resolvePromise({ transcript: result.transcript || "" });
           }
         } catch (err) {
+          console.error("[STT] Error:", err);
           if (resolvePromise && !settled) {
             settled = true;
             resolvePromise({ transcript: "", error: String(err) });

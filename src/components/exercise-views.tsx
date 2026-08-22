@@ -431,14 +431,7 @@ function SpeakView({
                   <div className="mt-3 flex gap-2">
                     <button
                       type="button"
-                      onClick={() => setStatus("idle")}
-                      className="flex-1 text-sm font-extrabold uppercase text-primary underline"
-                    >
-                      Try again
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => { setStatus("typing"); setError(""); setTypedAnswer(""); }}
+                      onClick={() => { setStatus("idle"); setError(""); }}
                       className="flex-1 text-sm font-extrabold uppercase text-ink/60 underline"
                     >
                       Type instead

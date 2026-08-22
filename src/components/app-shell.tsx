@@ -45,7 +45,7 @@ export function AppShell({ children, active }: { children: ReactNode; active: Ta
       {/* Desktop sidebar */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r-[3px] border-ink bg-card p-5 lg:flex">
         <Link to="/learn" className="mb-9 flex items-center gap-2">
-          <img src="/mascot.svg" alt="NudiGO Mascot" className="h-10 w-10" />
+          <img src="/logo.jpg" alt="NudiGO" className="h-10 w-10 rounded-lg" />
           <Wordmark className="text-2xl" />
         </Link>
         <nav className="flex flex-col gap-2">

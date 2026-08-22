@@ -56,7 +56,7 @@ function Landing() {
       {/* Header */}
       <header className="mx-auto flex max-w-5xl items-center justify-between px-5 py-5">
         <div className="flex items-center gap-2">
-          <img src="/mascot.svg" alt="NudiGO Mascot" className="h-8 w-8" />
+          <img src="/logo.jpg" alt="NudiGO" className="h-8 w-8 rounded-lg" />
           <Wordmark className="text-xl" />
         </div>
         <NBLinkButton to="/auth" tone="white" size="sm">

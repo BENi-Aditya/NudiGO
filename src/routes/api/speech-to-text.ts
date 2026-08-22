@@ -1,4 +1,4 @@
-/** Speech-to-text API endpoint using AssemblyAI */
+import { json } from '@tanstack/start';
 
 export async function POST({ request }: { request: Request }) {
   try {
@@ -6,10 +6,7 @@ export async function POST({ request }: { request: Request }) {
     const audioBlob = formData.get("audio") as Blob;
 
     if (!audioBlob) {
-      return new Response(
-        JSON.stringify({ error: "No audio provided" }),
-        { status: 400 }
-      );
+      return json({ error: "No audio provided" }, { status: 400 });
     }
 
     // Convert blob to base64
@@ -28,10 +25,7 @@ export async function POST({ request }: { request: Request }) {
     const apiKey = process.env.ASSEMBLYAI_API_KEY;
     if (!apiKey) {
       console.error("[API] Missing ASSEMBLYAI_API_KEY environment variable");
-      return new Response(
-        JSON.stringify({ error: "Speech service not configured" }),
-        { status: 500 }
-      );
+      return json({ error: "Speech service not configured" }, { status: 500 });
     }
 
     // Call AssemblyAI API
@@ -51,26 +45,17 @@ export async function POST({ request }: { request: Request }) {
     if (!response.ok) {
       const error = await response.text();
       console.error("[API] AssemblyAI error:", error);
-      return new Response(
-        JSON.stringify({ error: `Speech service error: ${response.status}` }),
-        { status: 500 }
-      );
+      return json({ error: `Speech service error: ${response.status}` }, { status: 500 });
     }
 
     const result = await response.json();
     console.log("[API] AssemblyAI response:", result);
 
-    return new Response(
-      JSON.stringify({
-        transcript: result.text || "",
-      }),
-      { status: 200 }
-    );
+    return json({
+      transcript: result.text || "",
+    });
   } catch (error) {
     console.error("[API] Error:", error);
-    return new Response(
-      JSON.stringify({ error: String(error) }),
-      { status: 500 }
-    );
+    return json({ error: String(error) }, { status: 500 });
   }
 }

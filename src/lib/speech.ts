@@ -71,12 +71,33 @@ export function listenOnce(): {
       console.log("[STT] Microphone granted, starting recording...");
 
       globalAudioChunks = [];
-      globalMediaRecorder = new MediaRecorder(globalStream, {
-        mimeType: "audio/webm;codecs=opus"
-      });
+
+      // Try WebM codec first, fallback to default
+      let mimeType = "audio/webm;codecs=opus";
+      try {
+        if (!MediaRecorder.isTypeSupported(mimeType)) {
+          mimeType = "audio/webm";
+          if (!MediaRecorder.isTypeSupported(mimeType)) {
+            mimeType = "audio/mp4";
+            if (!MediaRecorder.isTypeSupported(mimeType)) {
+              mimeType = "";
+            }
+          }
+        }
+      } catch (e) {
+        mimeType = "";
+      }
+
+      console.log("[STT] Using mime type:", mimeType);
+
+      const recorderOpts = mimeType ? { mimeType } : {};
+      globalMediaRecorder = new MediaRecorder(globalStream, recorderOpts);
 
       globalMediaRecorder.ondataavailable = (event) => {
-        globalAudioChunks.push(event.data);
+        console.log("[STT] Data available:", event.data.size);
+        if (event.data.size > 0) {
+          globalAudioChunks.push(event.data);
+        }
       };
 
       globalMediaRecorder.onerror = (event) => {
@@ -87,7 +108,7 @@ export function listenOnce(): {
         }
       };
 
-      globalMediaRecorder.start();
+      globalMediaRecorder.start(100); // Collect data every 100ms
       globalIsRecording = true;
       console.log("[STT] Recording started");
     } catch (err) {
@@ -106,25 +127,31 @@ export function listenOnce(): {
     globalMediaRecorder.stop();
     globalIsRecording = false;
 
+    // Wait for recording to fully stop and onstop event
     await new Promise(resolve => {
-      const checkStop = () => {
-        if (globalMediaRecorder?.state === "inactive") {
-          resolve(null);
-        } else {
-          setTimeout(checkStop, 50);
-        }
+      const onStopHandler = () => {
+        globalMediaRecorder?.removeEventListener("stop", onStopHandler);
+        resolve(null);
       };
-      checkStop();
+      globalMediaRecorder?.addEventListener("stop", onStopHandler);
+
+      // Fallback timeout
+      setTimeout(() => {
+        globalMediaRecorder?.removeEventListener("stop", onStopHandler);
+        resolve(null);
+      }, 500);
     });
 
     try {
+      console.log("[STT] Audio chunks collected:", globalAudioChunks.length);
+
       const audioBlob = new Blob(globalAudioChunks, { type: "audio/webm" });
       console.log("[STT] Audio blob size:", audioBlob.size);
 
-      if (audioBlob.size < 1000) {
+      if (audioBlob.size < 500) {
         if (resolvePromise && !settled) {
           settled = true;
-          resolvePromise({ transcript: "", error: "No audio recorded - speak louder" });
+          resolvePromise({ transcript: "", error: "No audio recorded - speak louder or longer" });
         }
         return;
       }

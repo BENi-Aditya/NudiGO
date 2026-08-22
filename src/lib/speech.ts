@@ -35,6 +35,34 @@ let globalStream: MediaStream | null = null;
 let globalAudioChunks: Blob[] = [];
 let globalIsRecording = false;
 
+async function transcribeWithAssemblyAI(audioBase64: string): Promise<string> {
+  try {
+    // Call the AssemblyAI API directly from the browser
+    const response = await fetch("https://api.assemblyai.com/v2/transcribe", {
+      method: "POST",
+      headers: {
+        "Authorization": (import.meta as any).env.VITE_ASSEMBLYAI_API_KEY || "",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        audio_data: audioBase64,
+        encoding: "webm",
+        language_code: "kn",
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`AssemblyAI error: ${response.status}`);
+    }
+
+    const result = await response.json();
+    return result.text || "";
+  } catch (err) {
+    console.error("[STT] AssemblyAI error:", err);
+    throw err;
+  }
+}
+
 export function listenOnce(): {
   promise: Promise<{ transcript: string; error?: string }>;
   stop: () => void;
@@ -72,7 +100,6 @@ export function listenOnce(): {
 
       globalAudioChunks = [];
 
-      // Try WebM codec first, fallback to default
       let mimeType = "audio/webm;codecs=opus";
       try {
         if (!MediaRecorder.isTypeSupported(mimeType)) {
@@ -88,13 +115,10 @@ export function listenOnce(): {
         mimeType = "";
       }
 
-      console.log("[STT] Using mime type:", mimeType);
-
       const recorderOpts = mimeType ? { mimeType } : {};
       globalMediaRecorder = new MediaRecorder(globalStream, recorderOpts);
 
       globalMediaRecorder.ondataavailable = (event) => {
-        console.log("[STT] Data available:", event.data.size);
         if (event.data.size > 0) {
           globalAudioChunks.push(event.data);
         }
@@ -108,7 +132,7 @@ export function listenOnce(): {
         }
       };
 
-      globalMediaRecorder.start(100); // Collect data every 100ms
+      globalMediaRecorder.start(100);
       globalIsRecording = true;
       console.log("[STT] Recording started");
     } catch (err) {
@@ -127,7 +151,6 @@ export function listenOnce(): {
     globalMediaRecorder.stop();
     globalIsRecording = false;
 
-    // Wait for recording to fully stop and onstop event
     await new Promise(resolve => {
       const onStopHandler = () => {
         globalMediaRecorder?.removeEventListener("stop", onStopHandler);
@@ -135,7 +158,6 @@ export function listenOnce(): {
       };
       globalMediaRecorder?.addEventListener("stop", onStopHandler);
 
-      // Fallback timeout
       setTimeout(() => {
         globalMediaRecorder?.removeEventListener("stop", onStopHandler);
         resolve(null);
@@ -143,8 +165,6 @@ export function listenOnce(): {
     });
 
     try {
-      console.log("[STT] Audio chunks collected:", globalAudioChunks.length);
-
       const audioBlob = new Blob(globalAudioChunks, { type: "audio/webm" });
       console.log("[STT] Audio blob size:", audioBlob.size);
 
@@ -156,28 +176,34 @@ export function listenOnce(): {
         return;
       }
 
-      console.log("[STT] Sending to backend via AssemblyAI...");
-      const formData = new FormData();
-      formData.append("audio", audioBlob, "recording.webm");
+      // Convert to base64
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try {
+          const base64String = (reader.result as string).split(",")[1];
+          console.log("[STT] Sending to AssemblyAI...");
+          const transcript = await transcribeWithAssemblyAI(base64String);
 
-      const response = await fetch("/api/speech-to-text", {
-        method: "POST",
-        body: formData,
-      });
+          if (resolvePromise && !settled) {
+            settled = true;
+            resolvePromise({ transcript });
+          }
+        } catch (err) {
+          if (resolvePromise && !settled) {
+            settled = true;
+            resolvePromise({ transcript: "", error: String(err) });
+          }
+        }
+      };
 
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error("[STT] Backend error:", errorText);
-        throw new Error(`Server error: ${response.status}`);
-      }
+      reader.onerror = () => {
+        if (resolvePromise && !settled) {
+          settled = true;
+          resolvePromise({ transcript: "", error: "Failed to read audio" });
+        }
+      };
 
-      const data = await response.json();
-      console.log("[STT] Got transcript:", data.transcript);
-
-      if (resolvePromise && !settled) {
-        settled = true;
-        resolvePromise({ transcript: data.transcript || "" });
-      }
+      reader.readAsDataURL(audioBlob);
     } catch (err) {
       console.error("[STT] Processing error:", err);
       if (resolvePromise && !settled) {

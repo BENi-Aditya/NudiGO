@@ -17,6 +17,7 @@ import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ProfileRouteImport } from './routes/profile'
+import { Route as Profile_originalRouteImport } from './routes/profile_original'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson/$lessonId'
 import { Route as RoleplayScenarioIdRouteImport } from './routes/roleplay/$scenarioId'
@@ -61,6 +62,11 @@ const ProfileRoute = ProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => rootRouteImport,
 } as any)
+const Profile_originalRoute = Profile_originalRouteImport.update({
+  id: '/profile_original',
+  path: '/profile_original',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthCallbackRoute = AuthCallbackRouteImport.update({
   id: '/callback',
   path: '/callback',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/onboarding': typeof OnboardingRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
+  '/profile_original': typeof Profile_originalRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/roleplay/$scenarioId': typeof RoleplayScenarioIdRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/onboarding': typeof OnboardingRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
+  '/profile_original': typeof Profile_originalRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/roleplay/$scenarioId': typeof RoleplayScenarioIdRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/onboarding': typeof OnboardingRoute
   '/practice': typeof PracticeRoute
   '/profile': typeof ProfileRoute
+  '/profile_original': typeof Profile_originalRoute
   '/auth/callback': typeof AuthCallbackRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/roleplay/$scenarioId': typeof RoleplayScenarioIdRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/practice'
     | '/profile'
+    | '/profile_original'
     | '/auth/callback'
     | '/lesson/$lessonId'
     | '/roleplay/$scenarioId'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/practice'
     | '/profile'
+    | '/profile_original'
     | '/auth/callback'
     | '/lesson/$lessonId'
     | '/roleplay/$scenarioId'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/practice'
     | '/profile'
+    | '/profile_original'
     | '/auth/callback'
     | '/lesson/$lessonId'
     | '/roleplay/$scenarioId'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   OnboardingRoute: typeof OnboardingRoute
   PracticeRoute: typeof PracticeRoute
   ProfileRoute: typeof ProfileRoute
+  Profile_originalRoute: typeof Profile_originalRoute
   LessonLessonIdRoute: typeof LessonLessonIdRoute
   RoleplayScenarioIdRoute: typeof RoleplayScenarioIdRoute
 }
@@ -230,6 +243,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfileRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/profile_original': {
+      id: '/profile_original'
+      path: '/profile_original'
+      fullPath: '/profile_original'
+      preLoaderRoute: typeof Profile_originalRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/callback': {
       id: '/auth/callback'
       path: '/callback'
@@ -273,6 +293,7 @@ const rootRouteChildren: RootRouteChildren = {
   OnboardingRoute: OnboardingRoute,
   PracticeRoute: PracticeRoute,
   ProfileRoute: ProfileRoute,
+  Profile_originalRoute: Profile_originalRoute,
   LessonLessonIdRoute: LessonLessonIdRoute,
   RoleplayScenarioIdRoute: RoleplayScenarioIdRoute,
 }

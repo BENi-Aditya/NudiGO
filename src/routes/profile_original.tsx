@@ -9,12 +9,11 @@ import { AppShell } from "@/components/app-shell";
 import { ContributionChart } from "@/components/contribution-chart";
 import { useAuth } from "@/lib/auth";
 import { useProgress } from "@/lib/progress";
-import { useLanguage } from "@/lib/language-context";
 import { NBButton, NBCard, Sticker } from "@/lib/nb";
 import { cn } from "@/lib/utils";
 import { pushAvatarUrl } from "@/lib/sync";
 
-export const Route = createFileRoute("/profile")({
+export const Route = createFileRoute("/profile_original")({
   component: ProfilePage,
 });
 
@@ -23,7 +22,6 @@ function ProfilePage() {
   const { hydrated, state, totals, levelName, setDisplayName, resetProgress } =
     useProgress();
   const { configured, user, signOut } = useAuth();
-  const { currentLanguage, switchLanguage } = useLanguage();
 
   const [nameDraft, setNameDraft] = useState("");
   const [editing, setEditing] = useState(false);
@@ -156,30 +154,6 @@ function ProfilePage() {
         <Sticker tone="yellow" className="mt-2">
           {levelName}
         </Sticker>
-      </div>
-
-      {/* Language Switcher */}
-      <div className="mb-6 flex gap-2">
-        <button
-          onClick={() => switchLanguage("kannada")}
-          className={`flex-1 py-2 px-3 rounded-lg font-bold text-sm transition nb-border nb-shadow-sm ${
-            currentLanguage === "kannada"
-              ? "bg-primary text-primary-foreground"
-              : "bg-card text-ink hover:bg-card/80"
-          }`}
-        >
-          🚗 Kannada
-        </button>
-        <button
-          onClick={() => switchLanguage("kashmiri")}
-          className={`flex-1 py-2 px-3 rounded-lg font-bold text-sm transition nb-border nb-shadow-sm ${
-            currentLanguage === "kashmiri"
-              ? "bg-accent text-white"
-              : "bg-card text-ink hover:bg-card/80"
-          }`}
-        >
-          🏔️ Kashmiri
-        </button>
       </div>
 
       {/* Stats */}

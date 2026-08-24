@@ -10,7 +10,13 @@ interface LanguageContextType {
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 export function LanguageProvider({ children }: { children: ReactNode }) {
-  const [currentLanguage, setCurrentLanguage] = useState<Language>("kannada");
+  const [currentLanguage, setCurrentLanguage] = useState<Language>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("selectedLanguage");
+      return (saved as Language) || "kannada";
+    }
+    return "kannada";
+  });
 
   const switchLanguage = (lang: Language) => {
     setCurrentLanguage(lang);

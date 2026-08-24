@@ -189,3 +189,58 @@ export async function getClaudeResponse(
   }
   return fullResponse;
 }
+
+/** Translate text between Kashmiri and English. */
+export async function* translateKashmiri(
+  request: TranslationRequest & { targetLanguage: "kashmiri" | "english" }
+): AsyncGenerator<string, void, unknown> {
+  const systemPrompt =
+    request.targetLanguage === "kashmiri"
+      ? `You are a Kashmiri language translator. Translate the given English text to Kashmiri.
+IMPORTANT: Keep response VERY SHORT - maximum 2-3 lines.
+Format EXACTLY as:
+KASHMIRI: [Kashmiri script only, no English letters]
+TRANSLITERATION: [Roman transliteration only]
+MEANING: [One line English meaning]`
+      : `You are a Kashmiri language translator. Translate the given Kashmiri text to English.
+IMPORTANT: Keep response VERY SHORT - maximum 2-3 lines.
+Format EXACTLY as:
+KASHMIRI: [Original Kashmiri script only]
+TRANSLITERATION: [Roman transliteration only]
+ENGLISH: [One line English translation]`;
+
+  const userMessage =
+    request.targetLanguage === "kashmiri"
+      ? `Translate to Kashmiri: "${request.text}"`
+      : `Translate to English: "${request.text}"`;
+
+  yield* streamClaudeResponse(systemPrompt, userMessage);
+}
+
+/** Conversational Kashmiri tutor. */
+export async function* tutorKashmiri(
+  request: TutorRequest
+): AsyncGenerator<string, void, unknown> {
+  const systemPrompt = `You are a Kashmiri language teacher for ${request.currentLevel} learners who want to connect with Kashmiri culture and family.
+
+RESPONSE RULES (CRITICAL):
+- Maximum 2-3 lines per response
+- Keep explanations simple and direct
+- For Kashmiri text, use format: Kashmiri: [script], Transliteration: [roman], Meaning: [English]
+- No markdown, no special formatting
+- When responding with Kashmiri, ensure proper Kashmiri script (no English letters mixed in)
+- When responding with English, keep it clear and concise
+
+Teaching style:
+- Encourage and motivate
+- Use real Kashmir context (Wazwan feasts, family gatherings, bazaars, traditions)
+- Ask follow-up questions to check understanding
+- Adapt to learner level
+- Focus on cultural integration and family connection`;
+
+  yield* streamClaudeResponse(
+    systemPrompt,
+    request.message,
+    request.conversationHistory
+  );
+}

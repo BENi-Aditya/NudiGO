@@ -3,18 +3,28 @@ import { Volume2 } from "lucide-react";
 import { NBButton, Kannada } from "@/lib/nb";
 import { speak } from "@/lib/speech";
 import { listenOnce } from "@/lib/speech";
-import { translateKannada } from "@/lib/ai";
+import { translateKannada, translateKashmiri } from "@/lib/ai";
+import { useLanguage } from "@/lib/language-context";
 
 export function AITeacherTranslator() {
+  const { currentLanguage } = useLanguage();
   const [isListening, setIsListening] = useState(false);
   const [mascotSize, setMascotSize] = useState(100);
-  const [sourceLanguage, setSourceLanguage] = useState<"english" | "kannada">("english");
+  const [sourceLanguage, setSourceLanguage] = useState<"english" | "kannada" | "kashmiri">("english");
   const [inputText, setInputText] = useState("");
   const [outputText, setOutputText] = useState("");
-  const [kannada, setKannada] = useState("");
+  const [translatedText, setTranslatedText] = useState("");
   const [transliteration, setTransliteration] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [listener, setListener] = useState<ReturnType<typeof listenOnce> | null>(null);
+
+  useEffect(() => {
+    if (currentLanguage === "kannada") {
+      setSourceLanguage("english");
+    } else if (currentLanguage === "kashmiri") {
+      setSourceLanguage("english");
+    }
+  }, [currentLanguage]);
 
   const handleStartListening = async () => {
     setIsListening(true);
@@ -65,27 +75,50 @@ export function AITeacherTranslator() {
 
     setIsLoading(true);
     setOutputText("");
-    setKannada("");
+    setTranslatedText("");
     setTransliteration("");
 
     try {
       let fullResponse = "";
-      for await (const chunk of translateKannada({
-        text: textInput,
-        targetLanguage: sourceLanguage === "english" ? "kannada" : "english",
-      })) {
-        fullResponse += chunk;
-        setOutputText(fullResponse);
-      }
 
-      if (sourceLanguage === "english") {
-        const kannadaMatch = fullResponse.match(/KANNADA:\s*([^\n]+)/);
-        const translitMatch = fullResponse.match(/TRANSLITERATION:\s*([^\n]+)/);
-        if (kannadaMatch) setKannada(kannadaMatch[1].trim());
-        if (translitMatch) setTransliteration(translitMatch[1].trim());
-      } else {
-        const englishMatch = fullResponse.match(/ENGLISH:\s*([^\n]+)/);
-        if (englishMatch) setOutputText(englishMatch[1].trim());
+      if (currentLanguage === "kannada") {
+        const targetLang = sourceLanguage === "english" ? "kannada" : "english";
+        for await (const chunk of translateKannada({
+          text: textInput,
+          targetLanguage: targetLang,
+        })) {
+          fullResponse += chunk;
+          setOutputText(fullResponse);
+        }
+
+        if (sourceLanguage === "english") {
+          const kannadaMatch = fullResponse.match(/KANNADA:\s*([^\n]+)/);
+          const translitMatch = fullResponse.match(/TRANSLITERATION:\s*([^\n]+)/);
+          if (kannadaMatch) setTranslatedText(kannadaMatch[1].trim());
+          if (translitMatch) setTransliteration(translitMatch[1].trim());
+        } else {
+          const englishMatch = fullResponse.match(/ENGLISH:\s*([^\n]+)/);
+          if (englishMatch) setOutputText(englishMatch[1].trim());
+        }
+      } else if (currentLanguage === "kashmiri") {
+        const targetLang = sourceLanguage === "english" ? "kashmiri" : "english";
+        for await (const chunk of translateKashmiri({
+          text: textInput,
+          targetLanguage: targetLang,
+        })) {
+          fullResponse += chunk;
+          setOutputText(fullResponse);
+        }
+
+        if (sourceLanguage === "english") {
+          const kashmiriMatch = fullResponse.match(/KASHMIRI:\s*([^\n]+)/);
+          const translitMatch = fullResponse.match(/TRANSLITERATION:\s*([^\n]+)/);
+          if (kashmiriMatch) setTranslatedText(kashmiriMatch[1].trim());
+          if (translitMatch) setTransliteration(translitMatch[1].trim());
+        } else {
+          const englishMatch = fullResponse.match(/ENGLISH:\s*([^\n]+)/);
+          if (englishMatch) setOutputText(englishMatch[1].trim());
+        }
       }
     } catch (err) {
       console.error("[Translator] Error:", err);
@@ -95,13 +128,16 @@ export function AITeacherTranslator() {
     }
   };
 
+  const mascotLabel = currentLanguage === "kannada"
+    ? (sourceLanguage === "english" ? "Speak English" : "Speak Kannada")
+    : (sourceLanguage === "english" ? "Speak English" : "Speak Kashmiri");
+
   return (
     <div className="space-y-6">
-      {/* Mascot Section */}
       <div className="flex flex-col items-center justify-center space-y-4 rounded-2xl bg-gradient-to-br from-secondary to-secondary/50 p-8 nb-border">
         <div className="text-center">
           <p className="text-xs font-bold uppercase text-ink/60 mb-2">
-            {sourceLanguage === "english" ? "Speak English" : "Speak Kannada"}
+            {mascotLabel}
           </p>
           <img
             src="/logo.jpg"
@@ -115,7 +151,6 @@ export function AITeacherTranslator() {
           />
         </div>
 
-        {/* Recording indicator */}
         {isListening && (
           <div className="flex gap-1">
             <div className="h-2 w-2 animate-bounce rounded-full bg-primary" />
@@ -124,7 +159,6 @@ export function AITeacherTranslator() {
           </div>
         )}
 
-        {/* Voice buttons */}
         <div className="flex gap-4 flex-wrap justify-center">
           {!isListening ? (
             <NBButton
@@ -147,10 +181,12 @@ export function AITeacherTranslator() {
           <button
             type="button"
             onClick={() => {
-              setSourceLanguage(sourceLanguage === "english" ? "kannada" : "english");
+              setSourceLanguage(sourceLanguage === "english"
+                ? (currentLanguage === "kannada" ? "kannada" : "kashmiri")
+                : "english");
               setInputText("");
               setOutputText("");
-              setKannada("");
+              setTranslatedText("");
               setTransliteration("");
             }}
             className="nb-border nb-shadow-sm nb-press px-4 py-2 rounded-lg bg-card font-bold text-sm"
@@ -160,22 +196,21 @@ export function AITeacherTranslator() {
         </div>
       </div>
 
-      {/* Results */}
-      {(kannada || outputText) && (
+      {(translatedText || outputText) && (
         <div className="rounded-2xl bg-card p-6 nb-border space-y-4">
-          {sourceLanguage === "english" && kannada && (
+          {sourceLanguage === "english" && translatedText && (
             <>
               <div>
                 <p className="text-xs font-bold uppercase text-ink/60 mb-2">
-                  Kannada Translation
+                  {currentLanguage === "kannada" ? "Kannada" : "Kashmiri"} Translation
                 </p>
                 <div className="flex items-center justify-between gap-2">
-                  <Kannada className="text-4xl font-black">{kannada}</Kannada>
+                  <Kannada className="text-4xl font-black">{translatedText}</Kannada>
                   <button
                     type="button"
-                    onClick={() => speak(kannada)}
+                    onClick={() => speak(translatedText)}
                     className="nb-border nb-shadow-sm nb-press inline-flex h-12 w-12 items-center justify-center rounded-lg bg-primary text-primary-foreground hover:bg-primary/90"
-                    aria-label="Play Kannada audio"
+                    aria-label={`Play ${currentLanguage} audio`}
                   >
                     <Volume2 className="h-5 w-5" aria-hidden />
                   </button>
@@ -193,7 +228,7 @@ export function AITeacherTranslator() {
             </>
           )}
 
-          {sourceLanguage === "kannada" && outputText && (
+          {sourceLanguage !== "english" && outputText && (
             <div>
               <p className="text-xs font-bold uppercase text-ink/60 mb-2">
                 English Translation

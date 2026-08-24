@@ -17,9 +17,11 @@ import {
   sections,
   unitsForSection,
 } from "@/data/curriculum";
+import { kannadaLessons, kashmiriLessons } from "@/lib/language-content";
 import { AppShell } from "@/components/app-shell";
 import { StreakPill, XpPill } from "@/components/stats";
 import { useProgress } from "@/lib/progress";
+import { useLanguage } from "@/lib/language-context";
 import { NBCard, NBLinkButton, Sticker } from "@/lib/nb";
 import { cn } from "@/lib/utils";
 
@@ -31,6 +33,7 @@ const kindIcon = { lesson: BookOpen, speak: Mic, review: RefreshCw } as const;
 
 function LearnPage() {
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
   const {
     hydrated,
     state,
@@ -62,6 +65,9 @@ function LearnPage() {
   const mission = activeMission();
   const due = dueConcepts();
   const name = state.profile.displayName || "there";
+
+  // Get language-specific lessons
+  const languageLessons = currentLanguage === "kashmiri" ? kashmiriLessons : kannadaLessons;
 
   return (
     <AppShell active="learn">
@@ -148,31 +154,52 @@ function LearnPage() {
 
       {/* The path */}
       <h2 className="mb-3 mt-2 text-2xl">Your path</h2>
-      <div className="space-y-7">
-        {sections.map((section) => (
-          <section key={section.id}>
-            <div className="mb-3">
-              <Sticker tone="yellow">{section.title}</Sticker>
-              {section.subtitle && (
-                <p className="mt-1.5 text-sm font-semibold text-ink/60">
-                  {section.subtitle}
-                </p>
-              )}
-            </div>
-            <div className="space-y-4">
-              {unitsForSection(section.id).map((unit) => (
-                <UnitBlock
-                  key={unit.id}
-                  unitId={unit.id}
-                  next={next}
-                  isLessonCompleted={isLessonCompleted}
-                  isLessonUnlocked={isLessonUnlocked}
-                />
+      {currentLanguage === "kashmiri" ? (
+        <div className="space-y-4">
+          <div className="nb-card p-4">
+            <p className="font-black mb-3">🏔️ Kashmiri Lessons</p>
+            <ul className="space-y-2">
+              {kashmiriLessons.map((lesson) => (
+                <li key={lesson.id} className="nb-border rounded-lg p-3 bg-card hover:bg-card/80 transition">
+                  <div className="flex items-center gap-2">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    <div className="flex-1">
+                      <p className="font-bold text-sm">{lesson.title}</p>
+                      <p className="text-xs text-ink/60">{lesson.description}</p>
+                    </div>
+                  </div>
+                </li>
               ))}
-            </div>
-          </section>
-        ))}
-      </div>
+            </ul>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-7">
+          {sections.map((section) => (
+            <section key={section.id}>
+              <div className="mb-3">
+                <Sticker tone="yellow">{section.title}</Sticker>
+                {section.subtitle && (
+                  <p className="mt-1.5 text-sm font-semibold text-ink/60">
+                    {section.subtitle}
+                  </p>
+                )}
+              </div>
+              <div className="space-y-4">
+                {unitsForSection(section.id).map((unit) => (
+                  <UnitBlock
+                    key={unit.id}
+                    unitId={unit.id}
+                    next={next}
+                    isLessonCompleted={isLessonCompleted}
+                    isLessonUnlocked={isLessonUnlocked}
+                  />
+                ))}
+              </div>
+            </section>
+          ))}
+        </div>
+      )}
     </AppShell>
   );
 }

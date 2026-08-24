@@ -5,9 +5,11 @@ import { toast } from "sonner";
 
 import { getConcept } from "@/data/curriculum";
 import { getMission, missions as allMissions, type Mission } from "@/data/missions";
+import { kashmiriMissions } from "@/lib/language-content";
 import { AppShell } from "@/components/app-shell";
 import { SpeakButton } from "@/components/speak-button";
 import { useProgress } from "@/lib/progress";
+import { useLanguage } from "@/lib/language-context";
 import { NBButton, NBCard, Sticker, Kannada } from "@/lib/nb";
 import { cn } from "@/lib/utils";
 
@@ -17,6 +19,7 @@ export const Route = createFileRoute("/missions")({
 
 function MissionsPage() {
   const navigate = useNavigate();
+  const { currentLanguage } = useLanguage();
   const { hydrated, state, availableMissions, completeMission, unitCompletedCount } = useProgress();
 
   useEffect(() => {
@@ -31,11 +34,53 @@ function MissionsPage() {
 
   const onDid = (mission: Mission) => {
     completeMission(mission.id, mission.reward);
+    const langText = currentLanguage === "kashmiri" ? "Kashmiri" : "Kannada";
     toast.success(`Mission complete! +${mission.reward} XP`, {
       description:
-        "You used Kannada in the real world. That's the whole point.",
+        `You used ${langText} in the real world. That's the whole point.`,
     });
   };
+
+  // Show Kashmiri missions when language is Kashmiri
+  if (currentLanguage === "kashmiri") {
+    return (
+      <AppShell active="missions">
+        <h1 className="mb-1 text-3xl">Missions</h1>
+        <p className="mb-5 font-semibold text-ink/70">
+          Take your Kashmiri off the screen.
+        </p>
+
+        {kashmiriMissions.length === 0 && (
+          <NBCard tone="yellow">
+            <p className="font-bold">
+              No missions available yet. 🎯
+            </p>
+          </NBCard>
+        )}
+
+        <Sticker tone="pink">Kashmiri Missions</Sticker>
+        <div className="mt-3 space-y-4">
+          {kashmiriMissions.map((mission) => (
+            <NBCard key={mission.id} className="p-4">
+              <div className="flex items-start gap-3">
+                <Target className="h-5 w-5 text-primary mt-1" />
+                <div className="flex-1">
+                  <h3 className="font-black">{mission.title}</h3>
+                  <p className="text-sm font-semibold text-ink/70 mt-1">{mission.description}</p>
+                  <p className="text-xs text-ink/60 mt-2 italic">{mission.scenario}</p>
+                  <div className="mt-3 space-y-1">
+                    {mission.objectives.map((obj, idx) => (
+                      <p key={idx} className="text-xs font-semibold text-ink/70">• {obj}</p>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </NBCard>
+          ))}
+        </div>
+      </AppShell>
+    );
+  }
 
   return (
     <AppShell active="missions">

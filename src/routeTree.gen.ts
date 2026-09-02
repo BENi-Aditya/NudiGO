@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AiTeacherRouteImport } from './routes/ai-teacher'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as LearnRouteImport } from './routes/learn'
 import { Route as MissionsRouteImport } from './routes/missions'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
@@ -19,6 +20,7 @@ import { Route as PracticeRouteImport } from './routes/practice'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as Profile_originalRouteImport } from './routes/profile_original'
 import { Route as AuthCallbackRouteImport } from './routes/auth/callback'
+import { Route as ExploreGemIdRouteImport } from './routes/explore/$gemId'
 import { Route as LessonLessonIdRouteImport } from './routes/lesson/$lessonId'
 import { Route as RoleplayScenarioIdRouteImport } from './routes/roleplay/$scenarioId'
 
@@ -35,6 +37,11 @@ const AiTeacherRoute = AiTeacherRouteImport.update({
 const AuthRoute = AuthRouteImport.update({
   id: '/auth',
   path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExploreRoute = ExploreRouteImport.update({
+  id: '/explore',
+  path: '/explore',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LearnRoute = LearnRouteImport.update({
@@ -72,6 +79,11 @@ const AuthCallbackRoute = AuthCallbackRouteImport.update({
   path: '/callback',
   getParentRoute: () => AuthRoute,
 } as any)
+const ExploreGemIdRoute = ExploreGemIdRouteImport.update({
+  id: '/$gemId',
+  path: '/$gemId',
+  getParentRoute: () => ExploreRoute,
+} as any)
 const LessonLessonIdRoute = LessonLessonIdRouteImport.update({
   id: '/lesson/$lessonId',
   path: '/lesson/$lessonId',
@@ -87,6 +99,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/ai-teacher': typeof AiTeacherRoute
   '/auth': typeof AuthRouteWithChildren
+  '/explore': typeof ExploreRouteWithChildren
   '/learn': typeof LearnRoute
   '/missions': typeof MissionsRoute
   '/onboarding': typeof OnboardingRoute
@@ -94,6 +107,7 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/profile_original': typeof Profile_originalRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/explore/$gemId': typeof ExploreGemIdRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/roleplay/$scenarioId': typeof RoleplayScenarioIdRoute
 }
@@ -101,6 +115,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/ai-teacher': typeof AiTeacherRoute
   '/auth': typeof AuthRouteWithChildren
+  '/explore': typeof ExploreRouteWithChildren
   '/learn': typeof LearnRoute
   '/missions': typeof MissionsRoute
   '/onboarding': typeof OnboardingRoute
@@ -108,6 +123,7 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/profile_original': typeof Profile_originalRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/explore/$gemId': typeof ExploreGemIdRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/roleplay/$scenarioId': typeof RoleplayScenarioIdRoute
 }
@@ -116,6 +132,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/ai-teacher': typeof AiTeacherRoute
   '/auth': typeof AuthRouteWithChildren
+  '/explore': typeof ExploreRouteWithChildren
   '/learn': typeof LearnRoute
   '/missions': typeof MissionsRoute
   '/onboarding': typeof OnboardingRoute
@@ -123,6 +140,7 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/profile_original': typeof Profile_originalRoute
   '/auth/callback': typeof AuthCallbackRoute
+  '/explore/$gemId': typeof ExploreGemIdRoute
   '/lesson/$lessonId': typeof LessonLessonIdRoute
   '/roleplay/$scenarioId': typeof RoleplayScenarioIdRoute
 }
@@ -132,6 +150,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ai-teacher'
     | '/auth'
+    | '/explore'
     | '/learn'
     | '/missions'
     | '/onboarding'
@@ -139,6 +158,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/profile_original'
     | '/auth/callback'
+    | '/explore/$gemId'
     | '/lesson/$lessonId'
     | '/roleplay/$scenarioId'
   fileRoutesByTo: FileRoutesByTo
@@ -146,6 +166,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ai-teacher'
     | '/auth'
+    | '/explore'
     | '/learn'
     | '/missions'
     | '/onboarding'
@@ -153,6 +174,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/profile_original'
     | '/auth/callback'
+    | '/explore/$gemId'
     | '/lesson/$lessonId'
     | '/roleplay/$scenarioId'
   id:
@@ -160,6 +182,7 @@ export interface FileRouteTypes {
     | '/'
     | '/ai-teacher'
     | '/auth'
+    | '/explore'
     | '/learn'
     | '/missions'
     | '/onboarding'
@@ -167,6 +190,7 @@ export interface FileRouteTypes {
     | '/profile'
     | '/profile_original'
     | '/auth/callback'
+    | '/explore/$gemId'
     | '/lesson/$lessonId'
     | '/roleplay/$scenarioId'
   fileRoutesById: FileRoutesById
@@ -175,6 +199,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AiTeacherRoute: typeof AiTeacherRoute
   AuthRoute: typeof AuthRouteWithChildren
+  ExploreRoute: typeof ExploreRouteWithChildren
   LearnRoute: typeof LearnRoute
   MissionsRoute: typeof MissionsRoute
   OnboardingRoute: typeof OnboardingRoute
@@ -206,6 +231,13 @@ declare module '@tanstack/react-router' {
       path: '/auth'
       fullPath: '/auth'
       preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explore': {
+      id: '/explore'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/learn': {
@@ -257,6 +289,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthCallbackRouteImport
       parentRoute: typeof AuthRoute
     }
+    '/explore/$gemId': {
+      id: '/explore/$gemId'
+      path: '/$gemId'
+      fullPath: '/explore/$gemId'
+      preLoaderRoute: typeof ExploreGemIdRouteImport
+      parentRoute: typeof ExploreRoute
+    }
     '/lesson/$lessonId': {
       id: '/lesson/$lessonId'
       path: '/lesson/$lessonId'
@@ -284,10 +323,22 @@ const AuthRouteChildren: AuthRouteChildren = {
 
 const AuthRouteWithChildren = AuthRoute._addFileChildren(AuthRouteChildren)
 
+interface ExploreRouteChildren {
+  ExploreGemIdRoute: typeof ExploreGemIdRoute
+}
+
+const ExploreRouteChildren: ExploreRouteChildren = {
+  ExploreGemIdRoute: ExploreGemIdRoute,
+}
+
+const ExploreRouteWithChildren =
+  ExploreRoute._addFileChildren(ExploreRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AiTeacherRoute: AiTeacherRoute,
   AuthRoute: AuthRouteWithChildren,
+  ExploreRoute: ExploreRouteWithChildren,
   LearnRoute: LearnRoute,
   MissionsRoute: MissionsRoute,
   OnboardingRoute: OnboardingRoute,

@@ -1,5 +1,5 @@
 import { Link } from "@tanstack/react-router";
-import { Home, MessageSquareText, Target, User, Brain } from "lucide-react";
+import { Home, MessageSquareText, Target, User, Brain, MapPin } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 
@@ -7,12 +7,13 @@ import { LogoMark, Wordmark } from "@/components/brand";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/lib/auth";
 
-type Tab = "learn" | "practice" | "missions" | "profile" | "ai";
+type Tab = "learn" | "practice" | "missions" | "explore" | "ai" | "profile";
 
 const tabs: Array<{ key: Tab; to: string; label: string; Icon: typeof Home }> = [
   { key: "learn", to: "/learn", label: "Learn", Icon: Home },
   { key: "practice", to: "/practice", label: "Practice", Icon: MessageSquareText },
   { key: "missions", to: "/missions", label: "Missions", Icon: Target },
+  { key: "explore", to: "/explore", label: "Explore", Icon: MapPin },
   { key: "ai", to: "/ai-teacher", label: "AI", Icon: Brain },
   { key: "profile", to: "/profile", label: "Profile", Icon: User },
 ];

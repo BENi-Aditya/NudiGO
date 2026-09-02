@@ -226,3 +226,28 @@
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Hidden Gems - Metro Line Colors */
+.metro-purple {
+  background: oklch(0.55 0.25 280);
+}
+
+.metro-green {
+  background: oklch(0.65 0.25 145);
+}
+
+.metro-blue {
+  background: oklch(0.55 0.25 240);
+}
+
+/* Hidden Gems - Image Aspect Ratio */
+.gem-image-aspect {
+  aspect-ratio: 16 / 9;
+}
+
+/* Hidden Gems - Photo Gallery Grid */
+.gem-gallery {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 1rem;
+}

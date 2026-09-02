@@ -56,6 +56,13 @@ export type LessonStat = {
 
 export type DayStat = { xp: number; lessons: number; exercises: number };
 
+export type ExploredGem = {
+  visitedAt: number; // timestamp
+  favorite: boolean;
+  rating?: number;
+  notes?: string;
+};
+
 export type ProgressState = {
   profile: Profile;
   xp: number;
@@ -69,12 +76,14 @@ export type ProgressState = {
   missions: Record<string, number>; // missionId -> completedAt
   achievements: Record<string, number>; // achievementId -> earnedAt
   daily: Record<string, DayStat>;
+  exploredGems: Record<string, ExploredGem>; // gemId -> gem exploration data
 };
 
 const STORAGE_KEY = "namago:progress:v1";
 const EXERCISE_XP = 2;
 const LESSON_XP = 20;
 const CONVERSATION_XP = 10;
+const GEM_VISIT_XP = 15;
 const MASTERED_AT = 4;
 
 // Spaced-review intervals (ms), indexed by resulting mastery level.
@@ -109,6 +118,7 @@ function createInitialState(): ProgressState {
     missions: {},
     achievements: {},
     daily: {},
+    exploredGems: {},
   };
 }
 

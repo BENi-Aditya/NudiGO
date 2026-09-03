@@ -63,6 +63,20 @@ export type ExploredGem = {
   notes?: string;
 };
 
+export type DynamicMission = {
+  id: string;
+  title: string;
+  objective: string;
+  conceptId: string;
+  context: string;
+  reward: number;
+  unitId: number;
+  unlockAfterLessons: number;
+  /** Where this mission came from (e.g. "hidden-gems:koshy-bar-restaurant"). */
+  source?: string;
+  createdAt: number;
+};
+
 export type ProgressState = {
   profile: Profile;
   xp: number;
@@ -74,6 +88,8 @@ export type ProgressState = {
   conceptStats: Record<string, ConceptStat>;
   mistakes: Record<string, { times: number; resolved: boolean }>;
   missions: Record<string, number>; // missionId -> completedAt
+  /** User-created missions, e.g. phrases from the Explore (hidden gems) page. */
+  dynamicMissions: Record<string, DynamicMission>;
   achievements: Record<string, number>; // achievementId -> earnedAt
   daily: Record<string, DayStat>;
   exploredGems: Record<string, ExploredGem>; // gemId -> gem exploration data
@@ -116,6 +132,7 @@ function createInitialState(): ProgressState {
     conceptStats: {},
     mistakes: {},
     missions: {},
+    dynamicMissions: {},
     achievements: {},
     daily: {},
     exploredGems: {},
@@ -308,6 +325,19 @@ type ProgressContextValue = {
   recordExercise: (conceptId: string, correct: boolean) => void;
   completeLesson: (lessonId: number, accuracy: number) => void;
   completeMission: (missionId: string, reward: number) => void;
+  /**
+    Create a user-sourced mission tied to a gem phrase + curriculum concept.
+    No-op if a mission already exists for the same gem/concept pair.
+    Returns the new mission id, or null if nothing was created.
+  */
+  addPhraseAsMission: (input: {
+    gemId: string;
+    conceptId: string;
+    title: string;
+    objective: string;
+    context: string;
+    reward?: number;
+  }) => string | null;
   recordConversation: () => void;
   setDisplayName: (name: string) => void;
   resetProgress: () => void;
@@ -317,6 +347,8 @@ type ProgressContextValue = {
   nextLesson: () => Lesson | undefined;
   unitCompletedCount: (unitId: number) => number;
   dueConcepts: (limit?: number) => Concept[];
+  /** All user-created (dynamic) missions. */
+  dynamicMissions: () => DynamicMission[];
   availableMissions: () => Mission[];
   activeMission: () => Mission | undefined;
   totals: Totals;
@@ -388,7 +420,10 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
         }
 
         // Seed mock data for demo account
-        if (email === "aditya.tripathi.beni@gmail.com" && Object.keys(next.daily).length === 0) {
+        if (
+          email === "aditya.tripathi.beni@gmail.com" &&
+          Object.keys(next.daily).length === 0
+        ) {
           next = {
             ...next,
             daily: generateMockHeatmap(),
@@ -582,6 +617,37 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     [],
   );
 
+  const addPhraseAsMission = useCallback<
+    ProgressContextValue["addPhraseAsMission"]
+  >(({ gemId, conceptId, title, objective, context, reward = 30 }) => {
+    const id = `gem:${gemId}:${conceptId}`;
+    let created: string | null = null;
+    setState((prev) => {
+      if (prev.dynamicMissions[id]) return prev;
+      const concept = getConcept(conceptId);
+      const unitId = concept?.unitId ?? 1;
+      const dynamicMission: DynamicMission = {
+        id,
+        title,
+        objective,
+        conceptId,
+        context,
+        reward,
+        unitId,
+        // 0 = immediately available, even before finishing any lesson
+        unlockAfterLessons: 0,
+        source: `hidden-gems:${gemId}`,
+        createdAt: Date.now(),
+      };
+      created = id;
+      return {
+        ...prev,
+        dynamicMissions: { ...prev.dynamicMissions, [id]: dynamicMission },
+      };
+    });
+    return created;
+  }, []);
+
   const recordConversation = useCallback<
     ProgressContextValue["recordConversation"]
   >(() => {
@@ -677,6 +743,11 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     [unitCompletedCount],
   );
 
+  const dynamicMissions = useCallback<ProgressContextValue["dynamicMissions"]>(
+    () => Object.values(state.dynamicMissions),
+    [state.dynamicMissions],
+  );
+
   const activeMission = useCallback(
     () => availableMissions().find((m) => !state.missions[m.id]),
     [availableMissions, state.missions],
@@ -708,6 +779,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     recordExercise,
     completeLesson,
     completeMission,
+    addPhraseAsMission,
     recordConversation,
     setDisplayName,
     resetProgress,
@@ -716,6 +788,7 @@ export function ProgressProvider({ children }: { children: ReactNode }) {
     nextLesson,
     unitCompletedCount,
     dueConcepts,
+    dynamicMissions,
     availableMissions,
     activeMission,
     totals,

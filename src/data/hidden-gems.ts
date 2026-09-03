@@ -1,8 +1,16 @@
 /** Hidden Gems of Bangalore - Curated Local Favorites */
 
-import { findNearestMetro } from './metro-stations';
+import { findNearestMetro, metroStations } from "./metro-stations";
+import { getConcept, type Concept } from "./curriculum";
 
-export type Category = 'food' | 'nature' | 'culture' | 'shopping' | 'nightlife';
+export type Category = "food" | "nature" | "culture" | "shopping" | "nightlife";
+
+export type Phrase = {
+  /** Curriculum concept ID this phrase links to (must exist in curriculum.ts). */
+  conceptId: string;
+  /** Why this phrase helps at this specific gem. */
+  context: string;
+};
 
 export type HiddenGem = {
   id: string;
@@ -19,6 +27,7 @@ export type HiddenGem = {
     coordinates: { lat: number; lng: number };
     nearestMetro: {
       station: string;
+      stationId: string;
       line: string;
       distanceKm: number;
       walkMinutes: number;
@@ -30,6 +39,7 @@ export type HiddenGem = {
     gallery: string[];
   };
 
+  /** Headline phrase shown on the card preview. Must be in `phrases[0]`. */
   kannadaLearning: {
     usefulPhrase: string;
     transliteration: string;
@@ -37,8 +47,14 @@ export type HiddenGem = {
     context: string;
   };
 
+  /** Ordered list of useful phrases at this gem. First item is the headline. */
+  phrases: Phrase[];
+
+  /** Other metro stations within easy reach of this gem. */
+  nearbyStations?: string[];
+
   metadata: {
-    source: 'curated' | 'reddit' | 'community' | 'google';
+    source: "curated" | "reddit" | "community" | "google";
     sourceUrl?: string;
     discoveredAt: string;
     curatorNotes?: string;
@@ -48,18 +64,22 @@ export type HiddenGem = {
 
 // Placeholder images from Unsplash - replace with real images later
 const PLACEHOLDER_IMAGES = {
-  food: 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80',
-  nature: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80',
-  culture: 'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&q=80',
-  shopping: 'https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800&q=80',
-  nightlife: 'https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80',
+  food: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800&q=80",
+  nature:
+    "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+  culture:
+    "https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=800&q=80",
+  shopping:
+    "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?w=800&q=80",
+  nightlife:
+    "https://images.unsplash.com/photo-1514933651103-005eec06c04b?w=800&q=80",
 };
 
 // Helper function to auto-calculate nearest metro
 function createGem(
-  data: Omit<HiddenGem, 'location'> & {
-    location: Omit<HiddenGem['location'], 'nearestMetro'>;
-  }
+  data: Omit<HiddenGem, "location"> & {
+    location: Omit<HiddenGem["location"], "nearestMetro">;
+  },
 ): HiddenGem {
   const { lat, lng } = data.location.coordinates;
   const nearest = findNearestMetro(lat, lng);
@@ -70,6 +90,7 @@ function createGem(
       ...data.location,
       nearestMetro: {
         station: nearest.station.name,
+        stationId: nearest.station.id,
         line: nearest.station.line,
         distanceKm: nearest.distanceKm,
         walkMinutes: nearest.walkMinutes,
@@ -81,397 +102,596 @@ function createGem(
 export const hiddenGems: HiddenGem[] = [
   // FOOD - Hidden Cafes & Restaurants
   createGem({
-    id: 'koshy-bar-restaurant',
+    id: "koshy-bar-restaurant",
     name: "Koshy's Bar & Restaurant",
-    nameKannada: 'ಕೋಶಿಸ್ ಬಾರ್ ಮತ್ತು ರೆಸ್ಟೋರೆಂಟ್',
-    category: 'food',
-    subcategory: 'cafe',
+    nameKannada: "ಕೋಶಿಸ್ ಬಾರ್ ಮತ್ತು ರೆಸ್ಟೋರೆಂಟ್",
+    category: "food",
+    subcategory: "cafe",
     description:
-      'Iconic 1940s Irani cafe where Bangalore intellectuals have gathered for decades. Old-world charm with wooden furniture and vintage vibes.',
+      "Iconic 1940s Irani cafe where Bangalore intellectuals have gathered for decades. Old-world charm with wooden furniture and vintage vibes.",
     longDescription:
       "A Bangalore institution since 1940, Koshy's is where the city's artists, writers, and thinkers have gathered for generations. The menu hasn't changed much - classic English breakfast, mutton cutlets, and filter coffee served in steel tumblers. The wooden interiors and leisurely pace transport you to old Bangalore.",
     location: {
-      area: 'St. Marks Road',
+      area: "St. Marks Road",
       address: "39, St Mark's Rd, Shanthala Nagar, Ashok Nagar",
       coordinates: { lat: 12.9716, lng: 77.5946 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&q=80', // Classic cafe interior
-      gallery: ['https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಒಂದು ಫಿಲ್ಟರ್ ಕಾಫಿ ಕೊಡಿ',
-      transliteration: 'Ondu filter kaapi kodi',
-      english: 'Give me one filter coffee',
-      context: 'Order their famous filter coffee like a local!',
+      usefulPhrase: "ಒಂದು ಫಿಲ್ಟರ್ ಕಾಫಿ ಕೊಡಿ",
+      transliteration: "Ondu filter kaapi kodi",
+      english: "Give me one filter coffee",
+      context: "Order their famous filter coffee like a local!",
     },
+    phrases: [
+      {
+        conceptId: "ondu-kafi-kodi",
+        context: "Order their signature filter coffee in steel tumbler.",
+      },
+      {
+        conceptId: "sakkare-beda",
+        context: "Customise your coffee - skip the sugar.",
+      },
+      {
+        conceptId: "bill-kodi",
+        context: "Close the meal the old-Bangalore way.",
+      },
+      {
+        conceptId: "dhanyavada",
+        context: "Thank the server when they bring the bill.",
+      },
+    ],
+    nearbyStations: ["mg-road", "cubbon-park"],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['hidden', 'historic', 'cafe', 'breakfast', 'vintage'],
-      curatorNotes: 'Must-visit for anyone interested in Bangalore history',
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: ["hidden", "historic", "cafe", "breakfast", "vintage"],
+      curatorNotes: "Must-visit for anyone interested in Bangalore history",
     },
   }),
 
   // FOOD - Veena Stores
   createGem({
-    id: 'veena-stores',
-    name: 'Veena Stores',
-    nameKannada: 'ವೀಣಾ ಸ್ಟೋರ್ಸ್',
-    category: 'food',
-    subcategory: 'street-food',
+    id: "veena-stores",
+    name: "Veena Stores",
+    nameKannada: "ವೀಣಾ ಸ್ಟೋರ್ಸ್",
+    category: "food",
+    subcategory: "street-food",
     description:
-      'Tiny hole-in-the-wall famous for crispy masala dosas. Get here early - they sell out by 11am!',
+      "Tiny hole-in-the-wall famous for crispy masala dosas. Get here early - they sell out by 11am!",
     longDescription:
-      'This unassuming eatery near Malleshwaram has been serving perfect masala dosas since 1953. The secret? Paper-thin dosas with a spicy potato filling and generous dollop of butter. Locals queue up from 7am, and they often sell out by mid-morning. Cash only, no seating - eat standing at the tiny counter.',
+      "This unassuming eatery near Malleshwaram has been serving perfect masala dosas since 1953. The secret? Paper-thin dosas with a spicy potato filling and generous dollop of butter. Locals queue up from 7am, and they often sell out by mid-morning. Cash only, no seating - eat standing at the tiny counter.",
     location: {
-      area: 'Malleshwaram',
-      address: '9th Cross Rd, Malleshwaram',
+      area: "Malleshwaram",
+      address: "9th Cross Rd, Malleshwaram",
       coordinates: { lat: 13.0067, lng: 77.5682 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1630383249896-424e482df921?w=800&q=80', // South Indian dosa
-      gallery: ['https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1630383249896-424e482df921?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಎರಡು ಮಸಾಲಾ ದೋಸೆ ಕೊಡಿ',
-      transliteration: 'Eradu masala dose kodi',
-      english: 'Give me two masala dosas',
+      usefulPhrase: "ಎರಡು ಮಸಾಲಾ ದೋಸೆ ಕೊಡಿ",
+      transliteration: "Eradu masala dose kodi",
+      english: "Give me two masala dosas",
       context: "Always order at least two - they're that good!",
     },
+    phrases: [
+      {
+        conceptId: "dose",
+        context: 'Point and say "dose kodi" if the queue is loud.',
+      },
+      { conceptId: "idli", context: "Prefer idlis? Same word, smaller bite." },
+      {
+        conceptId: "eshtu",
+        context: 'Ask "eshtu?" for the price - it stays cheap.',
+      },
+      {
+        conceptId: "dhanyavada",
+        context: "Wrap up with a warm dhanyavada to the owner.",
+      },
+    ],
+    nearbyStations: ["srirampura"],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['hidden', 'street-food', 'breakfast', 'budget-friendly', 'local-favorite'],
-      curatorNotes: 'Get there before 9am to avoid the crowd',
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: [
+        "hidden",
+        "street-food",
+        "breakfast",
+        "budget-friendly",
+        "local-favorite",
+      ],
+      curatorNotes: "Get there before 9am to avoid the crowd",
     },
   }),
 
   createGem({
-    id: 'Airlines-hotel',
-    name: 'Airlines Hotel',
-    nameKannada: 'ಏರ್‌ಲೈನ್ಸ್ ಹೋಟೆಲ್',
-    category: 'food',
-    subcategory: 'restaurant',
+    id: "airlines-hotel",
+    name: "Airlines Hotel",
+    nameKannada: "ಏರ್‌ಲೈನ್ಸ್ ಹೋಟೆಲ್",
+    category: "food",
+    subcategory: "restaurant",
     description:
-      'Legendary Udupi restaurant serving authentic South Indian meals on banana leaves since 1971.',
+      "Legendary Udupi restaurant serving authentic South Indian meals on banana leaves since 1971.",
     longDescription:
-      'Despite its name, Airlines Hotel has nothing to do with aviation. This Lavelle Road institution serves unlimited South Indian thalis on banana leaves. The crispy rava dosas are massive, and the filter coffee is perfection. Family-run since 1971, it maintains old-school service and quality.',
+      "Despite its name, Airlines Hotel has nothing to do with aviation. This Lavelle Road institution serves unlimited South Indian thalis on banana leaves. The crispy rava dosas are massive, and the filter coffee is perfection. Family-run since 1971, it maintains old-school service and quality.",
     location: {
-      area: 'Lavelle Road',
-      address: '1, Lavelle Rd, Kumara Park East',
+      area: "Lavelle Road",
+      address: "1, Lavelle Rd, Kumara Park East",
       coordinates: { lat: 12.9729, lng: 77.5958 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&q=80', // South Indian thali
-      gallery: ['https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1589302168068-964664d93dc0?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1606491956689-2ea866880c84?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಮತ್ತು ಸ್ವಲ್ಪ ಸಾಂಬಾರ್ ಕೊಡಿ',
-      transliteration: 'Mattu swalpa sambar kodi',
-      english: 'Give me some more sambar',
-      context: 'Unlimited refills are the tradition - ask freely!',
+      usefulPhrase: "ಮತ್ತು ಸ್ವಲ್ಪ ಸಾಂಬಾರ್ ಕೊಡಿ",
+      transliteration: "Mattu swalpa sambar kodi",
+      english: "Give me some more sambar",
+      context: "Unlimited refills are the tradition - ask freely!",
     },
+    phrases: [
+      {
+        conceptId: "ondu-kafi-kodi",
+        context: "Finish the meal with a filter coffee.",
+      },
+      {
+        conceptId: "bisi",
+        context: 'Ask for "bisi" sambar when you want it piping hot.',
+      },
+      { conceptId: "bill-kodi", context: "Ask for the bill at the counter." },
+      { conceptId: "dhanyavada", context: "Thank the staff as you leave." },
+    ],
+    nearbyStations: ["mg-road"],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['hidden', 'authentic', 'south-indian', 'family-friendly', 'budget-friendly'],
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: [
+        "hidden",
+        "authentic",
+        "south-indian",
+        "family-friendly",
+        "budget-friendly",
+      ],
     },
   }),
 
   // NATURE - Parks & Green Spaces
   createGem({
-    id: 'bugle-rock-park',
-    name: 'Bugle Rock Park',
-    nameKannada: 'ಬ್ಯೂಗಲ್ ರಾಕ್ ಪಾರ್ಕ್',
-    category: 'nature',
-    subcategory: 'park',
+    id: "bugle-rock-park",
+    name: "Bugle Rock Park",
+    nameKannada: "ಬ್ಯೂಗಲ್ ರಾಕ್ ಪಾರ್ಕ್",
+    category: "nature",
+    subcategory: "park",
     description:
-      'Ancient 3000-year-old monolithic rock formation offering panoramic city views. Peaceful morning walks.',
+      "Ancient 3000-year-old monolithic rock formation offering panoramic city views. Peaceful morning walks.",
     longDescription:
-      'This hidden gem in Basavanagudi features a massive 3000-year-old rock that dominates the landscape. Climb the steps to the top for stunning sunrise views of the city. The park is quieter than Lalbagh, perfect for morning walks and bird watching. The rock is geologically significant and has mythological connections to the Ramayana.',
+      "This hidden gem in Basavanagudi features a massive 3000-year-old rock that dominates the landscape. Climb the steps to the top for stunning sunrise views of the city. The park is quieter than Lalbagh, perfect for morning walks and bird watching. The rock is geologically significant and has mythological connections to the Ramayana.",
     location: {
-      area: 'Basavanagudi',
-      address: 'Bugle Rock Rd, Basavanagudi',
+      area: "Basavanagudi",
+      address: "Bugle Rock Rd, Basavanagudi",
       coordinates: { lat: 12.9432, lng: 77.5748 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
-      gallery: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಈ ಬಂಡೆ ಎಷ್ಟು ಹಳೆಯದು?',
-      transliteration: 'Ee bande eshtu haleyadu?',
-      english: 'How old is this rock?',
-      context: 'Ask locals about the rock\'s history - they love sharing!',
+      usefulPhrase: "ಈ ಬಂಡೆ ಎಷ್ಟು ಹಳೆಯದು?",
+      transliteration: "Ee bande eshtu haleyadu?",
+      english: "How old is this rock?",
+      context: "Ask locals about the rock's history - they love sharing!",
     },
+    phrases: [
+      { conceptId: "eshtu", context: 'Ask "eshtu haleyadu" to start a story.' },
+      {
+        conceptId: "namaskara",
+        context: "Greet fellow walkers with a warm namaskara.",
+      },
+      {
+        conceptId: "sari",
+        context: 'Nod and say "sari sari" while listening.',
+      },
+    ],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['hidden', 'nature', 'sunrise', 'historic', 'free-entry'],
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: ["hidden", "nature", "sunrise", "historic", "free-entry"],
     },
   }),
 
   createGem({
-    id: 'kaveri-river-mekedatu',
-    name: 'Mekedatu',
-    nameKannada: 'ಮೇಕೆದಾಟು',
-    category: 'nature',
-    subcategory: 'river',
+    id: "kaveri-river-mekedatu",
+    name: "Mekedatu",
+    nameKannada: "ಮೇಕೆದಾಟು",
+    category: "nature",
+    subcategory: "river",
     description:
       "Where the Kaveri river squeezes through narrow gorge. Dramatic rock formations and emerald waters. Day trip from Bangalore.",
     longDescription:
       'Mekedatu means "goat\'s leap" in Kannada - legend says a goat escaped a tiger by leaping across the narrow gorge. The Kaveri river forces through a 100-foot gap between towering cliffs, creating spectacular views. 100km from Bangalore, perfect for a weekend day trip. Best visited post-monsoon (Nov-Jan) when water levels are high.',
     location: {
-      area: 'Kanakapura Road',
-      address: 'Mekedatu, Kanakapura Taluk',
+      area: "Kanakapura Road",
+      address: "Mekedatu, Kanakapura Taluk",
       coordinates: { lat: 12.4167, lng: 77.3667 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
-      gallery: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ನೀರು ತುಂಬಾ ತಂಪಾಗಿದೆ',
-      transliteration: 'Neeru thumba thampagide',
-      english: 'The water is very cold',
-      context: 'Perfect phrase when dipping your feet in the river!',
+      usefulPhrase: "ನೀರು ತುಂಬಾ ತಂಪಾಗಿದೆ",
+      transliteration: "Neeru thumba thampagide",
+      english: "The water is very cold",
+      context: "Perfect phrase when dipping your feet in the river!",
     },
+    phrases: [
+      { conceptId: "niru", context: 'Point at the river and say "niru bisi".' },
+      {
+        conceptId: "sahaya-madi",
+        context: 'Ask the boatman "sahaya madi?" for help.',
+      },
+      {
+        conceptId: "ellige",
+        context: 'Get directions back - "Bangalore ellige?".',
+      },
+    ],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['nature', 'day-trip', 'adventure', 'photography', 'river'],
-      curatorNotes: 'Check river levels before visiting - closed during heavy monsoon',
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: ["nature", "day-trip", "adventure", "photography", "river"],
+      curatorNotes:
+        "Check river levels before visiting - closed during heavy monsoon",
     },
   }),
 
   createGem({
-    id: 'kaikondrahalli-lake',
-    name: 'Kaikondrahalli Lake',
-    nameKannada: 'ಕಾಯ್ಕೊಂದ್ರಹಳ್ಳಿ ಕೆರೆ',
-    category: 'nature',
-    subcategory: 'lake',
+    id: "kaikondrahalli-lake",
+    name: "Kaikondrahalli Lake",
+    nameKannada: "ಕಾಯ್ಕೊಂದ್ರಹಳ್ಳಿ ಕೆರೆ",
+    category: "nature",
+    subcategory: "lake",
     description:
-      'Bird watcher\'s paradise with 120+ species. Restored lake with walking trail and floating islands.',
+      "Bird watcher's paradise with 120+ species. Restored lake with walking trail and floating islands.",
     longDescription:
-      'Once a dying lake, Kaikondrahalli was restored by residents and is now a biodiversity hotspot. Home to 120+ bird species including rare migrants. The floating islands created with native plants are engineering marvels. Early morning (6-8am) is best for bird watching. Bring binoculars!',
+      "Once a dying lake, Kaikondrahalli was restored by residents and is now a biodiversity hotspot. Home to 120+ bird species including rare migrants. The floating islands created with native plants are engineering marvels. Early morning (6-8am) is best for bird watching. Bring binoculars!",
     location: {
-      area: 'Sarjapur Road',
-      address: 'Kaikondrahalli, Near Sarjapur Road',
+      area: "Sarjapur Road",
+      address: "Kaikondrahalli, Near Sarjapur Road",
       coordinates: { lat: 12.9117, lng: 77.6736 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
-      gallery: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಅದು ಯಾವ ಹಕ್ಕಿ?',
-      transliteration: 'Adu yaava hakki?',
-      english: 'Which bird is that?',
-      context: 'Ask the regular bird watchers - they know every species!',
+      usefulPhrase: "ಅದು ಯಾವ ಹಕ್ಕಿ?",
+      transliteration: "Adu yaava hakki?",
+      english: "Which bird is that?",
+      context: "Ask the regular bird watchers - they know every species!",
     },
+    phrases: [
+      {
+        conceptId: "idu-enu",
+        context: 'Ask "idu enu?" while pointing at a bird.',
+      },
+      {
+        conceptId: "hegiddira",
+        context: 'Use "hegiddira" to greet a regular jogger.',
+      },
+      { conceptId: "haudu", context: 'Count birds you spot - "haudu hakki!"' },
+    ],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['nature', 'bird-watching', 'lake', 'free-entry', 'morning-walk'],
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: ["nature", "bird-watching", "lake", "free-entry", "morning-walk"],
     },
   }),
 
   // CULTURE - Temples & Heritage
   createGem({
-    id: 'gavi-gangadhareshwara-temple',
-    name: 'Gavi Gangadhareshwara Temple',
-    nameKannada: 'ಗವಿ ಗಂಗಾಧರೇಶ್ವರ ದೇವಸ್ಥಾನ',
-    category: 'culture',
-    subcategory: 'temple',
+    id: "gavi-gangadhareshwara-temple",
+    name: "Gavi Gangadhareshwara Temple",
+    nameKannada: "ಗವಿ ಗಂಗಾಧರೇಶ್ವರ ದೇವಸ್ಥಾನ",
+    category: "culture",
+    subcategory: "temple",
     description:
-      'Cave temple with astronomical precision. Sunlight illuminates the idol twice a year (Sankranti). 9th century architecture.',
+      "Cave temple with astronomical precision. Sunlight illuminates the idol twice a year (Sankranti). 9th century architecture.",
     longDescription:
-      'This rock-cut cave temple is an architectural marvel. On Makara Sankranti (Jan 14/15), sunlight passes through the horns of Nandi and precisely illuminates the Shiva linga inside the cave - a feat of ancient astronomy. The temple has four monolithic pillars and a mysterious underground chamber. Best visited during Sankranti for the light phenomenon.',
+      "This rock-cut cave temple is an architectural marvel. On Makara Sankranti (Jan 14/15), sunlight passes through the horns of Nandi and precisely illuminates the Shiva linga inside the cave - a feat of ancient astronomy. The temple has four monolithic pillars and a mysterious underground chamber. Best visited during Sankranti for the light phenomenon.",
     location: {
-      area: 'Gavipuram',
-      address: 'Gavipuram Guttahalli, Basavangudi',
-      coordinates: { lat: 12.9507, lng: 77.5610 },
+      area: "Gavipuram",
+      address: "Gavipuram Guttahalli, Basavangudi",
+      coordinates: { lat: 12.9507, lng: 77.561 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
-      gallery: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ದೇವಸ್ಥಾನ ಎಲ್ಲಿದೆ?',
-      transliteration: 'Devasthana ellide?',
-      english: 'Where is the temple?',
-      context: 'Use this to find temples or get directions',
+      usefulPhrase: "ದೇವಸ್ಥಾನ ಎಲ್ಲಿದೆ?",
+      transliteration: "Devasthana ellide?",
+      english: "Where is the temple?",
+      context: "Use this to find temples or get directions",
     },
+    phrases: [
+      {
+        conceptId: "namaskara",
+        context: "Bow and say namaskara at the entrance.",
+      },
+      {
+        conceptId: "elli",
+        context: 'Ask the priest "elli photo?" before clicking.',
+      },
+      {
+        conceptId: "dhanyavada",
+        context: "Thank the priest for any guidance.",
+      },
+    ],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['culture', 'temple', 'historic', 'architecture', 'free-entry'],
-      curatorNotes: 'Visit during Makara Sankranti for the sunlight phenomenon',
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: ["culture", "temple", "historic", "architecture", "free-entry"],
+      curatorNotes: "Visit during Makara Sankranti for the sunlight phenomenon",
     },
   }),
 
   createGem({
-    id: 'devanahalli-fort',
-    name: 'Devanahalli Fort',
-    nameKannada: 'ದೇವನಹಳ್ಳಿ ಕೋಟೆ',
-    category: 'culture',
-    subcategory: 'fort',
+    id: "devanahalli-fort",
+    name: "Devanahalli Fort",
+    nameKannada: "ದೇವನಹಳ್ಳಿ ಕೋಟೆ",
+    category: "culture",
+    subcategory: "fort",
     description:
       "Tipu Sultan's birthplace. 15th century mud fort with intact ramparts and bastions. Uncrowded heritage site.",
     longDescription:
-      'Built in 1501, this mud fort is where Tipu Sultan was born in 1750. Unlike crowded tourist spots, Devanahalli Fort remains relatively unknown. Walk along the intact ramparts, explore the bastions, and visit the small Tipu Sultan museum. The fort complex includes 12 Muslim tombs and ancient temples. Peaceful atmosphere perfect for history buffs.',
+      "Built in 1501, this mud fort is where Tipu Sultan was born in 1750. Unlike crowded tourist spots, Devanahalli Fort remains relatively unknown. Walk along the intact ramparts, explore the bastions, and visit the small Tipu Sultan museum. The fort complex includes 12 Muslim tombs and ancient temples. Peaceful atmosphere perfect for history buffs.",
     location: {
-      area: 'Devanahalli',
-      address: 'Devanahalli, North Bangalore',
+      area: "Devanahalli",
+      address: "Devanahalli, North Bangalore",
       coordinates: { lat: 13.2429, lng: 77.7189 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
-      gallery: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಇದು ಎಷ್ಟು ಹಳೆಯದು?',
-      transliteration: 'Idu eshtu haleyadu?',
-      english: 'How old is this?',
-      context: 'Great question to start conversations about history',
+      usefulPhrase: "ಇದು ಎಷ್ಟು ಹಳೆಯದು?",
+      transliteration: "Idu eshtu haleyadu?",
+      english: "How old is this?",
+      context: "Great question to start conversations about history",
     },
+    phrases: [
+      {
+        conceptId: "eshtu",
+        context: 'Ask guides "eshtu haleyadu?" about the ramparts.',
+      },
+      {
+        conceptId: "nanna-hesaru",
+        context: "Introduce yourself to fellow visitors.",
+      },
+      {
+        conceptId: "elli",
+        context: 'Ask "elli photo agbeku?" before clicking.',
+      },
+    ],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['culture', 'historic', 'fort', 'tipu-sultan', 'day-trip'],
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: ["culture", "historic", "fort", "tipu-sultan", "day-trip"],
     },
   }),
 
   // SHOPPING - Local Markets
   createGem({
-    id: 'avenue-road',
-    name: 'Avenue Road Market',
-    nameKannada: 'ಅವೆನ್ಯೂ ರೋಡ್ ಮಾರುಕಟ್ಟೆ',
-    category: 'shopping',
-    subcategory: 'market',
+    id: "avenue-road",
+    name: "Avenue Road Market",
+    nameKannada: "ಅವೆನ್ಯೂ ರೋಡ್ ಮಾರುಕಟ್ಟೆ",
+    category: "shopping",
+    subcategory: "market",
     description:
-      'Wholesale spice and dry fruits market. Chaotic lanes filled with aromas. Best deals in the city if you bargain.',
+      "Wholesale spice and dry fruits market. Chaotic lanes filled with aromas. Best deals in the city if you bargain.",
     longDescription:
-      'Avenue Road is sensory overload in the best way. Narrow lanes packed with wholesale shops selling spices, dry fruits, pulses, and traditional ingredients. The air is thick with the smell of cardamom, cloves, and coffee. Prices are wholesale rates - bargain hard. Best visited early morning (7-9am) when vendors are setting up.',
+      "Avenue Road is sensory overload in the best way. Narrow lanes packed with wholesale shops selling spices, dry fruits, pulses, and traditional ingredients. The air is thick with the smell of cardamom, cloves, and coffee. Prices are wholesale rates - bargain hard. Best visited early morning (7-9am) when vendors are setting up.",
     location: {
-      area: 'Avenue Road',
-      address: 'Avenue Road, Near City Market',
+      area: "Avenue Road",
+      address: "Avenue Road, Near City Market",
       coordinates: { lat: 12.9725, lng: 77.5747 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
-      gallery: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಇದರ ಬೆಲೆ ಎಷ್ಟು?',
-      transliteration: 'Idara bele eshtu?',
-      english: 'How much does this cost?',
-      context: 'Essential phrase for bargaining in markets!',
+      usefulPhrase: "ಇದರ ಬೆಲೆ ಎಷ್ಟು?",
+      transliteration: "Idara bele eshtu?",
+      english: "How much does this cost?",
+      context: "Essential phrase for bargaining in markets!",
     },
+    phrases: [
+      {
+        conceptId: "eshtu",
+        context: 'Always start with "eshtu?" before bargaining.',
+      },
+      {
+        conceptId: "eshtu-ayitu",
+        context: 'Counter-offer with "eshtu ayitu?".',
+      },
+      {
+        conceptId: "card-nadeyutta",
+        context: 'Ask "card nadeyutta?" before paying.',
+      },
+      {
+        conceptId: "dhanyavada",
+        context: "Thank the vendor - they remember polite buyers.",
+      },
+    ],
+    nearbyStations: ["kempegowda"],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['shopping', 'market', 'wholesale', 'spices', 'budget-friendly'],
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: ["shopping", "market", "wholesale", "spices", "budget-friendly"],
       curatorNotes: "Bring cash - most shops don't accept cards",
     },
   }),
 
   createGem({
-    id: 'gandhi-bazaar',
-    name: 'Gandhi Bazaar',
-    nameKannada: 'ಗಾಂಧಿ ಬಜಾರ್',
-    category: 'shopping',
-    subcategory: 'market',
+    id: "gandhi-bazaar",
+    name: "Gandhi Bazaar",
+    nameKannada: "ಗಾಂಧಿ ಬಜಾರ್",
+    category: "shopping",
+    subcategory: "market",
     description:
-      'Traditional neighborhood market. Fresh produce, flowers, and sweets. Try VV Puram Food Street nearby!',
+      "Traditional neighborhood market. Fresh produce, flowers, and sweets. Try VV Puram Food Street nearby!",
     longDescription:
-      'Gandhi Bazaar is old Bangalore charm personified. This Basavanagudi market has been serving locals since the 1960s. Fresh vegetables, fragrant flower garlands, traditional sweets, and tiny shops selling everything. After shopping, walk to VV Puram Food Street for dosas and chaats. Best visited Sunday morning for the full bustle.',
+      "Gandhi Bazaar is old Bangalore charm personified. This Basavanagudi market has been serving locals since the 1960s. Fresh vegetables, fragrant flower garlands, traditional sweets, and tiny shops selling everything. After shopping, walk to VV Puram Food Street for dosas and chaats. Best visited Sunday morning for the full bustle.",
     location: {
-      area: 'Basavanagudi',
-      address: 'Gandhi Bazaar Main Road, Basavanagudi',
+      area: "Basavanagudi",
+      address: "Gandhi Bazaar Main Road, Basavanagudi",
       coordinates: { lat: 12.9425, lng: 77.5758 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
-      gallery: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಹಣ್ಣು ತಾಜಾ ಇದೆಯಾ?',
-      transliteration: 'Hannu taaja ideya?',
-      english: 'Is the fruit fresh?',
-      context: 'Use when buying produce - shows you know your stuff!',
+      usefulPhrase: "ಹಣ್ಣು ತಾಜಾ ಇದೆಯಾ?",
+      transliteration: "Hannu taaja ideya?",
+      english: "Is the fruit fresh?",
+      context: "Use when buying produce - shows you know your stuff!",
     },
+    phrases: [
+      { conceptId: "eshtu", context: 'Ask "eshtu?" for any produce price.' },
+      {
+        conceptId: "eshtu-ayitu",
+        context: 'Negotiate gently with "eshtu ayitu?".',
+      },
+      { conceptId: "dhanyavada", context: "Wrap up with a polite dhanyavada." },
+    ],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['shopping', 'market', 'food-street', 'traditional', 'local-favorite'],
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: [
+        "shopping",
+        "market",
+        "food-street",
+        "traditional",
+        "local-favorite",
+      ],
     },
   }),
 
   // NIGHTLIFE - Unique Experiences
   createGem({
-    id: 'bangalore-turf-club',
-    name: 'Bangalore Turf Club',
-    nameKannada: 'ಬೆಂಗಳೂರು ಟರ್ಫ್ ಕ್ಲಬ್',
-    category: 'nightlife',
-    subcategory: 'entertainment',
+    id: "bangalore-turf-club",
+    name: "Bangalore Turf Club",
+    nameKannada: "ಬೆಂಗಳೂರು ಟರ್ಫ್ ಕ್ಲಬ್",
+    category: "nightlife",
+    subcategory: "entertainment",
     description:
-      'Historic horse racing track since 1920. Colonial architecture, live racing on weekends. Dress code enforced.',
+      "Historic horse racing track since 1920. Colonial architecture, live racing on weekends. Dress code enforced.",
     longDescription:
-      'Step back in time at this colonial-era race course. Founded in 1920, the Bangalore Turf Club hosts live horse racing on weekends (Nov-July season). The elegant grandstand, manicured lawns, and betting windows preserve old-world charm. Entry is affordable, dress code is smart casual. Great place to spend a lazy Sunday afternoon.',
+      "Step back in time at this colonial-era race course. Founded in 1920, the Bangalore Turf Club hosts live horse racing on weekends (Nov-July season). The elegant grandstand, manicured lawns, and betting windows preserve old-world charm. Entry is affordable, dress code is smart casual. Great place to spend a lazy Sunday afternoon.",
     location: {
-      area: 'Race Course Road',
-      address: 'Race Course Road, Opposite Cubbon Park',
+      area: "Race Course Road",
+      address: "Race Course Road, Opposite Cubbon Park",
       coordinates: { lat: 12.9889, lng: 77.5976 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
-      gallery: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಕುದುರೆ ಓಟ ಯಾವಾಗ ಆರಂಭವಾಗುತ್ತೆ?',
-      transliteration: 'Kudure ota yaavaga arambhavaagutte?',
-      english: 'When does the horse race start?',
-      context: 'Perfect question to ask at the ticket counter',
+      usefulPhrase: "ಕುದುರೆ ಓಟ ಯಾವಾಗ ಆರಂಭವಾಗುತ್ತೆ?",
+      transliteration: "Kudure ota yaavaga arambhavaagutte?",
+      english: "When does the horse race start?",
+      context: "Perfect question to ask at the ticket counter",
     },
+    phrases: [
+      { conceptId: "eshtu", context: 'Ask "ticket eshtu?" at the counter.' },
+      {
+        conceptId: "card-nadeyutta",
+        context: 'Check "card nadeyutta?" before paying the entry fee.',
+      },
+      { conceptId: "dhanyavada", context: "Thank the staff as you leave." },
+    ],
+    nearbyStations: ["cubbon-park"],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['nightlife', 'entertainment', 'historic', 'colonial', 'weekend'],
-      curatorNotes: 'Check racing season dates (Nov-July) before visiting',
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: ["nightlife", "entertainment", "historic", "colonial", "weekend"],
+      curatorNotes: "Check racing season dates (Nov-July) before visiting",
     },
   }),
 
   createGem({
-    id: 'biere-street',
-    name: 'Biere Street',
-    nameKannada: 'ಬಿಯರ್ ಸ್ಟ್ರೀಟ್',
-    category: 'nightlife',
-    subcategory: 'bar',
+    id: "biere-street",
+    name: "Biere Street",
+    nameKannada: "ಬಿಯರ್ ಸ್ಟ್ರೀಟ್",
+    category: "nightlife",
+    subcategory: "bar",
     description:
-      'Cozy underground bar with 50+ craft beers. Board games, live music weekends. Hidden entrance adds to the charm.',
+      "Cozy underground bar with 50+ craft beers. Board games, live music weekends. Hidden entrance adds to the charm.",
     longDescription:
-      'This speakeasy-style bar is literally underground - descend the stairs from the street to find a cozy den with exposed brick walls and dim lighting. The beer menu has 50+ craft brews from across India and Belgium. Thursday nights feature live acoustic music. Board games are free to play. The burgers pair perfectly with their IPAs.',
+      "This speakeasy-style bar is literally underground - descend the stairs from the street to find a cozy den with exposed brick walls and dim lighting. The beer menu has 50+ craft brews from across India and Belgium. Thursday nights feature live acoustic music. Board games are free to play. The burgers pair perfectly with their IPAs.",
     location: {
-      area: 'Indiranagar',
-      address: '12th Main Road, HAL 2nd Stage, Indiranagar',
+      area: "Indiranagar",
+      address: "12th Main Road, HAL 2nd Stage, Indiranagar",
       coordinates: { lat: 12.9716, lng: 77.6412 },
     },
     images: {
-      main: 'https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80',
-      gallery: ['https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80'],
+      main: "https://images.unsplash.com/photo-1585937421612-70a008356fbe?w=800&q=80",
+      gallery: [
+        "https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&q=80",
+      ],
     },
     kannadaLearning: {
-      usefulPhrase: 'ಯಾವ ಬಿಯರ್ ಒಳ್ಳೆಯದು?',
-      transliteration: 'Yaava beer olleyadu?',
-      english: 'Which beer is good?',
-      context: 'Ask the bartender for recommendations!',
+      usefulPhrase: "ಯಾವ ಬಿಯರ್ ಒಳ್ಳೆಯದು?",
+      transliteration: "Yaava beer olleyadu?",
+      english: "Which beer is good?",
+      context: "Ask the bartender for recommendations!",
     },
+    phrases: [
+      {
+        conceptId: "eshtu",
+        context: 'Ask "eshtu?" for the price of each beer.',
+      },
+      {
+        conceptId: "card-nadeyutta",
+        context: 'Check "card nadeyutta?" - many craft pubs do.',
+      },
+      { conceptId: "bill-kodi", context: 'Close the night with "bill kodi".' },
+    ],
     metadata: {
-      source: 'curated',
-      discoveredAt: '2026-09-01',
-      tags: ['nightlife', 'bar', 'craft-beer', 'live-music', 'hidden-entrance'],
+      source: "curated",
+      discoveredAt: "2026-09-01",
+      tags: ["nightlife", "bar", "craft-beer", "live-music", "hidden-entrance"],
     },
   }),
 ];
@@ -489,10 +709,26 @@ export function searchGems(query: string): HiddenGem[] {
       gem.nameKannada.includes(query) ||
       gem.description.toLowerCase().includes(lowerQuery) ||
       gem.location.area.toLowerCase().includes(lowerQuery) ||
-      gem.metadata.tags.some((tag) => tag.includes(lowerQuery))
+      gem.metadata.tags.some((tag) => tag.includes(lowerQuery)),
   );
 }
 
 export function getGemById(id: string): HiddenGem | undefined {
   return hiddenGems.find((gem) => gem.id === id);
+}
+
+/** Return the curriculum concept for a phrase, falling back to undefined. */
+export function getPhraseConcept(phrase: Phrase): Concept | undefined {
+  return getConcept(phrase.conceptId);
+}
+
+/**
+ * Stations on the same line as the gem's nearest station, ordered as they appear
+ * in metroStations. Used to render a simple map widget.
+ */
+export function lineStationsForGem(gem: HiddenGem) {
+  const nearestId = gem.location.nearestMetro.stationId;
+  const nearest = metroStations.find((s) => s.id === nearestId);
+  if (!nearest) return [];
+  return metroStations.filter((s) => s.line === nearest.line);
 }

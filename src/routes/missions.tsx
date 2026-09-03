@@ -1,14 +1,18 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { Check, Target, Lock } from "lucide-react";
+import { Check, Target, Lock, MapPin } from "lucide-react";
 import { toast } from "sonner";
 
 import { getConcept } from "@/data/curriculum";
-import { getMission, missions as allMissions, type Mission } from "@/data/missions";
+import {
+  getMission,
+  missions as allMissions,
+  type Mission,
+} from "@/data/missions";
 import { kashmiriMissions } from "@/lib/language-content";
 import { AppShell } from "@/components/app-shell";
 import { SpeakButton } from "@/components/speak-button";
-import { useProgress } from "@/lib/progress";
+import { useProgress, type DynamicMission } from "@/lib/progress";
 import { useLanguage } from "@/lib/language-context";
 import { NBButton, NBCard, Sticker, Kannada } from "@/lib/nb";
 import { cn } from "@/lib/utils";
@@ -17,10 +21,62 @@ export const Route = createFileRoute("/missions")({
   component: MissionsPage,
 });
 
+function PendingDynamicMission({
+  mission,
+  onDid,
+}: {
+  mission: DynamicMission;
+  onDid: () => void;
+}) {
+  const concept = getConcept(mission.conceptId);
+  return (
+    <NBCard>
+      <div className="flex items-start gap-2">
+        <MapPin className="mt-0.5 h-5 w-5 shrink-0 text-primary" aria-hidden />
+        <div className="flex-1">
+          <p className="font-black">{mission.title}</p>
+          <p className="text-sm font-semibold text-ink/70">
+            {mission.objective}
+          </p>
+          {mission.source && (
+            <p className="mt-1 text-[10px] font-extrabold uppercase tracking-wide text-ink/40">
+              From a hidden gem
+            </p>
+          )}
+        </div>
+      </div>
+
+      {concept && (
+        <div className="nb-border mt-3 rounded-xl bg-secondary p-3 text-center">
+          <Kannada className="block text-2xl">{concept.kannada}</Kannada>
+          <p className="mt-1 font-extrabold">{concept.transliteration}</p>
+          <div className="mt-2 flex justify-center">
+            <SpeakButton text={concept.kannada} />
+          </div>
+        </div>
+      )}
+
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <Sticker tone="yellow">+{mission.reward} XP</Sticker>
+        <NBButton size="sm" onClick={onDid}>
+          I did it!
+        </NBButton>
+      </div>
+    </NBCard>
+  );
+}
+
 function MissionsPage() {
   const navigate = useNavigate();
   const { currentLanguage } = useLanguage();
-  const { hydrated, state, availableMissions, completeMission, unitCompletedCount } = useProgress();
+  const {
+    hydrated,
+    state,
+    availableMissions,
+    completeMission,
+    unitCompletedCount,
+    dynamicMissions,
+  } = useProgress();
 
   useEffect(() => {
     if (hydrated && !state.profile.onboardingDone) {
@@ -32,12 +88,22 @@ function MissionsPage() {
   const pending = unlocked.filter((m) => !state.missions[m.id]);
   const completedIds = Object.keys(state.missions);
 
+  // User-created missions from the Explore page (hidden gems phrases).
+  const dynamicList = dynamicMissions();
+  const pendingDynamic = dynamicList.filter((m) => !state.missions[m.id]);
+
   const onDid = (mission: Mission) => {
     completeMission(mission.id, mission.reward);
     const langText = currentLanguage === "kashmiri" ? "Kashmiri" : "Kannada";
     toast.success(`Mission complete! +${mission.reward} XP`, {
-      description:
-        `You used ${langText} in the real world. That's the whole point.`,
+      description: `You used ${langText} in the real world. That's the whole point.`,
+    });
+  };
+
+  const onDidDynamic = (mission: DynamicMission) => {
+    completeMission(mission.id, mission.reward);
+    toast.success(`Mission complete! +${mission.reward} XP`, {
+      description: "You used Kannada at a real Bangalore spot.",
     });
   };
 
@@ -52,9 +118,7 @@ function MissionsPage() {
 
         {kashmiriMissions.length === 0 && (
           <NBCard tone="yellow">
-            <p className="font-bold">
-              No missions available yet. 🎯
-            </p>
+            <p className="font-bold">No missions available yet. 🎯</p>
           </NBCard>
         )}
 
@@ -66,11 +130,20 @@ function MissionsPage() {
                 <Target className="h-5 w-5 text-primary mt-1" />
                 <div className="flex-1">
                   <h3 className="font-black">{mission.title}</h3>
-                  <p className="text-sm font-semibold text-ink/70 mt-1">{mission.description}</p>
-                  <p className="text-xs text-ink/60 mt-2 italic">{mission.scenario}</p>
+                  <p className="text-sm font-semibold text-ink/70 mt-1">
+                    {mission.description}
+                  </p>
+                  <p className="text-xs text-ink/60 mt-2 italic">
+                    {mission.scenario}
+                  </p>
                   <div className="mt-3 space-y-1">
                     {mission.objectives.map((obj, idx) => (
-                      <p key={idx} className="text-xs font-semibold text-ink/70">• {obj}</p>
+                      <p
+                        key={idx}
+                        className="text-xs font-semibold text-ink/70"
+                      >
+                        • {obj}
+                      </p>
                     ))}
                   </div>
                 </div>
@@ -110,6 +183,26 @@ function MissionsPage() {
             ))}
           </div>
         </>
+      )}
+
+      {pendingDynamic.length > 0 && (
+        <div className="mt-8">
+          <div className="flex items-center justify-between">
+            <Sticker tone="success">From your gems</Sticker>
+            <span className="text-xs font-bold text-ink/50">
+              {pendingDynamic.length} pending
+            </span>
+          </div>
+          <div className="mt-3 space-y-4">
+            {pendingDynamic.map((mission) => (
+              <PendingDynamicMission
+                key={mission.id}
+                mission={mission}
+                onDid={() => onDidDynamic(mission)}
+              />
+            ))}
+          </div>
+        </div>
       )}
 
       {completedIds.length > 0 && (
@@ -153,14 +246,20 @@ function MissionsPage() {
                 className={cn(
                   "transition-all",
                   isCompleted && "bg-success/10",
-                  !isUnlocked && "opacity-60"
+                  !isUnlocked && "opacity-60",
                 )}
               >
                 <div className="flex items-start gap-3">
-                  <div className={cn(
-                    "mt-1 h-5 w-5 shrink-0",
-                    isCompleted ? "text-success" : isUnlocked ? "text-primary" : "text-ink/40"
-                  )}>
+                  <div
+                    className={cn(
+                      "mt-1 h-5 w-5 shrink-0",
+                      isCompleted
+                        ? "text-success"
+                        : isUnlocked
+                          ? "text-primary"
+                          : "text-ink/40",
+                    )}
+                  >
                     {isCompleted ? (
                       <Check className="h-5 w-5" />
                     ) : !isUnlocked ? (
@@ -170,22 +269,25 @@ function MissionsPage() {
                     )}
                   </div>
                   <div className="flex-1">
-                    <p className={cn(
-                      "font-black",
-                      !isUnlocked && "text-ink/50"
-                    )}>
+                    <p
+                      className={cn("font-black", !isUnlocked && "text-ink/50")}
+                    >
                       {mission.title}
                     </p>
-                    <p className={cn(
-                      "text-xs mt-1",
-                      isUnlocked ? "text-ink/70" : "text-ink/40"
-                    )}>
+                    <p
+                      className={cn(
+                        "text-xs mt-1",
+                        isUnlocked ? "text-ink/70" : "text-ink/40",
+                      )}
+                    >
                       {mission.objective}
                     </p>
-                    <p className={cn(
-                      "text-xs mt-1 font-semibold",
-                      !isUnlocked && "text-ink/40"
-                    )}>
+                    <p
+                      className={cn(
+                        "text-xs mt-1 font-semibold",
+                        !isUnlocked && "text-ink/40",
+                      )}
+                    >
                       Unlocks at: {unlockLevel}
                     </p>
                   </div>

@@ -1,5 +1,6 @@
 # NudiGO: Learn Kannada Like You Actually Speak It
 
+
 A voice-first language learning app designed for Bengaluru. Stop pretending. Start speaking.
 
 ---

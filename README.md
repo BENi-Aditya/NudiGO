@@ -5,7 +5,7 @@ A voice-first language learning app designed for Bengaluru. Stop pretending. Sta
 
 ---
 
-## 🚀 APP IS NOW LIVE
+## APP IS NOW LIVE
 
 ### Please visit: **https://nudigo.openbuilder.in**
 

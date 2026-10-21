@@ -4,7 +4,6 @@
 A voice-first language learning app designed for Bengaluru. Stop pretending. Start speaking.
 
 ---
-
 ## APP IS NOW LIVE
 
 ### Please visit: **https://nudigo.openbuilder.in**
